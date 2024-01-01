@@ -56,11 +56,11 @@ ul {
 
 
 #sidebar {
-  width: 35%;
+  width: 50%;
   height: 100%;
   position: fixed;
   top: 0;
-  right: -36%;
+  right: -50%;
   background-color: #f4f4f4;
   padding: 20px;
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
