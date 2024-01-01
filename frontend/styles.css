@@ -1,0 +1,48 @@
+/* styles.css */
+
+/* Definir um tamanho de fonte maior */
+body {
+  font-size: 25px; /* Ajuste conforme necessário */
+}
+
+/* Estilizar seta para representar expansão/recolhimento */
+.arrow {
+  cursor: pointer;
+  user-select: none; /* Evita que o texto seja selecionado ao clicar na seta */
+  margin-right: 10px; /* Espaçamento entre a seta e o texto */
+  display: inline-block;
+  float: left; /* Alinhar setas à esquerda */
+}
+
+.collapsed .arrow::before {
+  content: "▶";
+}
+
+.expanded .arrow::before {
+  content: "▼";
+}
+
+.hidden {
+  display: none;
+}
+
+.folder-text {
+  cursor: pointer;
+  display: inline-block; /* Manter o texto na mesma linha que a seta */
+}
+
+.folder {
+  cursor: pointer;
+  display: block; /* Mudar para display block para evitar centralização */
+  align-items: flex-start; /* Alinhar itens à esquerda */
+}
+
+ul {
+  list-style-type: none; /* Remover marcadores de lista */
+  padding-left: 0; /* Remover recuo padrão */
+}
+
+/* Estilo para filhos */
+.folder > ul > li {
+  margin-left: 30px; /* Espaço à esquerda para filhos */
+}
