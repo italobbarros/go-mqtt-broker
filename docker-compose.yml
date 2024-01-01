@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  broker-mqtt:
+    image: broker-mqtt
+    build: .
+    container_name: broker-mqtt
+    logging:            # Configuração de log
+      options:
+        max-size: "50m" # Tamanho máximo de cada arquivo de log
+        max-file: "2"   # Número máximo de arquivos de log
+    network_mode: host
+    command: ["./main","--portManagement","43038"]
+    restart: unless-stopped
+    environment:
+      - LOG_CONFIG_PROD=true
+  

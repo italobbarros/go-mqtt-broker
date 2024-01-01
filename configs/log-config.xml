@@ -1,0 +1,36 @@
+<seelog type="sync">
+    <outputs>
+        <!-- Console Output -->
+        <filter levels="trace">
+            <console formatid="colored_prot"/>
+        </filter>
+        <filter levels="debug">
+            <console formatid="colored_debug"/>
+        </filter>
+        <filter levels="info">
+            <console formatid="colored_info"/>
+        </filter>
+        <filter levels="warn">
+            <console formatid="colored_warn"/>
+        </filter>
+        <filter levels="error">
+            <console formatid="colored_error"/>
+        </filter>
+
+        <!-- File Output -->
+        <filter levels="debug,info,warn,error">
+            <file path="logs/main.log" formatid="file_format"/>
+        </filter>
+    </outputs>
+
+    <!-- Formatos -->
+    <formats>
+        <format id="colored_debug" format="%%EscM(0)[%%Date %%Time] %%EscM(0;1)[%%MYLEVEL][%s]  %%Msg%%n%%EscM(0)"/>
+        <format id="colored_prot" format="%%EscM(0)[%%Date %%Time] %%EscM(35;1)[%%MYLEVEL][%s] %%Msg%%n%%EscM(0)"/>
+        
+        <format id="colored_info" format="%%EscM(0)[%%Date %%Time] %%EscM(32;1)[%%MYLEVEL][%s] %%Msg%%n%%EscM(0)"/>
+        <format id="colored_warn" format="%%EscM(0)[%%Date %%Time] %%EscM(33;1)[%%MYLEVEL][%s] %%Msg%%n%%EscM(0)"/>
+        <format id="colored_error" format="%%EscM(0)[%%Date %%Time] %%EscM(31;1)[%%MYLEVEL][%s] %%Msg%%n%%EscM(0)"/>
+        <format id="file_format" format="[%%Date %%Time] [%%MYLEVEL] [%s] %%Msg%%n"/>
+    </formats>
+</seelog>

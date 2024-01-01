@@ -1,0 +1,8 @@
+# Ignore arquivos de build
+build/*
+logs/*
+tmp/*
+# Exceção para a pasta de build
+!build/
+!logs/
+!tmp/
