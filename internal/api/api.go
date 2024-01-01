@@ -50,11 +50,11 @@ func mqttTreeHandler(w http.ResponseWriter, r *http.Request) {
 
 						Children: []*TreeNode{
 							{
-								Name:  "client1_io1",
+								Name:  "io1",
 								Topic: "container1/client1/teste/io1",
 							},
 							{
-								Name:  "client1_io2",
+								Name:  "io1",
 								Topic: "container1/client1/teste/io2",
 							},
 						},
@@ -66,11 +66,11 @@ func mqttTreeHandler(w http.ResponseWriter, r *http.Request) {
 				Topic: "container1/client1/*",
 				Children: []*TreeNode{
 					{
-						Name:  "client1_io1",
+						Name:  "io1",
 						Topic: "container1/client2/teste/io1",
 					},
 					{
-						Name:  "client1_io2",
+						Name:  "io1",
 						Topic: "container1/client2/teste/io2",
 					},
 				},
