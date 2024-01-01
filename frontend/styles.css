@@ -1,24 +1,30 @@
 /* styles.css */
 
-/* Definir um tamanho de fonte maior */
 body {
-  font-size: 25px; /* Ajuste conforme necessário */
+  font-size: 30px;
 }
 
-/* Estilizar seta para representar expansão/recolhimento */
+ul {
+  cursor: default;
+  list-style-type: none;
+}
+
+
 .arrow {
   cursor: pointer;
-  user-select: none; /* Evita que o texto seja selecionado ao clicar na seta */
-  margin-right: 10px; /* Espaçamento entre a seta e o texto */
-  display: inline-block;
-  float: left; /* Alinhar setas à esquerda */
+  user-select: none;
+  margin-right: 10px;
 }
 
-.collapsed .arrow::before {
+.arrow::before {
+  content: "▼"; /* Por padrão, a seta aponta para a direita */
+}
+
+.arrow.collapsed::before {
   content: "▶";
 }
 
-.expanded .arrow::before {
+.arrow.expanded::before {
   content: "▼";
 }
 
@@ -26,23 +32,49 @@ body {
   display: none;
 }
 
-.folder-text {
-  cursor: pointer;
-  display: inline-block; /* Manter o texto na mesma linha que a seta */
-}
-
 .folder {
   cursor: pointer;
-  display: block; /* Mudar para display block para evitar centralização */
-  align-items: flex-start; /* Alinhar itens à esquerda */
+  display: flex;
+  align-items: center;
 }
 
-ul {
-  list-style-type: none; /* Remover marcadores de lista */
-  padding-left: 0; /* Remover recuo padrão */
+.folder > ul {
+  list-style-type: none;
+  padding-left: 0;
 }
 
-/* Estilo para filhos */
 .folder > ul > li {
-  margin-left: 30px; /* Espaço à esquerda para filhos */
+  margin-left: 20px;
+}
+
+/* Estilo para a árvore principal */
+#tree > ul > li {
+  margin-bottom: 10px; /* Espaçamento entre os nós principais */
+}
+
+
+
+
+#sidebar {
+  width: 35%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  right: -36%;
+  background-color: #f4f4f4;
+  padding: 20px;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+  transition: right 0.3s;
+}
+
+#sidebar.active {
+  right: 0;
+}
+
+#sidebarTitle {
+  margin-top: 0;
+}
+
+#sidebarContent {
+  /* Estilos para o conteúdo da janela lateral */
 }
