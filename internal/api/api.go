@@ -5,13 +5,26 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	brokerMqtt "github.com/italobbarros/go-mqtt-broker/internal/broker"
 )
 
-func Init() {
+// API representa a interface da API do servidor
+type API struct {
+	Broker *brokerMqtt.Broker
+}
+
+// Init inicializa a API com as rotas e inicia o servidor
+func NewAPI(broker *brokerMqtt.Broker) *API {
+	return &API{
+		Broker: broker,
+	}
+}
+
+func (a *API) Init() {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/mqtt-tree", corsHandler(mqttTreeHandler)).Methods("GET")
-	r.HandleFunc("/topic-info", corsHandler(topicInfoHandler)).Methods("GET")
+	r.HandleFunc("/mqtt-tree", corsHandler(a.MqttTreeHandler)).Methods("GET")
+	r.HandleFunc("/topic-info", corsHandler(a.TopicInfoHandler)).Methods("GET")
 
 	http.Handle("/", r)
 
@@ -19,7 +32,7 @@ func Init() {
 	http.ListenAndServe(":8080", nil)
 }
 
-func topicInfoHandler(w http.ResponseWriter, r *http.Request) {
+func (a *API) TopicInfoHandler(w http.ResponseWriter, r *http.Request) {
 	// Suponha que você esteja buscando informações do tópico de um banco de dados ou outro recurso.
 	// Por agora, vamos simular algumas informações fictícias.
 	topic := r.URL.Query().Get("topic")
@@ -34,50 +47,12 @@ func topicInfoHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(topicInfo)
 }
 
-func mqttTreeHandler(w http.ResponseWriter, r *http.Request) {
-	// Simulação de uma árvore de tópicos MQTT simples
-	root := &TreeNode{
-		Name:  "container1",
-		Topic: "container1/*",
-		Children: []*TreeNode{
-			{
-				Name:  "client1",
-				Topic: "container1/client1/*",
-				Children: []*TreeNode{
-					{
-						Name:  "teste",
-						Topic: "container1/client1/teste/*",
-
-						Children: []*TreeNode{
-							{
-								Name:  "io1",
-								Topic: "container1/client1/teste/io1",
-							},
-							{
-								Name:  "io1",
-								Topic: "container1/client1/teste/io2",
-							},
-						},
-					},
-				},
-			},
-			{
-				Name:  "client2",
-				Topic: "container1/client1/*",
-				Children: []*TreeNode{
-					{
-						Name:  "io1",
-						Topic: "container1/client2/teste/io1",
-					},
-					{
-						Name:  "io1",
-						Topic: "container1/client2/teste/io2",
-					},
-				},
-			},
-		},
-	}
+func (a *API) MqttTreeHandler(w http.ResponseWriter, r *http.Request) {
+	// Aqui, você pode usar a instância de Broker para obter a árvore MQTT.
+	root := a.Broker.Root // Esta é uma suposição; você pode precisar implementar o método correspondente no seu Broker.
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(root)
 }
+
+// Você também pode adicionar métodos adicionais à estrutura API conforme necessário.
