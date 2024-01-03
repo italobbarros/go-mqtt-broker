@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
-  fetch('http://127.0.0.1:8080/mqtt-tree')
+  fetch('http://192.168.0.109:8080/mqtt-tree')
   .then(response => {
       if (!response.ok) {
           throw new Error('Erro ao recuperar a árvore MQTT');
@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function() {
         li.appendChild(arrow);
       }
 
-      const textNode = document.createTextNode(nodes.name);
+      const textNode = document.createTextNode("/"+nodes.name);
       li.appendChild(textNode);
 
       const ul = document.createElement('ul');
@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", function() {
           li.appendChild(arrow);
         }
 
-        const textNode = document.createTextNode("/" +node.name);
+        const textNode = document.createTextNode("/"+node.name);
         li.appendChild(textNode);
 
         const ul = document.createElement('ul');
@@ -100,9 +100,10 @@ document.addEventListener("DOMContentLoaded", function() {
 function handleListItemClick(dataObject,name) {
   const topic = findTopicByName(dataObject, name); // Substitua yourDataObject pelo objeto de dados retornado do endpoint
   if (topic) {
-      showSidebarDetails(topic); // Chama a função com o tópico correspondente
+    console.log("topic: "+topic)
+    showSidebarDetails(topic); // Chama a função com o tópico correspondente
   } else {
-      console.log("Tópico não encontrado para o nome:", name);
+    console.log("Tópico não encontrado para o nome:", name);
   }
 }
 
@@ -129,6 +130,16 @@ function getCurrentClickText(element) {
   
 }
 
+function processTopic(topic) {
+  // Verifica se a string contém '#'
+  if (topic.includes('#')) {
+    // Substitui todos os '#' por '%23'
+    return topic.replace(/#/g, '%23');
+  }
+  // Retorna a string original se não houver '#'
+  return topic;
+}
+
 function showSidebarDetails(name) {
   console.log("showSidebarDetails")
   const sidebarTitle = document.getElementById('sidebarTitle');
@@ -137,7 +148,8 @@ function showSidebarDetails(name) {
 
   sidebarTitle.textContent = `Detalhes de ${name}`;
   //sidebarContent.textContent = `Informações detalhadas sobre ${name}.`; 
-  fetch(`http://127.0.0.1:8080/topic-info?topic=${name}`)
+  
+  fetch(`http://192.168.0.109:8080/topic-info?topic=${processTopic(name)}`)
   .then(response => {
       if (!response.ok) {
           throw new Error('Erro ao recuperar as informações do tópico');
