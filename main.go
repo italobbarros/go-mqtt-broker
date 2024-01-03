@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	broker := brokerMqtt.NewBroker("Container1")
+	broker := brokerMqtt.NewBroker("go-mqtt-broker")
 	api := api.NewAPI(broker)
 	go api.Init()
 	topics := []string{

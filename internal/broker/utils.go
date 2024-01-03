@@ -26,7 +26,6 @@ func getTopicUntilKeyword(topic, keyword string) string {
 	for i, part := range parts {
 		result = append(result, part)
 		if part == keyword && i != len(parts)-1 {
-			result = append(result, "")
 			break
 		}
 	}

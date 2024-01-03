@@ -8,7 +8,6 @@ type TopicNode struct {
 }
 
 type TopicConfig struct {
-	TopicName    string   // Nome do tópico
 	QoS          int      // Nível de Qualidade de Serviço (0, 1 ou 2)
 	Retained     bool     // Indica se a mensagem é retida ou não
 	Subscribers  []string // Lista de sub-tópicos associados a este tópico

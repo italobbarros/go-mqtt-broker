@@ -19,14 +19,11 @@ func (b *Broker) AddTopic(topic string) {
 		}
 
 		if !found {
-			topicRootWithoutDash := b.Root.Topic[:len(b.Root.Topic)-1]
-			newTopic := topicRootWithoutDash + getTopicUntilKeyword(topic, segment)
-
+			newTopic := getTopicUntilKeyword(topic, segment)
 			// Se for o último segmento, crie o nó com um TopicConfig
 			var topicConfig *TopicConfig = nil
 			if index == len(segments)-1 {
 				topicConfig = &TopicConfig{
-					TopicName:    newTopic,
 					QoS:          1, // Exemplo de valor, ajuste conforme necessário
 					Retained:     true,
 					Subscribers:  []string{},  // Lista vazia ou ajuste conforme necessário
