@@ -29,7 +29,7 @@ func (a *API) Init() {
 	http.Handle("/", r)
 
 	// Inicie o servidor
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe("0.0.0.0:8080", nil)
 }
 
 func (a *API) TopicInfoHandler(w http.ResponseWriter, r *http.Request) {

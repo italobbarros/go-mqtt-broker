@@ -6,10 +6,10 @@ import "fmt"
 func NewBroker(name string) *Broker {
 	topic := fmt.Sprintf("/%s/#", name)
 	return &Broker{
-		Root: &TreeNode{
+		Root: &TopicNode{
 			Name:     name,
 			Topic:    topic,
-			Children: make([]*TreeNode, 0),
+			Children: make([]*TopicNode, 0),
 		},
 	}
 }

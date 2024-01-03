@@ -1,16 +1,14 @@
 package broker
 
 import (
-	"fmt"
 	"strings"
 )
 
-// AddTopic adiciona um tópico à árvore
 func (b *Broker) AddTopic(topic string) {
 	segments := strings.Split(topic, "/")
 
 	currentNode := b.Root
-	for _, segment := range segments {
+	for index, segment := range segments {
 		found := false
 		for _, child := range currentNode.Children {
 			if child.Name == segment {
@@ -21,12 +19,26 @@ func (b *Broker) AddTopic(topic string) {
 		}
 
 		if !found {
-			fmt.Print(topic + "|" + segment)
-			topicWithoutWildcard := b.Root.Topic[:len(b.Root.Topic)-1]
-			newChild := &TreeNode{
-				Name:     segment,
-				Topic:    topicWithoutWildcard + getTopicUntilKeyword(topic, segment),
-				Children: make([]*TreeNode, 0),
+			topicRootWithoutDash := b.Root.Topic[:len(b.Root.Topic)-1]
+			newTopic := topicRootWithoutDash + getTopicUntilKeyword(topic, segment)
+
+			// Se for o último segmento, crie o nó com um TopicConfig
+			var topicConfig *TopicConfig = nil
+			if index == len(segments)-1 {
+				topicConfig = &TopicConfig{
+					TopicName:    newTopic,
+					QoS:          1, // Exemplo de valor, ajuste conforme necessário
+					Retained:     true,
+					Subscribers:  []string{},  // Lista vazia ou ajuste conforme necessário
+					SecurityRule: "ALLOW_ALL", // Exemplo de regra de segurança, ajuste conforme necessário
+				}
+			}
+
+			newChild := &TopicNode{
+				Name:        segment,
+				Topic:       newTopic,
+				TopicConfig: topicConfig,
+				Children:    make([]*TopicNode, 0),
 			}
 			currentNode.Children = append(currentNode.Children, newChild)
 			currentNode = newChild

@@ -11,7 +11,7 @@ func (b *Broker) PrintAllTree() {
 }
 
 // Função auxiliar para imprimir a árvore recursivamente
-func printTree(node *TreeNode, level int) {
+func printTree(node *TopicNode, level int) {
 	indent := strings.Repeat("  ", level)
 	fmt.Println(indent + node.Name)
 	for _, child := range node.Children {
@@ -26,7 +26,7 @@ func getTopicUntilKeyword(topic, keyword string) string {
 	for i, part := range parts {
 		result = append(result, part)
 		if part == keyword && i != len(parts)-1 {
-			result = append(result, "#")
+			result = append(result, "")
 			break
 		}
 	}

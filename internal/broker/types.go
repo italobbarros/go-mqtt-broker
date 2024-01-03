@@ -1,9 +1,18 @@
 package broker
 
-type TreeNode struct {
-	Name     string      `json:"name"`
-	Topic    string      `json:"topic"`
-	Children []*TreeNode `json:"children,omitempty"`
+type TopicNode struct {
+	Name        string       `json:"name"`
+	Topic       string       `json:"topic"`
+	TopicConfig *TopicConfig `json:"topicCfg,omitempty"`
+	Children    []*TopicNode `json:"children,omitempty"`
+}
+
+type TopicConfig struct {
+	TopicName    string   // Nome do tópico
+	QoS          int      // Nível de Qualidade de Serviço (0, 1 ou 2)
+	Retained     bool     // Indica se a mensagem é retida ou não
+	Subscribers  []string // Lista de sub-tópicos associados a este tópico
+	SecurityRule string   // Regra de segurança aplicada ao tópico
 }
 
 type TopicInfo struct {
@@ -15,5 +24,5 @@ type TopicInfo struct {
 
 // Broker representa a entidade do corretor MQTT
 type Broker struct {
-	Root *TreeNode
+	Root *TopicNode
 }
