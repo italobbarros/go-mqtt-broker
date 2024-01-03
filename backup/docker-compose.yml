@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  broker-mqtt:
+    image: broker-mqtt
+    build: .
+    container_name: broker-mqtt
+    logging:            # Configuração de log
+      options:
+        max-size: "50m" # Tamanho máximo de cada arquivo de log
+        max-file: "2"   # Número máximo de arquivos de log
+    command: ["./main","--portManagement","43038"]
+    restart: unless-stopped
+    ports:
+    - "8080:8080"
+    environment:
+      - LOG_CONFIG_PROD=true
+    networks:
+       - broker
+  
+  broker-managment:
+    image: broker-managment
+    build:
+      context: ./frontend
+    container_name: broker-managment
+    logging:            # Configuração de log
+      options:
+        max-size: "50m" # Tamanho máximo de cada arquivo de log
+        max-file: "2"   # Número máximo de arquivos de log
+    ports:
+    - "8000:8000"
+    restart: unless-stopped
+    networks:
+       - broker
+    #environment:
+    #  - API_MQTT_TREE='http://192.168.0.109:8080/mqtt-tree'
+    #  - API_TOPIC_INFO='http://192.168.0.109:8080/topic-info?topic='
+
+networks:
+  broker:
+    driver: bridge
