@@ -1,5 +1,16 @@
 package broker
 
+import (
+	"sync"
+	"time"
+)
+
+// Broker representa a entidade do corretor MQTT
+type Broker struct {
+	Root *TopicNode
+}
+
+// Topic.go
 type TopicNode struct {
 	Name        string       `json:"name"`
 	Topic       string       `json:"topic"`
@@ -21,7 +32,25 @@ type TopicInfo struct {
 	Subscribers  int    `json:"subscribers"`
 }
 
-// Broker representa a entidade do corretor MQTT
-type Broker struct {
-	Root *TopicNode
+// session.go
+type SessionConfig struct {
+	Id      string
+	Timeout int
+	Clean   bool
+}
+
+// Session representa uma sessão MQTT
+type Session struct {
+	Timestamp time.Time
+	config    *SessionConfig
+	top       *Session // Ponteiro para o nó anterior na lista
+	bottom    *Session // Ponteiro para o próximo nó na lista
+}
+
+// SessionManager gerencia sessões MQTT
+type SessionManager struct {
+	head       *Session            // Ponteiro para o primeiro nó da lista
+	tail       *Session            // Ponteiro para o ultimo nó da lista
+	sessionMap map[string]*Session // Mapa para acessar sessões por ID
+	lock       sync.Mutex
 }
