@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-func (b *Broker) AddTopic(topic string) {
+func (b *Broker) AddTopic(topic string, topicCfg *TopicConfig) {
 	segments := strings.Split(topic, "/")
 
 	currentNode := b.Root
@@ -23,12 +23,7 @@ func (b *Broker) AddTopic(topic string) {
 			// Se for o último segmento, crie o nó com um TopicConfig
 			var topicConfig *TopicConfig = nil
 			if index == len(segments)-1 {
-				topicConfig = &TopicConfig{
-					QoS:          1, // Exemplo de valor, ajuste conforme necessário
-					Retained:     true,
-					Subscribers:  []string{},  // Lista vazia ou ajuste conforme necessário
-					SecurityRule: "ALLOW_ALL", // Exemplo de regra de segurança, ajuste conforme necessário
-				}
+				topicConfig = topicCfg
 			}
 
 			newChild := &TopicNode{
