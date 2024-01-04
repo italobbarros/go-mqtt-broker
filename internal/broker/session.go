@@ -1,31 +1,6 @@
 package broker
 
-import (
-	"sync"
-	"time"
-)
-
-type SessionConfig struct {
-	Id      string
-	Timeout int
-	Clean   bool
-}
-
-// Session representa uma sessão MQTT
-type Session struct {
-	Timestamp time.Time
-	config    *SessionConfig
-	top       *Session // Ponteiro para o nó anterior na lista
-	bottom    *Session // Ponteiro para o próximo nó na lista
-}
-
-// SessionManager gerencia sessões MQTT
-type SessionManager struct {
-	head       *Session            // Ponteiro para o primeiro nó da lista
-	tail       *Session            // Ponteiro para o ultimo nó da lista
-	sessionMap map[string]*Session // Mapa para acessar sessões por ID
-	lock       sync.Mutex
-}
+import "time"
 
 // NewSessionManager cria um novo SessionManager
 func NewSessionManager() *SessionManager {
