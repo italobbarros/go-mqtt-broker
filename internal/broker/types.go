@@ -42,15 +42,21 @@ type SessionConfig struct {
 // Session representa uma sessão MQTT
 type Session struct {
 	Timestamp time.Time
+	partition int
 	config    *SessionConfig
 	top       *Session // Ponteiro para o nó anterior na lista
 	bottom    *Session // Ponteiro para o próximo nó na lista
 }
 
+type SessionPartition struct {
+	head *Session // Ponteiro para o primeiro nó da lista
+	tail *Session // Ponteiro para o ultimo nó da lista
+	lock sync.Mutex
+}
+
 // SessionManager gerencia sessões MQTT
 type SessionManager struct {
-	head       *Session            // Ponteiro para o primeiro nó da lista
-	tail       *Session            // Ponteiro para o ultimo nó da lista
-	sessionMap map[string]*Session // Mapa para acessar sessões por ID
-	lock       sync.Mutex
+	sessionMap   map[string]*Session // Mapa para acessar sessões por ID
+	partitionMap map[int]*SessionPartition
+	lock         sync.Mutex
 }

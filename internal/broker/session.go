@@ -1,15 +1,19 @@
 package broker
 
-import "time"
+import (
+	"sync"
+	"time"
+)
 
-// NewSessionManager cria um novo SessionManager
+// NewSessionManager creates a new SessionManager
 func NewSessionManager() *SessionManager {
 	return &SessionManager{
-		sessionMap: make(map[string]*Session),
+		partitionMap: make(map[int]*SessionPartition),
+		sessionMap:   make(map[string]*Session),
 	}
 }
 
-// AddSession adiciona uma nova sessão ao topo da lista
+// AddSession adds a new session to the top of the list
 func (sm *SessionManager) AddSession(sessionCfg *SessionConfig) {
 	sm.lock.Lock()
 	defer sm.lock.Unlock()
@@ -17,34 +21,43 @@ func (sm *SessionManager) AddSession(sessionCfg *SessionConfig) {
 		config:    sessionCfg,
 		Timestamp: time.Now(),
 	}
+	sessionPartition, ok := sm.partitionMap[sessionCfg.Timeout]
+	if !ok {
+		sessionPartition = &SessionPartition{}
+		sm.partitionMap[sessionCfg.Timeout] = sessionPartition
+	}
 
 	sm.sessionMap[sessionCfg.Id] = session
-
-	if sm.head == nil {
-		sm.head = session
-		sm.tail = session
+	if sessionPartition.head == nil {
+		sessionPartition.head = session
+		sessionPartition.tail = session
 		return
 	}
-	session.bottom = sm.head
-	sm.head.top = session
-	sm.head = session
+	session.bottom = sessionPartition.head
+	sessionPartition.head.top = session
+	sessionPartition.head = session
+
 }
 
-// UpdateSession move a sessão atualizada para o topo da lista
-func (sm *SessionManager) UpdateSession(id string) {
+// UpdateSession moves the updated session to the top of the list
+func (sm *SessionManager) UpdateSession(id string, timeout int) {
 	sm.lock.Lock()
 	defer sm.lock.Unlock()
-	if session, ok := sm.sessionMap[id]; ok {
-		// Se já estiver no topo, não faz nada
-		session.Timestamp = time.Now()
-		if session == sm.head {
+	if SessionPartition, ok := sm.partitionMap[timeout]; ok {
+		// If already at the top, do nothing
+		session, ok := sm.sessionMap[id]
+		if !ok {
 			return
 		}
-		if session == sm.tail {
-			sm.tail = session.top
+		session.Timestamp = time.Now()
+		if session == SessionPartition.head {
+			return
+		}
+		if session == SessionPartition.tail {
+			SessionPartition.tail = session.top
 		}
 
-		// Remove o nó da sua posição atual
+		// Remove the node from its current position
 		if session.bottom != nil {
 			session.bottom.top = session.top
 		}
@@ -52,29 +65,33 @@ func (sm *SessionManager) UpdateSession(id string) {
 			session.top.bottom = session.bottom
 		}
 
-		// Move o nó para o topo
-		session.bottom = sm.head
+		// Move the node to the top
+		session.bottom = SessionPartition.head
 		session.top = nil
-		sm.head.top = session
-		sm.head = session
+		SessionPartition.head.top = session
+		SessionPartition.head = session
 	}
 }
 
-func (sm *SessionManager) RemoveSession(id string) {
+// RemoveSession removes sessions from the map and updates pointers
+func (sm *SessionManager) RemoveSession(id string, timeout int) {
 	sm.lock.Lock()
 	defer sm.lock.Unlock()
 
-	// Verifica se a sessão existe no mapa
-	if session, ok := sm.sessionMap[id]; ok {
-		// Se a sessão for a cabeça da lista
-		if session == sm.head {
-			sm.head = session.bottom
+	if SessionPartition, ok := sm.partitionMap[timeout]; ok {
+		// If the session is the head of the list
+		session, ok := sm.sessionMap[id]
+		if !ok {
+			return
 		}
-		if session == sm.tail {
-			sm.tail = session.top
+		if session == SessionPartition.head {
+			SessionPartition.head = session.bottom
+		}
+		if session == SessionPartition.tail {
+			SessionPartition.tail = session.top
 		}
 
-		// Atualiza os ponteiros para remover a sessão da lista
+		// Update pointers to remove the session from the list
 		if session.bottom != nil {
 			session.bottom.top = session.top
 		}
@@ -82,53 +99,54 @@ func (sm *SessionManager) RemoveSession(id string) {
 			session.top.bottom = session.bottom
 		}
 
-		// Remove a sessão do mapa
+		// Remove the session from the map
 		delete(sm.sessionMap, id)
 	}
 }
 
-// CheckSessionTimeouts verifica e remove as sessões cujo timeout expirou
+// CheckSessionTimeouts verifica e remove sessões cujo tempo limite expirou
 func (sm *SessionManager) CheckSessionTimeouts() {
 	sm.lock.Lock()
 	defer sm.lock.Unlock()
 
 	currentTimestamp := time.Now()
 
-	currentSession := sm.tail
-	for currentSession != nil {
-		if !currentSession.config.Clean {
-			elapsed := currentTimestamp.Sub(currentSession.Timestamp)
-			if elapsed.Seconds() > float64(3600) {
-				sm.RemoveSession(currentSession.config.Id)
-			}
-		} else {
-			elapsed := currentTimestamp.Sub(currentSession.Timestamp)
-			if elapsed.Seconds() > float64(currentSession.config.Timeout) {
-				sm.RemoveSession(currentSession.config.Id)
-			}
-		}
-		currentSession = currentSession.top
-	}
-}
+	// Use WaitGroup para esperar até que todas as goroutines sejam concluídas
+	var wg sync.WaitGroup
 
-//func main() {
-//	manager := NewSessionManager(&SessionConfig{})
-//
-// Adicionar algumas sessões
-//	manager.AddSession("session1")
-//	manager.AddSession("session2")
-//	manager.AddSession("session3")
-//
-// Atualizar uma sessão
-//	manager.UpdateSession("session2")
-//
-// Remover uma sessão
-//	manager.RemoveSession("session2")
-//
-//	// Simplesmente imprimindo para demonstração
-//	current := manager.head
-//	for current != nil {
-//		fmt.Println(current.ID)
-//		current = current.bottom
-//	}
-//}
+	// Itera sobre cada SessionPartition
+	for _, sessionPartition := range sm.partitionMap {
+		wg.Add(1) // Incrementa o WaitGroup para cada goroutine iniciada
+
+		// Processa cada SessionPartition em uma goroutine separada
+		go func(partition *SessionPartition) {
+			defer wg.Done() // Sinaliza que a goroutine terminou
+
+			currentSession := partition.tail
+			for currentSession != nil {
+				var elapsed float64
+				if !currentSession.config.Clean {
+					elapsed = currentTimestamp.Sub(currentSession.Timestamp).Seconds()
+					if elapsed > 3600 {
+						sm.RemoveSession(currentSession.config.Id, currentSession.config.Timeout)
+					} else {
+						// Se a sessão ainda está dentro do intervalo, pode sair do loop
+						break
+					}
+				} else {
+					elapsed = currentTimestamp.Sub(currentSession.Timestamp).Seconds()
+					if elapsed > float64(currentSession.config.Timeout) {
+						sm.RemoveSession(currentSession.config.Id, currentSession.config.Timeout)
+					} else {
+						// Se a sessão ainda está dentro do intervalo, pode sair do loop
+						break
+					}
+				}
+				currentSession = currentSession.top
+			}
+		}(sessionPartition)
+	}
+
+	// Aguarde até que todas as goroutines sejam concluídas
+	wg.Wait()
+}
