@@ -1,10 +1,12 @@
 package broker
 
 import (
+	"fmt"
 	"strings"
 )
 
 func (b *Broker) AddTopic(topic string, topicCfg *TopicConfig) {
+	fmt.Println("add: " + topic)
 	segments := strings.Split(topic, "/")
 
 	currentNode := b.Root
@@ -12,6 +14,10 @@ func (b *Broker) AddTopic(topic string, topicCfg *TopicConfig) {
 		found := false
 		for _, child := range currentNode.Children {
 			if child.Name == segment {
+				// Se for o último segmento, atualize o TopicConfig existente
+				if index == len(segments)-1 {
+					child.TopicConfig = topicCfg
+				}
 				currentNode = child
 				found = true
 				break
@@ -36,4 +42,5 @@ func (b *Broker) AddTopic(topic string, topicCfg *TopicConfig) {
 			currentNode = newChild
 		}
 	}
+	b.PrintAllTree()
 }

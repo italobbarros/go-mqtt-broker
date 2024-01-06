@@ -185,6 +185,7 @@ func (prot *MqttProtocol) connAck(sessionCfg *ResponseConnect, resp ConnectRetur
 		response = append(response, []byte{0x01}...)
 	}
 	response = append(response, []byte{byte(resp)}...) //TODO response
+	log.Printf("connAck: %v\n", response)
 	err := prot.conn.Write(response)
 	if err != nil {
 		return err
@@ -196,7 +197,7 @@ func (prot *MqttProtocol) publishUnPack(data []byte) (*ResponsePublish, error) {
 	var response ResponsePublish
 	fmt.Println(data)
 	response.dutFlag = (data[0]&0b1000 == 0b1000)
-	response.Qos = int(data[0] & 0b110)
+	response.Qos = int((data[0] & 0b110) >> 1)
 	response.Retained = (data[0]&0b1 == 0b1)
 	variableHeader := data[2:]
 	log.Println(variableHeader)
@@ -209,19 +210,31 @@ func (prot *MqttProtocol) publishUnPack(data []byte) (*ResponsePublish, error) {
 	log.Println(response.Topic)
 	variableHeader = variableHeader[lengthTopic:]
 	if response.Qos > 0 {
-		response.Identifier = int(variableHeader[0])<<8 + int(variableHeader[1])
+		response.Identifier = variableHeader[:2]
 		log.Println(response.Identifier)
 		variableHeader = variableHeader[2:]
 	}
 	payload := variableHeader
-	response.Body = payload
-	log.Println(string(response.Body))
+	response.Data = payload
+	log.Println(string(response.Data))
 	return &response, nil
 }
-func (prot *MqttProtocol) pubAck(pubCfg *ResponsePublish, resp PublishReturnCode) error {
+func (prot *MqttProtocol) pubAck(pubCfg *ResponsePublish) error {
+	log.Println("pubAck")
+	response := []byte{byte(PUBACK), 0b10}
+	response = append(response, pubCfg.Identifier...) //TODO response
+	err := prot.conn.Write(response)
+	if err != nil {
+		return err
+	}
 	return nil
 }
-func (prot *MqttProtocol) pubRec(pubCfg *ResponsePublish, resp PublishReturnCode) error {
+func (prot *MqttProtocol) pubRec(pubCfg *ResponsePublish) error {
+	log.Println("pubRec")
+	return nil
+}
+func (prot *MqttProtocol) unpackPubRel(pubCfg *ResponsePublish) error {
+	log.Println("unpackPubRel")
 	return nil
 }
 
@@ -231,14 +244,14 @@ func (prot *MqttProtocol) PublishProcess(data []byte) (*ResponsePublish, error) 
 		return nil, err
 	}
 	if r.Qos == 1 {
-		err = prot.pubAck(r, PUBLISHED)
+		err = prot.pubAck(r)
 		if err != nil {
 			return nil, err
 		}
 		return r, nil
 	}
 	if r.Qos == 2 {
-		err = prot.pubRec(r, PUBLISHED)
+		err = prot.pubRec(r)
 		if err != nil {
 			return nil, err
 		}

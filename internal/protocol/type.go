@@ -8,6 +8,7 @@ const (
 	CONNECT   Command = 0x10
 	CONNACK   Command = 0x20
 	PUBLISH   Command = 0x30
+	PUBACK    Command = 0x40
 	SUBSCRIBE Command = 0x82
 	PINGREQ   Command = 0xC0
 	PINGRESP  Command = 0xD0
@@ -22,13 +23,6 @@ const (
 	CONNECT_SERVER_UNAVAILABLE     ConnectReturnCode = 0x03 //Connection Refused, Server unavailable The Network Connection has been made but the MQTT service is unavailable
 	CONNECT_USER_OR_PASS_MALFORMED ConnectReturnCode = 0x04 //Connection Refused, bad user name or password The data in the user name or password is malformed
 	CONNECT_NOT_AUTHORIZED         ConnectReturnCode = 0x05 //Connection Refused, not authorized The Client is not authorized to connect
-)
-
-type PublishReturnCode byte
-
-const (
-	PUBLISHED PublishReturnCode = 0x00 //Connection Accepted Connection accepted
-	NOT_PUBLISHED
 )
 
 type MqttProtocol struct {

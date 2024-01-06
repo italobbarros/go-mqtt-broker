@@ -18,9 +18,9 @@ func TestNewSessionManager(t *testing.T) {
 func TestAddSession(t *testing.T) {
 	sm := NewSessionManager()
 	cfg := &SessionConfig{
-		Id:      "testID",
-		Timeout: 10,
-		Clean:   false,
+		Id:        "testID",
+		KeepAlive: 10,
+		Clean:     false,
 	}
 	sm.AddSession(cfg)
 	if len(sm.partitionMap) != 1 || len(sm.sessionMap) != 1 {
@@ -31,22 +31,22 @@ func TestAddSession(t *testing.T) {
 func TestUpdateSession(t *testing.T) {
 	sm := NewSessionManager()
 	cfg := &SessionConfig{
-		Id:      "testID",
-		Timeout: 10,
-		Clean:   false,
+		Id:        "testID",
+		KeepAlive: 10,
+		Clean:     false,
 	}
 	sm.AddSession(cfg)
 	time.Sleep(1 * time.Second) // Espera 1 segundo para simular uma atualização
-	sm.UpdateSession("testID", 10)
+	sm.UpdateSession(cfg)
 	// Você pode adicionar mais verificações aqui para validar a funcionalidade.
 }
 
 func TestRemoveSession(t *testing.T) {
 	sm := NewSessionManager()
 	cfg := &SessionConfig{
-		Id:      "testID",
-		Timeout: 10,
-		Clean:   false,
+		Id:        "testID",
+		KeepAlive: 10,
+		Clean:     false,
 	}
 	sm.AddSession(cfg)
 	sm.RemoveSession("testID", 10)
@@ -58,24 +58,24 @@ func TestRemoveSession(t *testing.T) {
 func TestCheckSessionTimeouts(t *testing.T) {
 	sm := NewSessionManager()
 	sm.AddSession(&SessionConfig{
-		Id:      "testID1",
-		Timeout: 1,
-		Clean:   true,
+		Id:        "testID1",
+		KeepAlive: 1,
+		Clean:     true,
 	})
 	sm.AddSession(&SessionConfig{
-		Id:      "testID2",
-		Timeout: 0,
-		Clean:   true,
+		Id:        "testID2",
+		KeepAlive: 0,
+		Clean:     true,
 	})
 	sm.AddSession(&SessionConfig{
-		Id:      "testID3",
-		Timeout: 0,
-		Clean:   false,
+		Id:        "testID3",
+		KeepAlive: 0,
+		Clean:     false,
 	})
 	sm.AddSession(&SessionConfig{
-		Id:      "testID3",
-		Timeout: 10,
-		Clean:   true,
+		Id:        "testID3",
+		KeepAlive: 10,
+		Clean:     true,
 	})
 	t.Log("sessionMap length:", len(sm.sessionMap))
 	t.Log("partitionMap length:", len(sm.partitionMap))

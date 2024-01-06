@@ -7,15 +7,31 @@ import (
 
 // PrintTree imprime a árvore de tópicos a partir do nó fornecido
 func (b *Broker) PrintAllTree() {
-	printTree(b.Root, 0)
+	printTree(b.Root, 0, "")
 }
 
 // Função auxiliar para imprimir a árvore recursivamente
-func printTree(node *TopicNode, level int) {
+func printTree(node *TopicNode, level int, arrow string) {
 	indent := strings.Repeat("  ", level)
-	fmt.Println(indent + node.Name)
-	for _, child := range node.Children {
-		printTree(child, level+1)
+
+	if node.TopicConfig != nil {
+		fmt.Print(indent + arrow + " " + node.Name)
+		fmt.Print(" -> "+"Data:", string(node.TopicConfig.Data))
+		fmt.Print(" | "+"Retained:", node.TopicConfig.Retained)
+		fmt.Print(" | "+"Subscribers:", node.TopicConfig.Subscribers)
+		fmt.Println(" | "+"SecurityRule:", node.TopicConfig.SecurityRule)
+	} else {
+		fmt.Println(indent + arrow + " " + node.Name)
+	}
+
+	for index, child := range node.Children {
+		var newArrow string
+		if index == len(node.Children)-1 {
+			newArrow = "└──"
+		} else {
+			newArrow = "├──"
+		}
+		printTree(child, level+1, newArrow)
 	}
 }
 

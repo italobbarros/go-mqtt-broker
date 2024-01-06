@@ -9,9 +9,16 @@ import (
 // NewSessionManager creates a new SessionManager
 func NewSessionManager() *SessionManager {
 	return &SessionManager{
-		partitionMap: make(map[int]*SessionPartition),
+		partitionMap: make(map[int16]*SessionPartition),
 		sessionMap:   make(map[string]*Session),
 	}
+}
+
+func (sm *SessionManager) Exist(id string) bool {
+	sm.lockSession.Lock()
+	_, ok := sm.sessionMap[id]
+	sm.lockSession.Unlock()
+	return ok
 }
 
 // AddSession adds a new session to the top of the list
@@ -22,10 +29,10 @@ func (sm *SessionManager) AddSession(sessionCfg *SessionConfig) {
 		config:    sessionCfg,
 		Timestamp: time.Now(),
 	}
-	sessionPartition, ok := sm.partitionMap[sessionCfg.Timeout]
+	sessionPartition, ok := sm.partitionMap[sessionCfg.KeepAlive]
 	if !ok {
 		sessionPartition = &SessionPartition{}
-		sm.partitionMap[sessionCfg.Timeout] = sessionPartition
+		sm.partitionMap[sessionCfg.KeepAlive] = sessionPartition
 	}
 	sm.lockSession.Lock()
 	sm.sessionMap[sessionCfg.Id] = session
@@ -42,17 +49,21 @@ func (sm *SessionManager) AddSession(sessionCfg *SessionConfig) {
 }
 
 // UpdateSession moves the updated session to the top of the list
-func (sm *SessionManager) UpdateSession(id string, timeout int) {
+func (sm *SessionManager) UpdateSession(sessionCfg *SessionConfig) {
 	sm.lockPartition.Lock()
 	defer sm.lockPartition.Unlock()
-	if SessionPartition, ok := sm.partitionMap[timeout]; ok {
+	if SessionPartition, ok := sm.partitionMap[sessionCfg.KeepAlive]; ok {
 		// If already at the top, do nothing
 		sm.lockSession.Lock()
-		session, ok := sm.sessionMap[id]
+		session, ok := sm.sessionMap[sessionCfg.Id]
 		sm.lockSession.Unlock()
 		if !ok {
 			return
 		}
+		if session.config.KeepAlive != sessionCfg.KeepAlive {
+			//TODO caso tenha mudado o keepalive
+		}
+		session.config = sessionCfg
 		session.Timestamp = time.Now()
 		if session == SessionPartition.head {
 			return
@@ -100,10 +111,10 @@ func (sm *SessionManager) onlyRemoveSession(sessionPartition *SessionPartition, 
 }
 
 // RemoveSession removes sessions from the map and updates pointers
-func (sm *SessionManager) RemoveSession(id string, timeout int) {
+func (sm *SessionManager) RemoveSession(id string, keepAlive int16) {
 	sm.lockPartition.Lock()
 	defer sm.lockPartition.Unlock()
-	if sessionPartition, ok := sm.partitionMap[timeout]; ok {
+	if sessionPartition, ok := sm.partitionMap[keepAlive]; ok {
 		// If the session is the head of the list
 
 		sm.lockSession.Lock()
@@ -130,7 +141,7 @@ func (sm *SessionManager) CheckSession(partition *SessionPartition, wg *sync.Wai
 			}
 		} else {
 			elapsed = currentTimestamp.Sub(currentSession.Timestamp).Seconds()
-			if elapsed > float64(currentSession.config.Timeout) {
+			if elapsed > float64(currentSession.config.KeepAlive) {
 				sm.onlyRemoveSession(partition, currentSession)
 			} else {
 				break
@@ -175,11 +186,12 @@ func (sm *SessionManager) DebugPrint() {
 		fmt.Println("Partition Key:", k) // Supondo que você tenha um ID para cada partição
 
 		for currentSession != nil {
-			fmt.Println("                    ^")
-			fmt.Printf("-> Session ID: %s, Timeout: %d, Clean: %v\n",
+			fmt.Println("                             ^")
+			fmt.Printf("-> Session ID: %s, KeepAlive: %d, Clean: %v ,Timestamp: %s\n",
 				currentSession.config.Id,
-				currentSession.config.Timeout,
-				currentSession.config.Clean)
+				currentSession.config.KeepAlive,
+				currentSession.config.Clean,
+				currentSession.Timestamp.Format("2006-01-02 15:04:05"))
 			currentSession = currentSession.bottom
 			//fmt.Println("                    v")
 		}

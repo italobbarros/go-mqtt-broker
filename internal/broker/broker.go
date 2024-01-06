@@ -45,16 +45,7 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 		log.Println(err)
 		return
 	}
-	if sessionCfg != nil {
-		b.SessionMg.AddSession(&SessionConfig{
-			Id:        sessionCfg.Id,
-			Timeout:   2,
-			keepAlive: sessionCfg.KeepAlive,
-			username:  sessionCfg.Username,
-			password:  sessionCfg.Password,
-		})
-	}
-	log.Println(sessionCfg)
+	b.newSession(sessionCfg)
 	for {
 		cmd, data, err := prot.IsValidMqttCmd()
 		if err != nil {
@@ -65,22 +56,60 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 			log.Println("Command is nil")
 			return
 		}
-		switch *cmd {
-		case protocol.PUBLISH:
-			r, err := prot.PublishProcess(data)
+		if *cmd&protocol.PUBLISH == protocol.PUBLISH {
+			err := b.handlePublishCommand(data, prot)
 			if err != nil {
-				log.Printf("PublishProcess error: %s\n", err)
+				log.Printf("handlePublishCommand error: %s\n", err)
 				return
 			}
-			log.Println(r)
-		case protocol.PINGREQ:
+			continue
+		}
+		if *cmd&protocol.PINGREQ == protocol.PINGREQ {
 			err := prot.PingProcess()
 			if err != nil {
 				log.Printf("PingProcess error: %s\n", err)
 				return
 			}
+			log.Println("PING!")
+			continue
 		}
 	}
+}
+
+func (b *Broker) newSession(sessionCfg *protocol.ResponseConnect) {
+	defer b.SessionMg.DebugPrint()
+	if sessionCfg == nil {
+		return
+	}
+	if b.SessionMg.Exist(sessionCfg.Id) {
+		b.SessionMg.UpdateSession(&SessionConfig{
+			Id:        sessionCfg.Id,
+			KeepAlive: sessionCfg.KeepAlive,
+			username:  sessionCfg.Username,
+			password:  sessionCfg.Password,
+		})
+		return
+	}
+	b.SessionMg.AddSession(&SessionConfig{
+		Id:        sessionCfg.Id,
+		KeepAlive: sessionCfg.KeepAlive,
+		username:  sessionCfg.Username,
+		password:  sessionCfg.Password,
+	})
+	return
+}
+
+func (b *Broker) handlePublishCommand(data []byte, prot *protocol.MqttProtocol) error {
+	r, err := prot.PublishProcess(data)
+	if err != nil {
+		return err
+	}
+	log.Println(r)
+	b.AddTopic(r.Topic, &TopicConfig{
+		Retained: r.Retained,
+		Data:     r.Data,
+	})
+	return nil
 }
 
 func (b *Broker) Start() {

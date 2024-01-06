@@ -10,9 +10,9 @@ type ResponseConnect struct {
 }
 
 type ResponsePublish struct {
-	Identifier int
+	Identifier []byte
 	Topic      string
-	Body       []byte
+	Data       []byte
 	dutFlag    bool
 	Retained   bool
 	Qos        int

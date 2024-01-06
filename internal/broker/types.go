@@ -29,7 +29,8 @@ type TopicNode struct {
 }
 
 type TopicConfig struct {
-	QoS          int      // Nível de Qualidade de Serviço (0, 1 ou 2)
+	Data         []byte
+	Qos          int
 	Retained     bool     // Indica se a mensagem é retida ou não
 	Subscribers  []string // Lista de sub-tópicos associados a este tópico
 	SecurityRule string   // Regra de segurança aplicada ao tópico
@@ -45,8 +46,7 @@ type TopicInfo struct {
 // session.go
 type SessionConfig struct {
 	Id        string
-	Timeout   int
-	keepAlive int16
+	KeepAlive int16
 	Clean     bool
 	username  string
 	password  string
@@ -69,7 +69,7 @@ type SessionPartition struct {
 // SessionManager gerencia sessões MQTT
 type SessionManager struct {
 	sessionMap    map[string]*Session // Mapa para acessar sessões por ID
-	partitionMap  map[int]*SessionPartition
+	partitionMap  map[int16]*SessionPartition
 	lockSession   sync.Mutex
 	lockPartition sync.Mutex
 }
