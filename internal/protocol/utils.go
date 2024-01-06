@@ -1,6 +1,8 @@
 package protocol
 
-import "bytes"
+import (
+	"bytes"
+)
 
 func mqttVersionCompatible(b []byte) bool {
 	if bytes.Equal(b, []byte{0x00, 0x04, 0x4D, 0x51, 0x54, 0x54, 0x0}) { //3.1 MQTT 0

@@ -3,35 +3,24 @@ package broker
 import (
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/italobbarros/go-mqtt-broker/internal/protocol"
-	interfaces "github.com/italobbarros/go-mqtt-broker/pkg/interfaces"
+	connection "github.com/italobbarros/go-mqtt-broker/pkg/connection"
 )
 
 // NewBroker inicializa um novo corretor MQTT com um nó raiz
 func NewBroker(b *BrokerConfigs) *Broker {
 	topic := fmt.Sprintf("/%s/#", b.Name)
 	sessionMg := NewSessionManager()
-	var conn interfaces.Communicator
-	var err error
+	var server connection.ServerInterface
 	switch b.TypeConnection {
-	case interfaces.TCP:
-		conn, err = interfaces.NewTcp(b.Address)
-		if err != nil {
-			log.Printf("Erro ao se conectar na tcp%s", err)
-			time.Sleep(time.Second * 60)
-			return NewBroker(b)
-		}
+	case connection.TCP:
+		server = connection.NewTcpServer()
+		go server.Start(b.Address)
 	default:
-		conn, err = interfaces.NewTcp(b.Address)
-		if err != nil {
-			log.Printf("Erro ao se conectar na tcp%s", err)
-			time.Sleep(time.Second * 60)
-			return NewBroker(b)
-		}
+		server = connection.NewTcpServer()
+		go server.Start(b.Address)
 	}
-	prot := protocol.NewMqttProtocol(conn)
 	return &Broker{
 		Root: &TopicNode{
 			Name:     b.Name,
@@ -39,6 +28,29 @@ func NewBroker(b *BrokerConfigs) *Broker {
 			Children: make([]*TopicNode, 0),
 		},
 		SessionMg: sessionMg,
-		protocol:  prot,
+		server:    server,
+	}
+}
+
+func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
+	log.Println("handleConnectionMQTT")
+	defer conn.Close()
+	prot := protocol.NewMqttProtocol(conn)
+	sessionCfg, err := prot.ConnectProcess()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	log.Println(sessionCfg)
+	for {
+	}
+}
+
+func (b *Broker) Start() {
+	log.Print("Starting broker...")
+	for conn := range b.server.GetChannel() {
+		if conn != nil {
+			go b.handleConnectionMQTT(conn)
+		}
 	}
 }

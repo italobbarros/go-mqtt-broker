@@ -4,21 +4,20 @@ import (
 	"sync"
 	"time"
 
-	"github.com/italobbarros/go-mqtt-broker/internal/protocol"
-	interfaces "github.com/italobbarros/go-mqtt-broker/pkg/interfaces"
+	connection "github.com/italobbarros/go-mqtt-broker/pkg/connection"
 )
 
 // Broker representa a entidade do corretor MQTT
 type BrokerConfigs struct {
 	Name           string
 	Address        string
-	TypeConnection interfaces.TypeConnection
+	TypeConnection connection.TypeConnection
 }
 
 type Broker struct {
 	Root      *TopicNode
 	SessionMg *SessionManager
-	protocol  *protocol.MqttProtocol
+	server    connection.ServerInterface
 }
 
 // Topic.go
