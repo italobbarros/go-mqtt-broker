@@ -69,8 +69,12 @@ func (t *TcpConn) Read(length int) ([]byte, error) {
 
 // Write escreve dados na conexão TCP.
 func (t *TcpConn) Write(data []byte) error {
+	err := t.conn.SetWriteDeadline(time.Now().Add(time.Duration(30) * time.Second))
+	if err != nil {
+		return err
+	}
 	log.Printf("Write: %v\n", data)
-	_, err := t.conn.Write(data)
+	_, err = t.conn.Write(data)
 	return err
 }
 
