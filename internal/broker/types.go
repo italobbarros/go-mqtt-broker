@@ -7,7 +7,8 @@ import (
 
 // Broker representa a entidade do corretor MQTT
 type Broker struct {
-	Root *TopicNode
+	Root      *TopicNode
+	SessionMg *SessionManager
 }
 
 // Topic.go

@@ -164,3 +164,26 @@ func (sm *SessionManager) CheckSessionTimeouts() error {
 
 	return nil
 }
+
+func (sm *SessionManager) DebugPrint() {
+	sm.lockPartition.Lock()
+	defer sm.lockPartition.Unlock()
+
+	for k, partition := range sm.partitionMap {
+		fmt.Println("------------------------------------------------")
+		currentSession := partition.head
+		fmt.Println("Partition Key:", k) // Supondo que você tenha um ID para cada partição
+
+		for currentSession != nil {
+			fmt.Println("                    ^")
+			fmt.Printf("-> Session ID: %s, Timeout: %d, Clean: %v\n",
+				currentSession.config.Id,
+				currentSession.config.Timeout,
+				currentSession.config.Clean)
+			currentSession = currentSession.bottom
+			//fmt.Println("                    v")
+		}
+
+	}
+	fmt.Println("-------------------------------------------------")
+}
