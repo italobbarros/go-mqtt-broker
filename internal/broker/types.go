@@ -51,12 +51,12 @@ type Session struct {
 type SessionPartition struct {
 	head *Session // Ponteiro para o primeiro nó da lista
 	tail *Session // Ponteiro para o ultimo nó da lista
-	lock sync.Mutex
 }
 
 // SessionManager gerencia sessões MQTT
 type SessionManager struct {
-	sessionMap   map[string]*Session // Mapa para acessar sessões por ID
-	partitionMap map[int]*SessionPartition
-	lock         sync.Mutex
+	sessionMap    map[string]*Session // Mapa para acessar sessões por ID
+	partitionMap  map[int]*SessionPartition
+	lockSession   sync.Mutex
+	lockPartition sync.Mutex
 }
