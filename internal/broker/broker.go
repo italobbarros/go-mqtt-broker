@@ -34,15 +34,52 @@ func NewBroker(b *BrokerConfigs) *Broker {
 
 func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 	log.Println("handleConnectionMQTT")
-	defer conn.Close()
+	defer func() {
+		conn.Close()
+		log.Println("Closing client MQTT")
+
+	}()
 	prot := protocol.NewMqttProtocol(conn)
 	sessionCfg, err := prot.ConnectProcess()
 	if err != nil {
 		log.Println(err)
 		return
 	}
+	if sessionCfg != nil {
+		b.SessionMg.AddSession(&SessionConfig{
+			Id:        sessionCfg.Id,
+			Timeout:   2,
+			keepAlive: sessionCfg.KeepAlive,
+			username:  sessionCfg.Username,
+			password:  sessionCfg.Password,
+		})
+	}
 	log.Println(sessionCfg)
 	for {
+		cmd, data, err := prot.IsValidMqttCmd()
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		if cmd == nil {
+			log.Println("Command is nil")
+			return
+		}
+		switch *cmd {
+		case protocol.PUBLISH:
+			r, err := prot.PublishProcess(data)
+			if err != nil {
+				log.Printf("PublishProcess error: %s\n", err)
+				return
+			}
+			log.Println(r)
+		case protocol.PINGREQ:
+			err := prot.PingProcess()
+			if err != nil {
+				log.Printf("PingProcess error: %s\n", err)
+				return
+			}
+		}
 	}
 }
 

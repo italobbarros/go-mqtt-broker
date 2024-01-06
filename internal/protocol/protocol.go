@@ -15,6 +15,28 @@ func NewMqttProtocol(conn connection.ConnectionInterface) *MqttProtocol {
 	}
 }
 
+func (prot *MqttProtocol) IsValidMqttCmd() (*Command, []byte, error) {
+	data, err := prot.conn.Read(2)
+	var cmd Command
+	if err != nil {
+		return nil, make([]byte, 0), err
+	}
+	if len(data) > 2 {
+		return nil, make([]byte, 0), fmt.Errorf("length data is < 2")
+	}
+	cmd = Command(data[0])
+	length := calcLength(data[1])
+	if length != 0 {
+		data2, err := prot.conn.Read(length)
+		if err != nil {
+			return nil, make([]byte, 0), err
+		}
+		data = append(data, data2...)
+	}
+	return &cmd, data, nil
+
+}
+
 func (prot *MqttProtocol) isMqttCmd(Cmd Command) ([]byte, error) {
 	data, err := prot.conn.Read(2)
 	if err != nil {
@@ -23,7 +45,7 @@ func (prot *MqttProtocol) isMqttCmd(Cmd Command) ([]byte, error) {
 	if len(data) > 2 {
 		return make([]byte, 0), fmt.Errorf("length data is < 2")
 	}
-	if data[0] != byte(Cmd) {
+	if data[0]&byte(Cmd) != byte(Cmd) {
 		return make([]byte, 0), fmt.Errorf("Isn't a first byte %d Mqtt protocol", Cmd)
 	}
 	length := calcLength(data[1])
@@ -38,20 +60,23 @@ func (prot *MqttProtocol) isMqttCmd(Cmd Command) ([]byte, error) {
 func (prot *MqttProtocol) ConnectProcess() (*ResponseConnect, error) {
 	r, err := prot.connectUnPack()
 	if err != nil {
-		err = prot.connAck(r, UNACCEPCTABLE_PROTOCOL)
+		if r == nil {
+			return nil, err
+		}
+		err = prot.connAck(r, CONNECT_UNACCEPCTABLE_PROTOCOL)
 		if err != nil {
 			return nil, err
 		}
 		return nil, err
 	}
 	if r == nil { //Clean Session False
-		err = prot.connAck(r, ACCEPCTED)
+		err = prot.connAck(r, CONNECT_ACCEPCTED)
 		if err != nil {
 			return nil, err
 		}
 		return nil, nil
 	}
-	err = prot.connAck(r, ACCEPCTED)
+	err = prot.connAck(r, CONNECT_ACCEPCTED)
 	if err != nil {
 		return nil, err
 	}
@@ -109,9 +134,9 @@ func (prot *MqttProtocol) connectUnPack() (*ResponseConnect, error) {
 			Id:        clientId,
 			Timeout:   1,
 			Clean:     true,
-			keepAlive: keepAlive,
-			username:  "",
-			password:  "",
+			KeepAlive: keepAlive,
+			Username:  "",
+			Password:  "",
 		}
 		return &response, nil
 	}
@@ -119,7 +144,6 @@ func (prot *MqttProtocol) connectUnPack() (*ResponseConnect, error) {
 	payload = payload[2:]
 	clientId = string(payload[:lengthClientId])
 	if len(payload) > lengthClientId {
-		fmt.Println(len(payload))
 		payload = payload[lengthClientId:]
 	}
 
@@ -146,9 +170,9 @@ func (prot *MqttProtocol) connectUnPack() (*ResponseConnect, error) {
 		Id:        clientId,
 		Timeout:   1,
 		Clean:     true,
-		keepAlive: keepAlive,
-		username:  username,
-		password:  password,
+		KeepAlive: keepAlive,
+		Username:  username,
+		Password:  password,
 	}
 	return &response, nil
 }
@@ -168,4 +192,66 @@ func (prot *MqttProtocol) connAck(sessionCfg *ResponseConnect, resp ConnectRetur
 	return nil
 }
 
-//func (b *Broker) isPublish(topic string, topicCfg *TopicConfig)
+func (prot *MqttProtocol) publishUnPack(data []byte) (*ResponsePublish, error) {
+	var response ResponsePublish
+	fmt.Println(data)
+	response.dutFlag = (data[0]&0b1000 == 0b1000)
+	response.Qos = int(data[0] & 0b110)
+	response.Retained = (data[0]&0b1 == 0b1)
+	variableHeader := data[2:]
+	log.Println(variableHeader)
+	if len(variableHeader) < 3 {
+		return nil, fmt.Errorf("tamanho do payload(%d) sem topic: %v", len(variableHeader), variableHeader)
+	}
+	lengthTopic := int(variableHeader[0])<<8 + int(variableHeader[1])
+	variableHeader = variableHeader[2:]
+	response.Topic = string(variableHeader[:lengthTopic])
+	log.Println(response.Topic)
+	variableHeader = variableHeader[lengthTopic:]
+	if response.Qos > 0 {
+		response.Identifier = int(variableHeader[0])<<8 + int(variableHeader[1])
+		log.Println(response.Identifier)
+		variableHeader = variableHeader[2:]
+	}
+	payload := variableHeader
+	response.Body = payload
+	log.Println(string(response.Body))
+	return &response, nil
+}
+func (prot *MqttProtocol) pubAck(pubCfg *ResponsePublish, resp PublishReturnCode) error {
+	return nil
+}
+func (prot *MqttProtocol) pubRec(pubCfg *ResponsePublish, resp PublishReturnCode) error {
+	return nil
+}
+
+func (prot *MqttProtocol) PublishProcess(data []byte) (*ResponsePublish, error) {
+	r, err := prot.publishUnPack(data)
+	if err != nil {
+		return nil, err
+	}
+	if r.Qos == 1 {
+		err = prot.pubAck(r, PUBLISHED)
+		if err != nil {
+			return nil, err
+		}
+		return r, nil
+	}
+	if r.Qos == 2 {
+		err = prot.pubRec(r, PUBLISHED)
+		if err != nil {
+			return nil, err
+		}
+		return r, nil
+	}
+	return r, nil
+}
+
+func (prot *MqttProtocol) PingProcess() error {
+	response := []byte{byte(PINGRESP), 0}
+	err := prot.conn.Write(response)
+	if err != nil {
+		return err
+	}
+	return nil
+}

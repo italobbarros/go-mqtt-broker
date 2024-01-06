@@ -3,8 +3,17 @@ package protocol
 type ResponseConnect struct {
 	Id        string
 	Timeout   int
-	keepAlive int16
+	KeepAlive int16
 	Clean     bool
-	username  string
-	password  string
+	Username  string
+	Password  string
+}
+
+type ResponsePublish struct {
+	Identifier int
+	Topic      string
+	Body       []byte
+	dutFlag    bool
+	Retained   bool
+	Qos        int
 }
