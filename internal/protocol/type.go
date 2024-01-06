@@ -1,6 +1,6 @@
 package protocol
 
-import interfaces "github.com/italobbarros/go-mqtt-broker/pkg/connection"
+import interfaces "github.com/italobbarros/go-mqtt-broker/pkg/interfaces"
 
 type Command int
 
@@ -15,10 +15,4 @@ const (
 
 type MqttProtocol struct {
 	conn interfaces.Communicator
-}
-
-func NewMqttProtocol(conn interfaces.Communicator) *MqttProtocol {
-	return &MqttProtocol{
-		conn: conn,
-	}
 }

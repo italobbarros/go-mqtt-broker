@@ -4,10 +4,18 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+
+	interfaces "github.com/italobbarros/go-mqtt-broker/pkg/interfaces"
 )
 
+func NewMqttProtocol(conn interfaces.Communicator) *MqttProtocol {
+	return &MqttProtocol{
+		conn: conn,
+	}
+}
+
 func (prot *MqttProtocol) isMqttCmd(Cmd Command) ([]byte, error) {
-	data, err := prot.conn.ReadExactly(2)
+	data, err := prot.conn.Read(2)
 	if err != nil {
 		return make([]byte, 0), err
 	}
@@ -18,7 +26,7 @@ func (prot *MqttProtocol) isMqttCmd(Cmd Command) ([]byte, error) {
 		return make([]byte, 0), fmt.Errorf("Isn't a first byte connect Mqtt protocol")
 	}
 	length := calcLength(data[1])
-	data2, err := prot.conn.ReadExactly(length)
+	data2, err := prot.conn.Read(length)
 	data = append(data, data2...)
 	if mqttVersionCompatible(data[2:9]) {
 		return make([]byte, 0), fmt.Errorf("Invalid MQTT Protocol Name or Version")
