@@ -35,9 +35,12 @@ type TopicInfo struct {
 
 // session.go
 type SessionConfig struct {
-	Id      string
-	Timeout int
-	Clean   bool
+	Id        string
+	Timeout   int
+	keepAlive int16
+	Clean     bool
+	username  string
+	password  string
 }
 
 // Session representa uma sessão MQTT
