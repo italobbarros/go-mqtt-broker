@@ -215,8 +215,8 @@ func (prot *MqttProtocol) publishUnPack(data []byte) (*ResponsePublish, error) {
 		variableHeader = variableHeader[2:]
 	}
 	payload := variableHeader
-	response.Data = payload
-	log.Println(string(response.Data))
+	response.Payload = payload
+	log.Println(string(response.Payload))
 	return &response, nil
 }
 func (prot *MqttProtocol) pubAck(pubCfg *ResponsePublish) error {

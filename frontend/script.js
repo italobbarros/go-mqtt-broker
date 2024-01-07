@@ -169,21 +169,29 @@ function showSidebarDetails(name) {
     sidebarContent.innerHTML = '';
     // Criar elementos para mostrar as informações do tópico
     const topicName = document.createElement('h2');
-    topicName.textContent = `Tópico: ${topicInfo.topicName}`;
-
-    const description = document.createElement('p');
-    description.textContent = `Descrição: ${topicInfo.description}`;
+    topicName.textContent = `Tópico: ${topicInfo.topic}`;
 
     const messageCount = document.createElement('p');
     messageCount.textContent = `Número de Mensagens: ${topicInfo.messageCount}`;
 
-    const subscribers = document.createElement('p');
-    subscribers.textContent = `Número de Inscritos: ${topicInfo.subscribers}`;
+    const payload = document.createElement('p');
+    payload.textContent = `Payload: ${topicInfo.topicCfg.payload}`;
 
+    const qos = document.createElement('p');
+    qos.textContent = `Qos: ${topicInfo.topicCfg.qos}`;
+
+    const retained = document.createElement('p');
+    retained.textContent = `Retained: ${topicInfo.topicCfg.retained}`;
+
+    const subscribers = document.createElement('p');
+    const count = topicInfo.topicCfg.subscribers ? topicInfo.topicCfg.subscribers.length : 0;
+    subscribers.textContent = `Número de Inscritos: ${count}`;
     // Adicionar elementos à sidebar
     sidebar.appendChild(topicName);
-    sidebar.appendChild(description);
     sidebar.appendChild(messageCount);
+    sidebar.appendChild(payload);
+    sidebar.appendChild(qos);
+    sidebar.appendChild(retained);
     sidebar.appendChild(subscribers);
   }
   document.getElementById('sidebar').classList.add('active');

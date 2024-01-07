@@ -36,15 +36,14 @@ func (a *API) TopicInfoHandler(w http.ResponseWriter, r *http.Request) {
 	// Suponha que você esteja buscando informações do tópico de um banco de dados ou outro recurso.
 	// Por agora, vamos simular algumas informações fictícias.
 	topic := r.URL.Query().Get("topic")
-	topicInfo := TopicInfo{
-		TopicName:    topic,
-		Description:  "Esta é uma descrição para o tópico de exemplo.",
-		MessageCount: 1000,
-		Subscribers:  50,
+	node := a.Broker.GetTopicNode(topic)
+	if node == nil {
+		http.Error(w, "topic not found", http.StatusNotFound)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(topicInfo)
+	json.NewEncoder(w).Encode(node)
 }
 
 func (a *API) MqttTreeHandler(w http.ResponseWriter, r *http.Request) {

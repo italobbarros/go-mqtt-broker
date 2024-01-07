@@ -16,9 +16,10 @@ func printTree(node *TopicNode, level int, arrow string) {
 
 	if node.TopicConfig != nil {
 		fmt.Print(indent + arrow + " " + node.Name)
-		fmt.Print(" -> "+"Data:", string(node.TopicConfig.Data))
+		fmt.Print(" -> "+"Data:", string(node.TopicConfig.Payload))
 		fmt.Print(" | "+"Retained:", node.TopicConfig.Retained)
-		fmt.Print(" | "+"Subscribers:", node.TopicConfig.Subscribers)
+		fmt.Print(" | "+"Qos:", node.TopicConfig.Qos)
+		fmt.Print(" | "+"Subscribers:", len(node.TopicConfig.Subscribers))
 		fmt.Println(" | "+"SecurityRule:", node.TopicConfig.SecurityRule)
 	} else {
 		fmt.Println(indent + arrow + " " + node.Name)

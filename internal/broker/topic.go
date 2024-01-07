@@ -44,3 +44,26 @@ func (b *Broker) AddTopic(topic string, topicCfg *TopicConfig) {
 	}
 	b.PrintAllTree()
 }
+
+func (b *Broker) GetTopicNode(topic string) *TopicNode {
+	segments := strings.Split(topic, "/")
+	currentNode := b.Root
+
+	for _, segment := range segments {
+		found := false
+		for _, child := range currentNode.Children {
+			if child.Name == segment {
+				currentNode = child
+				found = true
+				break
+			}
+		}
+
+		// Se não encontrou o segmento atual, retorna nil
+		if !found {
+			return nil
+		}
+	}
+
+	return currentNode
+}

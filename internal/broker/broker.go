@@ -104,10 +104,10 @@ func (b *Broker) handlePublishCommand(data []byte, prot *protocol.MqttProtocol) 
 	if err != nil {
 		return err
 	}
-	log.Println(r)
 	b.AddTopic(r.Topic, &TopicConfig{
 		Retained: r.Retained,
-		Data:     r.Data,
+		Payload:  string(r.Payload),
+		Qos:      r.Qos,
 	})
 	return nil
 }

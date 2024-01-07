@@ -12,7 +12,7 @@ type ResponseConnect struct {
 type ResponsePublish struct {
 	Identifier []byte
 	Topic      string
-	Data       []byte
+	Payload    []byte
 	dutFlag    bool
 	Retained   bool
 	Qos        int
