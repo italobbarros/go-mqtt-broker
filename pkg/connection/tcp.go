@@ -59,6 +59,9 @@ func (t *TcpServer) Start(address string) {
 func (t *TcpServer) GetChannel() chan ConnectionInterface {
 	return t.ChNewConn
 }
+func (t *TcpConn) UpdateLogger(logger *logger.Logger) {
+	t.logger = logger
+}
 
 // ReadExactly lê exatamente n bytes da conexão TCP.
 func (t *TcpConn) Read(length int) ([]byte, error) {

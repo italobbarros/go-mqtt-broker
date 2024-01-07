@@ -55,6 +55,7 @@ type Session struct {
 	config    *SessionConfig
 	top       *Session // Ponteiro para o nó anterior na lista
 	bottom    *Session // Ponteiro para o próximo nó na lista
+	logger    *logger.Logger
 }
 
 type SessionPartition struct {

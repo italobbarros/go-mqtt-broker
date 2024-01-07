@@ -16,6 +16,10 @@ func NewMqttProtocol(conn connection.ConnectionInterface) *MqttProtocol {
 	}
 }
 
+func (prot *MqttProtocol) UpdateLogger(logger *logger.Logger) {
+	prot.logger = logger
+}
+
 func (prot *MqttProtocol) connectUnPack() (*ResponseConnect, error) {
 	var response ResponseConnect
 	data, err := prot.isMqttCmd(CONNECT)
@@ -127,7 +131,7 @@ func (prot *MqttProtocol) connAck(sessionCfg *ResponseConnect, resp ConnectRetur
 }
 
 func (prot *MqttProtocol) publishUnPack(data []byte) (*ResponsePublish, error) {
-	prot.logger.Info("publishUnPack")
+	prot.logger.Debug("publishUnPack")
 	var response ResponsePublish
 	response.dutFlag = (data[0]&0b1000 == 0b1000)
 	response.Qos = int((data[0] & 0b110) >> 1)
@@ -139,7 +143,6 @@ func (prot *MqttProtocol) publishUnPack(data []byte) (*ResponsePublish, error) {
 	lengthTopic := int(variableHeader[0])<<8 + int(variableHeader[1])
 	variableHeader = variableHeader[2:]
 	response.Topic = string(variableHeader[:lengthTopic])
-	prot.logger.Debug(response.Topic)
 	variableHeader = variableHeader[lengthTopic:]
 	if response.Qos > 0 {
 		response.Identifier = variableHeader[:2]
@@ -147,11 +150,10 @@ func (prot *MqttProtocol) publishUnPack(data []byte) (*ResponsePublish, error) {
 	}
 	payload := variableHeader
 	response.Payload = payload
-	prot.logger.Debug(string(response.Payload))
 	return &response, nil
 }
 func (prot *MqttProtocol) pubAck(pubCfg *ResponsePublish) error {
-	prot.logger.Info("pubAck")
+	prot.logger.Debug("pubAck")
 	response := []byte{byte(COMMAND_PUBACK), 0b10}
 	response = append(response, pubCfg.Identifier...)
 	err := prot.conn.Write(response)
@@ -161,7 +163,7 @@ func (prot *MqttProtocol) pubAck(pubCfg *ResponsePublish) error {
 	return nil
 }
 func (prot *MqttProtocol) pubRec(pubCfg *ResponsePublish) error {
-	prot.logger.Info("pubRec")
+	prot.logger.Debug("pubRec")
 	response := []byte{byte(COMMAND_PUBREC), 0b10}
 	response = append(response, pubCfg.Identifier...)
 	err := prot.conn.Write(response)
@@ -171,12 +173,11 @@ func (prot *MqttProtocol) pubRec(pubCfg *ResponsePublish) error {
 	return nil
 }
 func (prot *MqttProtocol) unpackPubRel(data []byte, packetIdentifier *[]byte) error {
-	prot.logger.Info("unpackPubRel")
+	prot.logger.Debug("unpackPubRel")
 	if data[0] != byte(COMMAND_PUBREL) {
 		return fmt.Errorf("Byte command isn't exactly COMMAND_PUBREL")
 	}
 	length := len(data[1:])
-	prot.logger.Debug("%d", length)
 	if length < 2 {
 		return fmt.Errorf("length < 2")
 	}
@@ -186,7 +187,7 @@ func (prot *MqttProtocol) unpackPubRel(data []byte, packetIdentifier *[]byte) er
 	return nil
 }
 func (prot *MqttProtocol) pubComp(packetIdentifier *[]byte) error {
-	prot.logger.Info("pubRec")
+	prot.logger.Debug("pubRec")
 	response := []byte{byte(COMMAND_PUBCOMP), 0b10}
 	response = append(response, *packetIdentifier...)
 	err := prot.conn.Write(response)

@@ -13,7 +13,7 @@ type Logger struct {
 }
 
 var myLevelToString = map[seelog.LogLevel]string{
-	seelog.TraceLvl:    "PROTOCOL",
+	seelog.TraceLvl:    "NETWORK",
 	seelog.DebugLvl:    "DEBUG",
 	seelog.InfoLvl:     "INFO",
 	seelog.WarnLvl:     "WARN",

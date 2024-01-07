@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
+
+	"github.com/italobbarros/go-mqtt-broker/pkg/logger"
 )
 
 // NewSessionManager creates a new SessionManager
@@ -22,12 +24,13 @@ func (sm *SessionManager) Exist(id string) bool {
 }
 
 // AddSession adds a new session to the top of the list
-func (sm *SessionManager) AddSession(sessionCfg *SessionConfig) {
+func (sm *SessionManager) AddSession(sessionCfg *SessionConfig) *Session {
 	sm.lockPartition.Lock()
 	defer sm.lockPartition.Unlock()
 	session := &Session{
 		config:    sessionCfg,
 		Timestamp: time.Now(),
+		logger:    logger.NewLogger(sessionCfg.Id),
 	}
 	sessionPartition, ok := sm.partitionMap[sessionCfg.KeepAlive]
 	if !ok {
@@ -40,16 +43,16 @@ func (sm *SessionManager) AddSession(sessionCfg *SessionConfig) {
 	if sessionPartition.head == nil {
 		sessionPartition.head = session
 		sessionPartition.tail = session
-		return
+		return session
 	}
 	session.bottom = sessionPartition.head
 	sessionPartition.head.top = session
 	sessionPartition.head = session
-
+	return session
 }
 
 // UpdateSession moves the updated session to the top of the list
-func (sm *SessionManager) UpdateSession(sessionCfg *SessionConfig) {
+func (sm *SessionManager) UpdateSession(sessionCfg *SessionConfig) *Session {
 	sm.lockPartition.Lock()
 	defer sm.lockPartition.Unlock()
 	if SessionPartition, ok := sm.partitionMap[sessionCfg.KeepAlive]; ok {
@@ -58,7 +61,7 @@ func (sm *SessionManager) UpdateSession(sessionCfg *SessionConfig) {
 		session, ok := sm.sessionMap[sessionCfg.Id]
 		sm.lockSession.Unlock()
 		if !ok {
-			return
+			return nil
 		}
 		if session.config.KeepAlive != sessionCfg.KeepAlive {
 			//TODO caso tenha mudado o keepalive
@@ -66,7 +69,7 @@ func (sm *SessionManager) UpdateSession(sessionCfg *SessionConfig) {
 		session.config = sessionCfg
 		session.Timestamp = time.Now()
 		if session == SessionPartition.head {
-			return
+			return session
 		}
 		if session == SessionPartition.tail {
 			SessionPartition.tail = session.top
@@ -85,7 +88,9 @@ func (sm *SessionManager) UpdateSession(sessionCfg *SessionConfig) {
 		session.top = nil
 		SessionPartition.head.top = session
 		SessionPartition.head = session
+		return session
 	}
+	return nil
 }
 
 func (sm *SessionManager) onlyRemoveSession(sessionPartition *SessionPartition, session *Session) {
@@ -197,5 +202,5 @@ func (sm *SessionManager) DebugPrint() {
 		}
 
 	}
-	fmt.Print("-------------------------------------------------")
+	fmt.Println("-------------------------------------------------")
 }

@@ -2,7 +2,6 @@ package broker
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/italobbarros/go-mqtt-broker/internal/protocol"
 	connection "github.com/italobbarros/go-mqtt-broker/pkg/connection"
@@ -36,7 +35,7 @@ func NewBroker(b *BrokerConfigs) *Broker {
 
 func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 	var packetIdentifier *[]byte = nil
-	b.logger.Debug("handleConnectionMQTT")
+	b.logger.Debug("Client Connecting...")
 	defer func() {
 		conn.Close()
 		b.logger.Debug("Closing client MQTT")
@@ -47,68 +46,73 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 		b.logger.Error(err.Error())
 		return
 	}
-	b.newSession(sessionCfg)
+	currentSession := b.newSession(sessionCfg)
+	prot.UpdateLogger(currentSession.logger)
+	conn.UpdateLogger(currentSession.logger)
 	for {
 		cmd, data, err := prot.IsValidMqttCmd()
 		if err != nil {
-			b.logger.Error(err.Error())
+			currentSession.logger.Error(err.Error())
 			return
 		}
 		if cmd == nil {
-			b.logger.Error("Command is nil")
+			currentSession.logger.Error("Command is nil")
 			return
 		}
 		if *cmd&protocol.COMMAND_PUBLISH == protocol.COMMAND_PUBLISH {
 			packetIdentifier, err = b.handlePublishCommand(data, prot)
 			if err != nil {
-				b.logger.Error("handlePublishCommand: %s", err)
+				currentSession.logger.Error("handlePublishCommand: %s", err.Error())
 				return
 			}
+			currentSession.logger.Debug("Published!")
 			continue
 		}
 		if (*cmd&protocol.COMMAND_PUBREL == protocol.COMMAND_PUBREL) && (packetIdentifier != nil) { // exactly equal
 			err := prot.PubRelProcess(data, packetIdentifier)
 			if err != nil {
-				b.logger.Error("PubRelProcess: %s", err)
+				currentSession.logger.Error("PubRelProcess: %s", err.Error())
 				return
 			}
 			packetIdentifier = nil
-			b.logger.Debug("Success PubRel!")
+			currentSession.logger.Debug("Success PubRel!")
 			continue
 		}
 		if *cmd&protocol.COMMAND_PINGREQ == protocol.COMMAND_PINGREQ {
 			err := prot.PingProcess()
 			if err != nil {
-				b.logger.Error("PingProcess: %s", err)
+				currentSession.logger.Error("PingProcess: %s", err.Error())
 				return
 			}
-			b.logger.Debug("PING!")
+			currentSession.logger.Debug("PING!")
 			continue
 		}
 	}
 }
 
-func (b *Broker) newSession(sessionCfg *protocol.ResponseConnect) {
+func (b *Broker) newSession(sessionCfg *protocol.ResponseConnect) *Session {
+	var currentSession *Session = nil
+
 	defer b.SessionMg.DebugPrint()
 	if sessionCfg == nil {
-		return
+		return currentSession
 	}
 	if b.SessionMg.Exist(sessionCfg.Id) {
-		b.SessionMg.UpdateSession(&SessionConfig{
+		currentSession = b.SessionMg.UpdateSession(&SessionConfig{
 			Id:        sessionCfg.Id,
 			KeepAlive: sessionCfg.KeepAlive,
 			username:  sessionCfg.Username,
 			password:  sessionCfg.Password,
 		})
-		return
+		return currentSession
 	}
-	b.SessionMg.AddSession(&SessionConfig{
+	currentSession = b.SessionMg.AddSession(&SessionConfig{
 		Id:        sessionCfg.Id,
 		KeepAlive: sessionCfg.KeepAlive,
 		username:  sessionCfg.Username,
 		password:  sessionCfg.Password,
 	})
-	return
+	return currentSession
 }
 
 func (b *Broker) handlePublishCommand(data []byte, prot *protocol.MqttProtocol) (*[]byte, error) {
@@ -128,7 +132,7 @@ func (b *Broker) handlePublishCommand(data []byte, prot *protocol.MqttProtocol) 
 }
 
 func (b *Broker) Start() {
-	log.Print("Starting broker...")
+	fmt.Print("Starting broker...")
 	for conn := range b.server.GetChannel() {
 		if conn != nil {
 			go b.handleConnectionMQTT(conn)
