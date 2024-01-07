@@ -1,17 +1,23 @@
 package protocol
 
-import connection "github.com/italobbarros/go-mqtt-broker/pkg/connection"
+import (
+	connection "github.com/italobbarros/go-mqtt-broker/pkg/connection"
+	"github.com/italobbarros/go-mqtt-broker/pkg/logger"
+)
 
 type Command int
 
 const (
-	CONNECT   Command = 0x10
-	CONNACK   Command = 0x20
-	PUBLISH   Command = 0x30
-	PUBACK    Command = 0x40
-	SUBSCRIBE Command = 0x82
-	PINGREQ   Command = 0xC0
-	PINGRESP  Command = 0xD0
+	CONNECT           Command = 0x10
+	COMMAND_CONNACK   Command = 0x20
+	COMMAND_PUBLISH   Command = 0x30
+	COMMAND_PUBACK    Command = 0x40
+	COMMAND_PUBREC    Command = 0x50
+	COMMAND_PUBREL    Command = 0x62 // exactly equal
+	COMMAND_PUBCOMP   Command = 0x70
+	COMMAND_SUBSCRIBE Command = 0x82
+	COMMAND_PINGREQ   Command = 0xC0
+	COMMAND_PINGRESP  Command = 0xD0
 )
 
 type ConnectReturnCode byte
@@ -26,5 +32,6 @@ const (
 )
 
 type MqttProtocol struct {
-	conn connection.ConnectionInterface
+	conn   connection.ConnectionInterface
+	logger *logger.Logger
 }

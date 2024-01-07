@@ -2,21 +2,27 @@ package connection
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"time"
+
+	"github.com/italobbarros/go-mqtt-broker/pkg/logger"
 )
 
 type TcpConn struct {
-	conn net.Conn
+	conn   net.Conn
+	logger *logger.Logger
 }
 
 type TcpServer struct {
 	ChNewConn chan ConnectionInterface
+	logger    *logger.Logger
 }
 
 func NewTcpConn(conn net.Conn) *TcpConn {
-	tcp := TcpConn{conn: conn}
+	tcp := TcpConn{
+		conn:   conn,
+		logger: logger.NewLogger("TCP"),
+	}
 	return &tcp
 }
 
@@ -24,24 +30,25 @@ func NewTcpConn(conn net.Conn) *TcpConn {
 func NewTcpServer() *TcpServer {
 	return &TcpServer{
 		ChNewConn: make(chan ConnectionInterface),
+		logger:    logger.NewLogger("TCPServer"),
 	}
 }
 
 func (t *TcpServer) Start(address string) {
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		log.Printf("Erro ao fazer o listen: %s", err)
+		t.logger.Error("Erro ao fazer o listen: %s", err)
 		time.Sleep(time.Second * 60)
 		t.Start(address)
 	}
 	defer listener.Close()
 
-	fmt.Println("Servidor TCP ouvindo ->", address)
+	t.logger.Debug("Servidor TCP ouvindo ->", address)
 
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			fmt.Println("Erro ao aceitar conexão:", err)
+			t.logger.Debug("Erro ao aceitar conexão:", err)
 			continue
 		}
 		tcpConn := NewTcpConn(conn)
@@ -63,7 +70,7 @@ func (t *TcpConn) Read(length int) ([]byte, error) {
 	if n != length {
 		return nil, fmt.Errorf("didn't read exactly %d bytes", length)
 	}
-	log.Printf("Read: %v\n", buffer)
+	t.logger.Answer("Read: %v", buffer)
 	return buffer, nil
 }
 
@@ -73,12 +80,13 @@ func (t *TcpConn) Write(data []byte) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("Write: %v\n", data)
+	t.logger.Ask("Write: %v", data)
 	_, err = t.conn.Write(data)
 	return err
 }
 
 // Close fecha a conexão TCP.
 func (t *TcpConn) Close() error {
+	t.logger.Debug("Closing...")
 	return t.conn.Close()
 }

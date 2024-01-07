@@ -5,6 +5,7 @@ import (
 	"time"
 
 	connection "github.com/italobbarros/go-mqtt-broker/pkg/connection"
+	"github.com/italobbarros/go-mqtt-broker/pkg/logger"
 )
 
 // Broker representa a entidade do corretor MQTT
@@ -15,6 +16,7 @@ type BrokerConfigs struct {
 }
 
 type Broker struct {
+	logger    *logger.Logger
 	Root      *TopicNode
 	SessionMg *SessionManager
 	server    connection.ServerInterface

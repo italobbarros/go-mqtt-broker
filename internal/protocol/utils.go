@@ -2,6 +2,7 @@ package protocol
 
 import (
 	"bytes"
+	"fmt"
 )
 
 func mqttVersionCompatible(b []byte) bool {
@@ -28,4 +29,45 @@ func calcLength(b byte) int {
 	}
 
 	return valor + int(b)
+}
+
+func (prot *MqttProtocol) IsValidMqttCmd() (*Command, []byte, error) {
+	data, err := prot.conn.Read(2)
+	var cmd Command
+	if err != nil {
+		return nil, make([]byte, 0), err
+	}
+	if len(data) > 2 {
+		return nil, make([]byte, 0), fmt.Errorf("length data is < 2")
+	}
+	cmd = Command(data[0])
+	length := calcLength(data[1])
+	if length != 0 {
+		data2, err := prot.conn.Read(length)
+		if err != nil {
+			return nil, make([]byte, 0), err
+		}
+		data = append(data, data2...)
+	}
+	return &cmd, data, nil
+}
+
+func (prot *MqttProtocol) isMqttCmd(Cmd Command) ([]byte, error) {
+	data, err := prot.conn.Read(2)
+	if err != nil {
+		return make([]byte, 0), err
+	}
+	if len(data) > 2 {
+		return make([]byte, 0), fmt.Errorf("length data is < 2")
+	}
+	if data[0]&byte(Cmd) != byte(Cmd) {
+		return make([]byte, 0), fmt.Errorf("Isn't a first byte %d Mqtt protocol", Cmd)
+	}
+	length := calcLength(data[1])
+	data2, err := prot.conn.Read(length)
+	data = append(data, data2...)
+	if !mqttVersionCompatible(data[2:9]) {
+		return make([]byte, 0), fmt.Errorf("Invalid MQTT Protocol Name or Version")
+	}
+	return data, nil
 }

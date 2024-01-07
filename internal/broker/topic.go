@@ -1,12 +1,10 @@
 package broker
 
 import (
-	"fmt"
 	"strings"
 )
 
 func (b *Broker) AddTopic(topic string, topicCfg *TopicConfig) {
-	fmt.Println("add: " + topic)
 	segments := strings.Split(topic, "/")
 
 	currentNode := b.Root

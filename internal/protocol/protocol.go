@@ -4,83 +4,16 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"log"
 
 	connection "github.com/italobbarros/go-mqtt-broker/pkg/connection"
+	"github.com/italobbarros/go-mqtt-broker/pkg/logger"
 )
 
 func NewMqttProtocol(conn connection.ConnectionInterface) *MqttProtocol {
 	return &MqttProtocol{
-		conn: conn,
+		conn:   conn,
+		logger: logger.NewLogger("Mqtt"),
 	}
-}
-
-func (prot *MqttProtocol) IsValidMqttCmd() (*Command, []byte, error) {
-	data, err := prot.conn.Read(2)
-	var cmd Command
-	if err != nil {
-		return nil, make([]byte, 0), err
-	}
-	if len(data) > 2 {
-		return nil, make([]byte, 0), fmt.Errorf("length data is < 2")
-	}
-	cmd = Command(data[0])
-	length := calcLength(data[1])
-	if length != 0 {
-		data2, err := prot.conn.Read(length)
-		if err != nil {
-			return nil, make([]byte, 0), err
-		}
-		data = append(data, data2...)
-	}
-	return &cmd, data, nil
-
-}
-
-func (prot *MqttProtocol) isMqttCmd(Cmd Command) ([]byte, error) {
-	data, err := prot.conn.Read(2)
-	if err != nil {
-		return make([]byte, 0), err
-	}
-	if len(data) > 2 {
-		return make([]byte, 0), fmt.Errorf("length data is < 2")
-	}
-	if data[0]&byte(Cmd) != byte(Cmd) {
-		return make([]byte, 0), fmt.Errorf("Isn't a first byte %d Mqtt protocol", Cmd)
-	}
-	length := calcLength(data[1])
-	data2, err := prot.conn.Read(length)
-	data = append(data, data2...)
-	if !mqttVersionCompatible(data[2:9]) {
-		return make([]byte, 0), fmt.Errorf("Invalid MQTT Protocol Name or Version")
-	}
-	return data, nil
-}
-
-func (prot *MqttProtocol) ConnectProcess() (*ResponseConnect, error) {
-	r, err := prot.connectUnPack()
-	if err != nil {
-		if r == nil {
-			return nil, err
-		}
-		err = prot.connAck(r, CONNECT_UNACCEPCTABLE_PROTOCOL)
-		if err != nil {
-			return nil, err
-		}
-		return nil, err
-	}
-	if r == nil { //Clean Session False
-		err = prot.connAck(r, CONNECT_ACCEPCTED)
-		if err != nil {
-			return nil, err
-		}
-		return nil, nil
-	}
-	err = prot.connAck(r, CONNECT_ACCEPCTED)
-	if err != nil {
-		return nil, err
-	}
-	return r, nil
 }
 
 func (prot *MqttProtocol) connectUnPack() (*ResponseConnect, error) {
@@ -124,7 +57,7 @@ func (prot *MqttProtocol) connectUnPack() (*ResponseConnect, error) {
 	var lengthWill, lengthUser, lengthClientId, lengthPayload int
 
 	payload := msg[3:]
-	fmt.Printf("Payload: %v\n", payload)
+	prot.logger.Debug("Payload: %v", payload)
 	lengthPayload = len(payload)
 	if lengthPayload < 2 {
 		//TODO criar client Id random se nao tiver sido passado
@@ -149,19 +82,19 @@ func (prot *MqttProtocol) connectUnPack() (*ResponseConnect, error) {
 
 	//TODO will msg
 	if hasWillFlag {
-		log.Println("hasWillFlag")
+		prot.logger.Debug("hasWillFlag")
 		//lengthWill = 0
 		payload = payload[lengthWill:]
 	}
 	if hasUser {
-		log.Println("hasUser")
+		prot.logger.Debug("hasUser")
 		lengthUser = int(payload[0])<<8 + int(payload[1]) //TODO calc length
 		payload = payload[2:]
 		username = string(payload[:lengthUser])
 		payload = payload[lengthUser:]
 	}
 	if hasPassword {
-		log.Println("hasPassword")
+		prot.logger.Debug("hasPassword")
 		lengthPassword := int(payload[0])<<8 + int(payload[1])
 		payload = payload[2:]
 		password = string(payload[:lengthPassword])
@@ -178,14 +111,14 @@ func (prot *MqttProtocol) connectUnPack() (*ResponseConnect, error) {
 }
 
 func (prot *MqttProtocol) connAck(sessionCfg *ResponseConnect, resp ConnectReturnCode) error {
-	response := []byte{byte(CONNACK), 0b10}
+	response := []byte{byte(COMMAND_CONNACK), 0b10}
 	if sessionCfg.Clean {
 		response = append(response, []byte{0x00}...)
 	} else {
 		response = append(response, []byte{0x01}...)
 	}
 	response = append(response, []byte{byte(resp)}...) //TODO response
-	log.Printf("connAck: %v\n", response)
+	prot.logger.Debug("connAck: %v", response)
 	err := prot.conn.Write(response)
 	if err != nil {
 		return err
@@ -194,35 +127,33 @@ func (prot *MqttProtocol) connAck(sessionCfg *ResponseConnect, resp ConnectRetur
 }
 
 func (prot *MqttProtocol) publishUnPack(data []byte) (*ResponsePublish, error) {
+	prot.logger.Info("publishUnPack")
 	var response ResponsePublish
-	fmt.Println(data)
 	response.dutFlag = (data[0]&0b1000 == 0b1000)
 	response.Qos = int((data[0] & 0b110) >> 1)
 	response.Retained = (data[0]&0b1 == 0b1)
 	variableHeader := data[2:]
-	log.Println(variableHeader)
 	if len(variableHeader) < 3 {
 		return nil, fmt.Errorf("tamanho do payload(%d) sem topic: %v", len(variableHeader), variableHeader)
 	}
 	lengthTopic := int(variableHeader[0])<<8 + int(variableHeader[1])
 	variableHeader = variableHeader[2:]
 	response.Topic = string(variableHeader[:lengthTopic])
-	log.Println(response.Topic)
+	prot.logger.Debug(response.Topic)
 	variableHeader = variableHeader[lengthTopic:]
 	if response.Qos > 0 {
 		response.Identifier = variableHeader[:2]
-		log.Println(response.Identifier)
 		variableHeader = variableHeader[2:]
 	}
 	payload := variableHeader
 	response.Payload = payload
-	log.Println(string(response.Payload))
+	prot.logger.Debug(string(response.Payload))
 	return &response, nil
 }
 func (prot *MqttProtocol) pubAck(pubCfg *ResponsePublish) error {
-	log.Println("pubAck")
-	response := []byte{byte(PUBACK), 0b10}
-	response = append(response, pubCfg.Identifier...) //TODO response
+	prot.logger.Info("pubAck")
+	response := []byte{byte(COMMAND_PUBACK), 0b10}
+	response = append(response, pubCfg.Identifier...)
 	err := prot.conn.Write(response)
 	if err != nil {
 		return err
@@ -230,38 +161,34 @@ func (prot *MqttProtocol) pubAck(pubCfg *ResponsePublish) error {
 	return nil
 }
 func (prot *MqttProtocol) pubRec(pubCfg *ResponsePublish) error {
-	log.Println("pubRec")
-	return nil
-}
-func (prot *MqttProtocol) unpackPubRel(pubCfg *ResponsePublish) error {
-	log.Println("unpackPubRel")
-	return nil
-}
-
-func (prot *MqttProtocol) PublishProcess(data []byte) (*ResponsePublish, error) {
-	r, err := prot.publishUnPack(data)
+	prot.logger.Info("pubRec")
+	response := []byte{byte(COMMAND_PUBREC), 0b10}
+	response = append(response, pubCfg.Identifier...)
+	err := prot.conn.Write(response)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	if r.Qos == 1 {
-		err = prot.pubAck(r)
-		if err != nil {
-			return nil, err
-		}
-		return r, nil
-	}
-	if r.Qos == 2 {
-		err = prot.pubRec(r)
-		if err != nil {
-			return nil, err
-		}
-		return r, nil
-	}
-	return r, nil
+	return nil
 }
-
-func (prot *MqttProtocol) PingProcess() error {
-	response := []byte{byte(PINGRESP), 0}
+func (prot *MqttProtocol) unpackPubRel(data []byte, packetIdentifier *[]byte) error {
+	prot.logger.Info("unpackPubRel")
+	if data[0] != byte(COMMAND_PUBREL) {
+		return fmt.Errorf("Byte command isn't exactly COMMAND_PUBREL")
+	}
+	length := len(data[1:])
+	prot.logger.Debug("%d", length)
+	if length < 2 {
+		return fmt.Errorf("length < 2")
+	}
+	if !bytes.Equal(data[2:], *packetIdentifier) {
+		return fmt.Errorf("incorrect packet identifier")
+	}
+	return nil
+}
+func (prot *MqttProtocol) pubComp(packetIdentifier *[]byte) error {
+	prot.logger.Info("pubRec")
+	response := []byte{byte(COMMAND_PUBCOMP), 0b10}
+	response = append(response, *packetIdentifier...)
 	err := prot.conn.Write(response)
 	if err != nil {
 		return err

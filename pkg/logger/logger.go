@@ -42,7 +42,6 @@ func InitCustomFormatter() {
 
 // NewLogger creates a new Logger instance with the specified name.
 func NewLogger(name string) *Logger {
-
 	var configFile string
 	if os.Getenv("LOG_CONFIG_PROD") == "true" {
 		configFile = "configs/log-config-prod.xml" // Substitua pelo caminho correto
