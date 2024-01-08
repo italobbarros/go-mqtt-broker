@@ -1,28 +1,25 @@
 package broker
 
 import (
-	"fmt"
 	"strings"
 )
 
 // PrintTree imprime a árvore de tópicos a partir do nó fornecido
 func (b *Broker) PrintAllTree() {
-	printTree(b.Root, 0, "")
+	b.printTree(b.Root, 0, "")
 }
 
 // Função auxiliar para imprimir a árvore recursivamente
-func printTree(node *TopicNode, level int, arrow string) {
+func (b *Broker) printTree(node *TopicNode, level int, arrow string) {
 	indent := strings.Repeat("  ", level)
 
 	if node.TopicConfig != nil {
-		fmt.Print(indent + arrow + " " + node.Name)
-		fmt.Print(" -> "+"Data:", string(node.TopicConfig.Payload))
-		fmt.Print(" | "+"Retained:", node.TopicConfig.Retained)
-		fmt.Print(" | "+"Qos:", node.TopicConfig.Qos)
-		fmt.Print(" | "+"Subscribers:", len(node.TopicConfig.Subscribers))
-		fmt.Println(" | "+"SecurityRule:", node.TopicConfig.SecurityRule)
+		b.logger.Debug(
+			indent+arrow+" "+node.Name+" -> "+"Data:%s | Retained: %v | Qos: %d | Subscribers: %d",
+			string(node.TopicConfig.Payload), node.TopicConfig.Retained, node.TopicConfig.Qos, len(node.TopicConfig.Subscribers),
+		)
 	} else {
-		fmt.Println(indent + arrow + " " + node.Name)
+		b.logger.Debug(indent + arrow + " " + node.Name)
 	}
 
 	for index, child := range node.Children {
@@ -32,7 +29,7 @@ func printTree(node *TopicNode, level int, arrow string) {
 		} else {
 			newArrow = "├──"
 		}
-		printTree(child, level+1, newArrow)
+		b.printTree(child, level+1, newArrow)
 	}
 }
 

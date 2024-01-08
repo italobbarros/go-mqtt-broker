@@ -38,7 +38,7 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 	b.logger.Debug("Client Connecting...")
 	defer func() {
 		conn.Close()
-		b.logger.Debug("Closing client MQTT")
+		b.logger.Warning("Closing client MQTT")
 	}()
 	prot := protocol.NewMqttProtocol(conn)
 	sessionCfg, err := prot.ConnectProcess()
@@ -65,7 +65,7 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 				currentSession.logger.Error("handlePublishCommand: %s", err.Error())
 				return
 			}
-			currentSession.logger.Debug("Published!")
+			currentSession.logger.Info("Published!")
 			continue
 		}
 		if (*cmd&protocol.COMMAND_PUBREL == protocol.COMMAND_PUBREL) && (packetIdentifier != nil) { // exactly equal
@@ -75,7 +75,7 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 				return
 			}
 			packetIdentifier = nil
-			currentSession.logger.Debug("Success PubRel!")
+			currentSession.logger.Info("Success PubRel!")
 			continue
 		}
 		if *cmd&protocol.COMMAND_PINGREQ == protocol.COMMAND_PINGREQ {
@@ -84,7 +84,7 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 				currentSession.logger.Error("PingProcess: %s", err.Error())
 				return
 			}
-			currentSession.logger.Debug("PING!")
+			currentSession.logger.Info("PING!")
 			continue
 		}
 	}

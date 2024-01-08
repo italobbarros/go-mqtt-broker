@@ -187,7 +187,7 @@ func (prot *MqttProtocol) unpackPubRel(data []byte, packetIdentifier *[]byte) er
 	return nil
 }
 func (prot *MqttProtocol) pubComp(packetIdentifier *[]byte) error {
-	prot.logger.Debug("pubRec")
+	prot.logger.Debug("pubComp")
 	response := []byte{byte(COMMAND_PUBCOMP), 0b10}
 	response = append(response, *packetIdentifier...)
 	err := prot.conn.Write(response)
