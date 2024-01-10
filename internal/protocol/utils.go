@@ -71,3 +71,7 @@ func (prot *MqttProtocol) isMqttCmd(Cmd Command) ([]byte, error) {
 	}
 	return data, nil
 }
+
+func IsCmdEqual(currentCommand *Command, testCommand Command) bool {
+	return *currentCommand&testCommand == testCommand
+}

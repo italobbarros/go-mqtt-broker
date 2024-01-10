@@ -1,6 +1,7 @@
 package broker
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -64,4 +65,29 @@ func (b *Broker) GetTopicNode(topic string) *TopicNode {
 	}
 
 	return currentNode
+}
+
+func (b *Broker) AddSubscribeTopicNode(topic string, subs *SubscriberConfig) error {
+	TopicNode := b.GetTopicNode(topic)
+	if TopicNode == nil {
+		return fmt.Errorf("Don't exist Topic on Topic Node")
+	}
+	b.logger.Debug("Add subscriber.")
+	TopicNode.Subscribers = append(TopicNode.Subscribers, []SubscriberConfig{*subs}...)
+	if TopicNode.TopicConfig.Retained {
+		if err := b.NotifyNewSubscriber(topic, subs); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (b *Broker) NotifyNewSubscriber(topic string, subs *SubscriberConfig) error {
+
+	return nil
+}
+
+func (b *Broker) NotifyAllSubscribers(topic string) error {
+
+	return nil
 }

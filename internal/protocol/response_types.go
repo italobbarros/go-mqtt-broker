@@ -1,5 +1,7 @@
 package protocol
 
+import "github.com/italobbarros/go-mqtt-broker/pkg/connection"
+
 type ResponseConnect struct {
 	Id        string
 	Timeout   int
@@ -16,4 +18,11 @@ type ResponsePublish struct {
 	dutFlag    bool
 	Retained   bool
 	Qos        int
+}
+
+type ResponseSubscribe struct {
+	Identifier  []byte
+	TopicFilter []string
+	Qos         []int
+	Conn        connection.ConnectionInterface
 }

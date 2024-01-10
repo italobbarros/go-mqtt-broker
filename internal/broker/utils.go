@@ -16,7 +16,7 @@ func (b *Broker) printTree(node *TopicNode, level int, arrow string) {
 	if node.TopicConfig != nil {
 		b.logger.Debug(
 			indent+arrow+" "+node.Name+" -> "+"Data:%s | Retained: %v | Qos: %d | Subscribers: %d",
-			string(node.TopicConfig.Payload), node.TopicConfig.Retained, node.TopicConfig.Qos, len(node.TopicConfig.Subscribers),
+			string(node.TopicConfig.Payload), node.TopicConfig.Retained, node.TopicConfig.Qos, len(node.Subscribers),
 		)
 	} else {
 		b.logger.Debug(indent + arrow + " " + node.Name)

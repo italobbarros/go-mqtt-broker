@@ -24,19 +24,25 @@ type Broker struct {
 
 // Topic.go
 type TopicNode struct {
-	Name         string       `json:"name"`
-	Topic        string       `json:"topic"`
-	TopicConfig  *TopicConfig `json:"topicCfg,omitempty"`
-	MessageCount int          `json:"messageCount"`
-	Children     []*TopicNode `json:"children,omitempty"`
+	Name         string             `json:"name"`
+	Topic        string             `json:"topic"`
+	TopicConfig  *TopicConfig       `json:"topicCfg,omitempty"`
+	Subscribers  []SubscriberConfig `json:"subscribers"` // Lista de sub-tópicos associados a este tópico
+	MessageCount int                `json:"messageCount"`
+	Children     []*TopicNode       `json:"children,omitempty"`
 }
 
 type TopicConfig struct {
-	Payload      string                           `json:"payload"`
-	Qos          int                              `json:"qos"`
-	Retained     bool                             `json:"retained"`     // Indica se a mensagem é retida ou não
-	Subscribers  []connection.ConnectionInterface `json:"subscribers"`  // Lista de sub-tópicos associados a este tópico
-	SecurityRule string                           `json:"securityRule"` // Regra de segurança aplicada ao tópico
+	Payload      string `json:"payload"`
+	Qos          int    `json:"qos"`
+	Retained     bool   `json:"retained"`     // Indica se a mensagem é retida ou não
+	SecurityRule string `json:"securityRule"` // Regra de segurança aplicada ao tópico
+}
+
+type SubscriberConfig struct {
+	Identifier []byte
+	Qos        int
+	conn       connection.ConnectionInterface
 }
 
 // session.go

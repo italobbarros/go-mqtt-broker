@@ -59,7 +59,7 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 			currentSession.logger.Error("Command is nil")
 			return
 		}
-		if *cmd&protocol.COMMAND_PUBLISH == protocol.COMMAND_PUBLISH {
+		if protocol.IsCmdEqual(cmd, protocol.COMMAND_PUBLISH) {
 			packetIdentifier, err = b.handlePublishCommand(data, prot)
 			if err != nil {
 				currentSession.logger.Error("handlePublishCommand: %s", err.Error())
@@ -68,7 +68,7 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 			currentSession.logger.Info("Published!")
 			continue
 		}
-		if (*cmd&protocol.COMMAND_PUBREL == protocol.COMMAND_PUBREL) && (packetIdentifier != nil) { // exactly equal
+		if (protocol.IsCmdEqual(cmd, protocol.COMMAND_PUBREL)) && (packetIdentifier != nil) { // exactly equal
 			err := prot.PubRelProcess(data, packetIdentifier)
 			if err != nil {
 				currentSession.logger.Error("PubRelProcess: %s", err.Error())
@@ -78,7 +78,32 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 			currentSession.logger.Info("Success PubRel!")
 			continue
 		}
-		if *cmd&protocol.COMMAND_PINGREQ == protocol.COMMAND_PINGREQ {
+		if protocol.IsCmdEqual(cmd, protocol.COMMAND_SUBSCRIBE) {
+			var Success []bool
+			subs, err := prot.SubscribeProcess(data)
+			if err != nil {
+				currentSession.logger.Error("SubscribeProcess: %s", err.Error())
+				return
+			}
+			Success = make([]bool, len(subs.TopicFilter))
+			for index, topic := range subs.TopicFilter {
+				b.logger.Debug("topic: %s", topic)
+				err = b.AddSubscribeTopicNode(topic, &SubscriberConfig{
+					Identifier: subs.Identifier,
+					Qos:        subs.Qos[index],
+					conn:       subs.Conn,
+				})
+				if err != nil {
+					b.logger.Error("Erro ao adicionar subscriber topic: %s , erro:%s", topic, err)
+					Success[index] = false
+				} else {
+					Success[index] = true
+				}
+			}
+			currentSession.logger.Info("Subscribed!")
+			continue
+		}
+		if protocol.IsCmdEqual(cmd, protocol.COMMAND_PINGREQ) {
 			err := prot.PingProcess()
 			if err != nil {
 				currentSession.logger.Error("PingProcess: %s", err.Error())

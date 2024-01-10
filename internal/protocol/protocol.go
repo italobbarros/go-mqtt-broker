@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"strconv"
 
 	connection "github.com/italobbarros/go-mqtt-broker/pkg/connection"
 	"github.com/italobbarros/go-mqtt-broker/pkg/logger"
@@ -190,6 +191,64 @@ func (prot *MqttProtocol) pubComp(packetIdentifier *[]byte) error {
 	prot.logger.Debug("pubComp")
 	response := []byte{byte(COMMAND_PUBCOMP), 0b10}
 	response = append(response, *packetIdentifier...)
+	err := prot.conn.Write(response)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (prot *MqttProtocol) subscribeUnPack(data []byte) (*ResponseSubscribe, error) {
+	prot.logger.Debug("subscribeUnPack")
+	var response ResponseSubscribe
+	if data[0] != byte(COMMAND_SUBSCRIBE) {
+		return nil, fmt.Errorf("Byte command isn't exactly COMMAND_SUBSCRIBE")
+	}
+	if len(data) < 5 {
+		return nil, fmt.Errorf("Incorrect Length")
+	}
+	response.Identifier = data[2:4]
+	payload := data[4:]
+	if len(payload) < 3 {
+		return nil, fmt.Errorf("Incorrect Length")
+	}
+	prot.logger.Debug("%v", payload)
+	for {
+		lengthTopicFilter := int(payload[0])<<8 + int(payload[1])
+		payload = payload[2:]
+		response.TopicFilter = append(response.TopicFilter, string(payload[:lengthTopicFilter]))
+		payload = payload[lengthTopicFilter:]
+		response.Qos = append(response.Qos, int(payload[0]&0b11))
+		if len(payload) < 2 {
+			break
+		}
+		payload = payload[1:]
+	}
+	return &response, nil
+}
+
+func (prot *MqttProtocol) subAck(subCfg *ResponseSubscribe, Success []bool) error {
+	prot.logger.Debug("subAck")
+	response := []byte{byte(COMMAND_SUBACK), 0b10}
+	response = append(response, subCfg.Identifier...)
+	if len(Success) != len(subCfg.Qos) {
+		return fmt.Errorf("Qtd of sucess incorrect")
+	}
+
+	for i, qos := range subCfg.Qos {
+		if !Success[i] {
+			response = append(response, []byte(strconv.Itoa(int(SUBSCRIBE_FAILED)))...)
+		}
+		switch qos {
+		case 0:
+			response = append(response, []byte(strconv.Itoa(int(SUBSCRIBE_SUCCESS_QOS0)))...)
+		case 1:
+			response = append(response, []byte(strconv.Itoa(int(SUBSCRIBE_SUCCESS_QOS1)))...)
+		case 2:
+			response = append(response, []byte(strconv.Itoa(int(SUBSCRIBE_SUCCESS_QOS2)))...)
+		}
+	}
+	response[1] = byte(len(response[2:]))
 	err := prot.conn.Write(response)
 	if err != nil {
 		return err

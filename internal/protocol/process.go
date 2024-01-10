@@ -60,6 +60,15 @@ func (prot *MqttProtocol) PublishProcess(data []byte) (*ResponsePublish, error) 
 	return r, nil
 }
 
+func (prot *MqttProtocol) SubscribeProcess(data []byte) (*ResponseSubscribe, error) {
+	r, err := prot.subscribeUnPack(data)
+	if err != nil {
+		return nil, err
+	}
+	r.Conn = prot.conn
+	return r, nil
+}
+
 func (prot *MqttProtocol) PingProcess() error {
 	response := []byte{byte(COMMAND_PINGRESP), 0}
 	err := prot.conn.Write(response)
