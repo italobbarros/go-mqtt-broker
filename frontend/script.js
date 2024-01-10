@@ -1,5 +1,6 @@
+import {MQTT_TREE,FRONT,TOPIC} from "./env.js"
 document.addEventListener("DOMContentLoaded", function() {
-  fetch('http://192.168.0.109:8080/mqtt-tree')
+  fetch(MQTT_TREE)
   .then(response => {
       if (!response.ok) {
           throw new Error('Erro ao recuperar a árvore MQTT');
@@ -149,7 +150,7 @@ function showSidebarDetails(name) {
   sidebarTitle.textContent = `Detalhes de ${name}`;
   //sidebarContent.textContent = `Informações detalhadas sobre ${name}.`; 
   
-  fetch(`http://192.168.0.109:8080/topic-info?topic=${processTopic(name)}`)
+  fetch(`${TOPIC}${processTopic(name)}`)
   .then(response => {
       if (!response.ok) {
           throw new Error('Erro ao recuperar as informações do tópico');
