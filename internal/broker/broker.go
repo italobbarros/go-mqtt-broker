@@ -47,6 +47,7 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 		return
 	}
 	currentSession := b.newSession(sessionCfg)
+	currentSession.prot = prot
 	prot.UpdateLogger(currentSession.logger)
 	conn.UpdateLogger(currentSession.logger)
 	for {
@@ -60,38 +61,48 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 			return
 		}
 		if protocol.IsCmdEqual(cmd, protocol.COMMAND_PUBLISH) {
+			prot.Start()
 			packetIdentifier, err = b.handlePublishCommand(data, prot)
 			if err != nil {
+				prot.End()
 				currentSession.logger.Error("handlePublishCommand: %s", err.Error())
 				return
+			}
+			if packetIdentifier == nil {
+				prot.End()
 			}
 			currentSession.logger.Info("Published!")
 			continue
 		}
 		if (protocol.IsCmdEqual(cmd, protocol.COMMAND_PUBREL)) && (packetIdentifier != nil) { // exactly equal
+			//Continued command publish if qos is 2
 			err := prot.PubRelProcess(data, packetIdentifier)
 			if err != nil {
+				prot.End()
 				currentSession.logger.Error("PubRelProcess: %s", err.Error())
 				return
 			}
 			packetIdentifier = nil
 			currentSession.logger.Info("Success PubRel!")
+			prot.End()
 			continue
 		}
 		if protocol.IsCmdEqual(cmd, protocol.COMMAND_SUBSCRIBE) {
+			prot.Start()
 			var Success []bool
 			subs, err := prot.SubscribeProcess(data)
 			if err != nil {
+				prot.End()
 				currentSession.logger.Error("SubscribeProcess: %s", err.Error())
 				return
 			}
 			Success = make([]bool, len(subs.TopicFilter))
 			for index, topic := range subs.TopicFilter {
 				b.logger.Debug("topic: %s", topic)
-				err = b.AddSubscribeTopicNode(topic, &SubscriberConfig{
+				err = b.AddSubscribeTopicNode(topic, currentSession.config.Id, &SubscriberConfig{
 					Identifier: subs.Identifier,
 					Qos:        subs.Qos[index],
-					conn:       subs.Conn,
+					session:    currentSession,
 				})
 				if err != nil {
 					b.logger.Error("Erro ao adicionar subscriber topic: %s , erro:%s", topic, err)
@@ -101,15 +112,19 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 				}
 			}
 			currentSession.logger.Info("Subscribed!")
+			prot.End()
 			continue
 		}
 		if protocol.IsCmdEqual(cmd, protocol.COMMAND_PINGREQ) {
+			prot.Start()
 			err := prot.PingProcess()
 			if err != nil {
+				prot.End()
 				currentSession.logger.Error("PingProcess: %s", err.Error())
 				return
 			}
 			currentSession.logger.Info("PING!")
+			prot.End()
 			continue
 		}
 	}
@@ -143,13 +158,16 @@ func (b *Broker) newSession(sessionCfg *protocol.ResponseConnect) *Session {
 func (b *Broker) handlePublishCommand(data []byte, prot *protocol.MqttProtocol) (*[]byte, error) {
 	r, err := prot.PublishProcess(data)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 	b.AddTopic(r.Topic, &TopicConfig{
 		Retained: r.Retained,
 		Payload:  string(r.Payload),
 		Qos:      r.Qos,
 	})
+	if err = b.NotifyAllSubscribers(r.Topic); err != nil {
+		b.logger.Error("Erro ao notificar todos os subscribers topic %s , erro:%s", r.Topic, err)
+	}
 	if r.Qos == 2 {
 		return &r.Identifier, nil
 	}

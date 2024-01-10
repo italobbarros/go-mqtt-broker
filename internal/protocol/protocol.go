@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"strconv"
+	"sync"
 
 	connection "github.com/italobbarros/go-mqtt-broker/pkg/connection"
 	"github.com/italobbarros/go-mqtt-broker/pkg/logger"
@@ -14,11 +15,20 @@ func NewMqttProtocol(conn connection.ConnectionInterface) *MqttProtocol {
 	return &MqttProtocol{
 		conn:   conn,
 		logger: logger.NewLogger("Mqtt"),
+		lock:   sync.Mutex{},
 	}
 }
 
 func (prot *MqttProtocol) UpdateLogger(logger *logger.Logger) {
 	prot.logger = logger
+}
+
+func (prot *MqttProtocol) Start() {
+	prot.lock.Lock()
+}
+
+func (prot *MqttProtocol) End() {
+	prot.lock.Unlock()
 }
 
 func (prot *MqttProtocol) connectUnPack() (*ResponseConnect, error) {
@@ -197,7 +207,6 @@ func (prot *MqttProtocol) pubComp(packetIdentifier *[]byte) error {
 	}
 	return nil
 }
-
 func (prot *MqttProtocol) subscribeUnPack(data []byte) (*ResponseSubscribe, error) {
 	prot.logger.Debug("subscribeUnPack")
 	var response ResponseSubscribe
@@ -226,7 +235,6 @@ func (prot *MqttProtocol) subscribeUnPack(data []byte) (*ResponseSubscribe, erro
 	}
 	return &response, nil
 }
-
 func (prot *MqttProtocol) subAck(subCfg *ResponseSubscribe, Success []bool) error {
 	prot.logger.Debug("subAck")
 	response := []byte{byte(COMMAND_SUBACK), 0b10}
@@ -250,6 +258,42 @@ func (prot *MqttProtocol) subAck(subCfg *ResponseSubscribe, Success []bool) erro
 	}
 	response[1] = byte(len(response[2:]))
 	err := prot.conn.Write(response)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (prot *MqttProtocol) PublishSend(Qos int, dutFlag bool, Retained bool, payload string, topic string, identifier []byte) error {
+	prot.logger.Debug("PublishSend")
+	var data []byte
+	data = make([]byte, 1)
+	data[0] = byte(COMMAND_PUBLISH)
+	if dutFlag {
+		data[0] = data[0] | 0b1000
+	}
+	data[0] = data[0] | byte(Qos<<1)
+	if Retained {
+		data[0] = data[0] | 0b1
+	}
+	remaingLength := 2
+	lenTopic := len(topic)
+	remaingLength += lenTopic
+	if Qos > 0 {
+		remaingLength += 2
+	}
+	remaingLength += len(payload)
+
+	d := encodeLength(remaingLength)
+	data = append(data, d...)
+	lenTopicMSB := byte(lenTopic >> 8)
+	lenTopicLSB := byte(lenTopic & 0xFF)
+	data = append(data, []byte{lenTopicMSB, lenTopicLSB}...)
+	data = append(data, []byte(topic)...)
+	if Qos > 0 {
+		data = append(data, identifier...)
+	}
+	data = append(data, []byte(payload)...)
+	err := prot.conn.Write(data)
 	if err != nil {
 		return err
 	}

@@ -4,6 +4,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/italobbarros/go-mqtt-broker/internal/protocol"
 	connection "github.com/italobbarros/go-mqtt-broker/pkg/connection"
 	"github.com/italobbarros/go-mqtt-broker/pkg/logger"
 )
@@ -24,12 +25,12 @@ type Broker struct {
 
 // Topic.go
 type TopicNode struct {
-	Name         string             `json:"name"`
-	Topic        string             `json:"topic"`
-	TopicConfig  *TopicConfig       `json:"topicCfg,omitempty"`
-	Subscribers  []SubscriberConfig `json:"subscribers"` // Lista de sub-tópicos associados a este tópico
-	MessageCount int                `json:"messageCount"`
-	Children     []*TopicNode       `json:"children,omitempty"`
+	Name         string                       `json:"name"`
+	Topic        string                       `json:"topic"`
+	TopicConfig  *TopicConfig                 `json:"topicCfg,omitempty"`
+	Subscribers  map[string]*SubscriberConfig `json:"subscribers"` // Lista de sub-tópicos associados a este tópico
+	MessageCount int                          `json:"messageCount"`
+	Children     []*TopicNode                 `json:"children,omitempty"`
 }
 
 type TopicConfig struct {
@@ -42,7 +43,7 @@ type TopicConfig struct {
 type SubscriberConfig struct {
 	Identifier []byte
 	Qos        int
-	conn       connection.ConnectionInterface
+	session    *Session
 }
 
 // session.go
@@ -58,6 +59,7 @@ type SessionConfig struct {
 type Session struct {
 	Timestamp time.Time
 	partition int
+	prot      *protocol.MqttProtocol
 	config    *SessionConfig
 	top       *Session // Ponteiro para o nó anterior na lista
 	bottom    *Session // Ponteiro para o próximo nó na lista

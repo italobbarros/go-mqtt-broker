@@ -3,6 +3,8 @@ package broker
 import (
 	"fmt"
 	"strings"
+
+	"github.com/italobbarros/go-mqtt-broker/internal/protocol"
 )
 
 func (b *Broker) AddTopic(topic string, topicCfg *TopicConfig) {
@@ -36,6 +38,7 @@ func (b *Broker) AddTopic(topic string, topicCfg *TopicConfig) {
 				Topic:       newTopic,
 				TopicConfig: topicConfig,
 				Children:    make([]*TopicNode, 0),
+				Subscribers: make(map[string]*SubscriberConfig),
 			}
 			currentNode.Children = append(currentNode.Children, newChild)
 			currentNode = newChild
@@ -67,27 +70,50 @@ func (b *Broker) GetTopicNode(topic string) *TopicNode {
 	return currentNode
 }
 
-func (b *Broker) AddSubscribeTopicNode(topic string, subs *SubscriberConfig) error {
+func (b *Broker) AddSubscribeTopicNode(topic string, id string, subs *SubscriberConfig) error {
 	TopicNode := b.GetTopicNode(topic)
 	if TopicNode == nil {
-		return fmt.Errorf("Don't exist Topic on Topic Node")
+		b.logger.Warning("Don't exist Topic on Topic Node")
+		b.AddTopic(topic, &TopicConfig{
+			Retained: false,
+			Payload:  "",
+			Qos:      0,
+		})
+		TopicNode = b.GetTopicNode(topic)
 	}
-	b.logger.Debug("Add subscriber.")
-	TopicNode.Subscribers = append(TopicNode.Subscribers, []SubscriberConfig{*subs}...)
+	TopicNode.Subscribers[id] = subs
+	b.logger.Debug("Add subscriber...")
 	if TopicNode.TopicConfig.Retained {
-		if err := b.NotifyNewSubscriber(topic, subs); err != nil {
+		if err := b.notifyNewSubscriber(topic, subs); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (b *Broker) NotifyNewSubscriber(topic string, subs *SubscriberConfig) error {
-
+func (b *Broker) notifyNewSubscriber(topic string, sub *SubscriberConfig) error {
+	b.logger.Debug("NotifyNewSubscriber: %s", sub.Identifier)
 	return nil
 }
 
 func (b *Broker) NotifyAllSubscribers(topic string) error {
-
+	TopicNode := b.GetTopicNode(topic)
+	if TopicNode == nil {
+		return fmt.Errorf("Don't exist Topic on Topic Node")
+	}
+	for _, sub := range TopicNode.Subscribers {
+		currentProt := sub.session.prot
+		go b.publishSubscribe(topic, currentProt, TopicNode.TopicConfig.Retained, TopicNode.TopicConfig.Payload, sub)
+	}
 	return nil
+}
+
+func (b *Broker) publishSubscribe(topic string, currentProt *protocol.MqttProtocol, retained bool, payload string, sub *SubscriberConfig) {
+	currentProt.Start()
+	err := currentProt.PublishSend(sub.Qos, true, retained, payload, topic, sub.Identifier)
+	if err != nil {
+		currentProt.End()
+	}
+	b.logger.Debug("sub.Identifier: %s", sub.Identifier)
+	currentProt.End()
 }

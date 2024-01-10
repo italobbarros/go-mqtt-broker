@@ -18,17 +18,50 @@ func mqttVersionCompatible(b []byte) bool {
 	return false
 }
 
-func calcLength(b byte) int {
-	valor := 0
-	multiplicador := 1
+func decodeLength(encoded []byte) (int, error) {
+	var length int
+	multiplier := 1
 
-	for b&128 != 0 {
-		valor += int(b&127) * multiplicador
-		multiplicador *= 128
-		b >>= 7
+	for i := 0; i < len(encoded); i++ {
+		// Verifique se o bit de continuação está definido
+		if encoded[i]&0x80 == 0 {
+			length += int(encoded[i]) * multiplier
+			return length, nil
+		}
+
+		// Remova o bit de continuação e some ao comprimento
+		length += int(encoded[i]&0x7F) * multiplier
+		multiplier *= 128
+
+		// Verifique se atingiu o máximo de 4 bytes para o comprimento
+		if multiplier > 128*128*128 {
+			return 0, fmt.Errorf("malformed remaining length")
+		}
 	}
 
-	return valor + int(b)
+	return 0, fmt.Errorf("incomplete remaining length")
+}
+
+func encodeLength(length int) []byte {
+	var encoded []byte
+
+	for {
+		digit := length % 128
+		length = length / 128
+
+		// Se ainda houver dígitos, defina o bit de continuação
+		if length > 0 {
+			digit = digit | 0x80
+		}
+
+		encoded = append(encoded, byte(digit))
+
+		if length <= 0 {
+			break
+		}
+	}
+
+	return encoded
 }
 
 func (prot *MqttProtocol) IsValidMqttCmd() (*Command, []byte, error) {
@@ -41,7 +74,32 @@ func (prot *MqttProtocol) IsValidMqttCmd() (*Command, []byte, error) {
 		return nil, make([]byte, 0), fmt.Errorf("length data is < 2")
 	}
 	cmd = Command(data[0])
-	length := calcLength(data[1])
+	var d1 []byte
+	if data[1] > 127 {
+		d1, err = prot.conn.Read(1)
+		if err != nil {
+			return nil, make([]byte, 0), err
+		}
+		data = append(data, d1...)
+		if data[2] > 127 {
+			d1, err = prot.conn.Read(1)
+			if err != nil {
+				return nil, make([]byte, 0), err
+			}
+			data = append(data, d1...)
+			if data[3] > 127 {
+				d1, err = prot.conn.Read(1)
+				if err != nil {
+					return nil, make([]byte, 0), err
+				}
+				data = append(data, d1...)
+			}
+		}
+	}
+	length, err := decodeLength(data[1:])
+	if err != nil {
+		return nil, make([]byte, 0), err
+	}
 	if length != 0 {
 		data2, err := prot.conn.Read(length)
 		if err != nil {
@@ -63,7 +121,32 @@ func (prot *MqttProtocol) isMqttCmd(Cmd Command) ([]byte, error) {
 	if data[0]&byte(Cmd) != byte(Cmd) {
 		return make([]byte, 0), fmt.Errorf("Isn't a first byte %d Mqtt protocol", Cmd)
 	}
-	length := calcLength(data[1])
+	var d1 []byte
+	if data[1] > 127 {
+		d1, err = prot.conn.Read(1)
+		if err != nil {
+			return make([]byte, 0), err
+		}
+		data = append(data, d1...)
+		if data[2] > 127 {
+			d1, err = prot.conn.Read(1)
+			if err != nil {
+				return make([]byte, 0), err
+			}
+			data = append(data, d1...)
+			if data[3] > 127 {
+				d1, err = prot.conn.Read(1)
+				if err != nil {
+					return make([]byte, 0), err
+				}
+				data = append(data, d1...)
+			}
+		}
+	}
+	length, err := decodeLength(data[1:])
+	if err != nil {
+		return make([]byte, 0), err
+	}
 	data2, err := prot.conn.Read(length)
 	data = append(data, data2...)
 	if !mqttVersionCompatible(data[2:9]) {
