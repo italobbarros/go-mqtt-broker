@@ -142,7 +142,6 @@ function processTopic(topic) {
 }
 
 function showSidebarDetails(name) {
-  console.log("showSidebarDetails")
   const sidebarTitle = document.getElementById('sidebarTitle');
   const sidebarContent = document.getElementById('sidebarContent');
   sidebarContent.innerHTML = '';
@@ -158,7 +157,6 @@ function showSidebarDetails(name) {
       return response.json();
   })
   .then(data => {
-    console.log("aqui")
     renderTopicInfo(data);
   })
   .catch(error => {
@@ -185,8 +183,8 @@ function showSidebarDetails(name) {
     retained.textContent = `Retained: ${topicInfo.topicCfg.retained}`;
 
     const subscribers = document.createElement('p');
-    const count = topicInfo.topicCfg.subscribers ? topicInfo.topicCfg.subscribers.length : 0;
-    subscribers.textContent = `Número de Inscritos: ${count}`;
+    subscribers.textContent = `Número de Subscribers: ${topicInfo.subscribersCount}`;
+    console.log("Tópico não encontrado para o nome:", topicInfo.subscribersCount);
     // Adicionar elementos à sidebar
     sidebar.appendChild(topicName);
     sidebar.appendChild(messageCount);
