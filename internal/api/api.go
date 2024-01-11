@@ -41,7 +41,6 @@ func (a *API) TopicInfoHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "topic not found", http.StatusNotFound)
 		return
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(node)
 }

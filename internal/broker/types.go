@@ -25,12 +25,13 @@ type Broker struct {
 
 // Topic.go
 type TopicNode struct {
-	Name         string                       `json:"name"`
-	Topic        string                       `json:"topic"`
-	TopicConfig  *TopicConfig                 `json:"topicCfg,omitempty"`
-	Subscribers  map[string]*SubscriberConfig `json:"subscribers"` // Lista de sub-tópicos associados a este tópico
-	MessageCount int                          `json:"messageCount"`
-	Children     []*TopicNode                 `json:"children,omitempty"`
+	Name             string                       `json:"name"`
+	Topic            string                       `json:"topic"`
+	TopicConfig      *TopicConfig                 `json:"topicCfg,omitempty"`
+	Subscribers      map[string]*SubscriberConfig `json:"subscribers"` // Lista de sub-tópicos associados a este tópico
+	MessageCount     int                          `json:"messageCount"`
+	SubscribersCount int                          `json:"subscribersCount"`
+	Children         []*TopicNode                 `json:"children,omitempty"`
 }
 
 type TopicConfig struct {

@@ -11,13 +11,28 @@ services:
         max-file: "2"   # Número máximo de arquivos de log
     restart: unless-stopped
     ports:
-      - "8000:8000"
       - "8080:8080"
       - "1883:1883"
     environment:
       - LOG_CONFIG_PROD=true
     networks:
        - broker
+
+  broker-management:
+    image: broker-management
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: broker-management
+    logging:            # Configuração de log
+      options:
+        max-size: "50m" # Tamanho máximo de cada arquivo de log
+        max-file: "2"   # Número máximo de arquivos de log
+    restart: unless-stopped
+    ports:
+      - "3000:8000"
+    networks:
+      - broker
 
 networks:
   broker:

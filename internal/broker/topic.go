@@ -82,7 +82,9 @@ func (b *Broker) AddSubscribeTopicNode(topic string, id string, subs *Subscriber
 		TopicNode = b.GetTopicNode(topic)
 	}
 	TopicNode.Subscribers[id] = subs
+	TopicNode.SubscribersCount = len(TopicNode.Subscribers)
 	b.logger.Debug("Add subscriber...")
+	b.logger.Debug("SubscribersCount: %d", len(TopicNode.Subscribers))
 	if TopicNode.TopicConfig.Retained {
 		if err := b.notifyNewSubscriber(topic, subs); err != nil {
 			return err
@@ -116,4 +118,13 @@ func (b *Broker) publishSubscribe(topic string, currentProt *protocol.MqttProtoc
 	}
 	b.logger.Debug("sub.Identifier: %s", sub.Identifier)
 	currentProt.End()
+}
+
+func (b *Broker) IncMsgCount(topic string) error {
+	TopicNode := b.GetTopicNode(topic)
+	if TopicNode == nil {
+		return fmt.Errorf("Don't exist Topic on Topic Node")
+	}
+	TopicNode.MessageCount += 1
+	return nil
 }
