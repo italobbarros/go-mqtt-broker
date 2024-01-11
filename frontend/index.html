@@ -7,6 +7,17 @@
 </head>
 <body>
 
+  <div id="reloadOptions">
+    <label for="reloadSelect">Reload: </label>
+    <select id="reloadSelect">
+      <option value="5">5 segundos</option>
+      <option value="10">10 segundos</option>
+      <option value="30">30 segundos</option>
+    </select>
+    <div id="lastUpdated">
+      Última atualização: <span id="lastUpdatedTime"></span>
+    </div>
+  </div>
   <div id="tree">
     <ul></ul>
     <!-- A árvore MQTT será gerada aqui pelo JavaScript -->
@@ -18,7 +29,6 @@
       <!-- O conteúdo será preenchido dinamicamente pelo JavaScript -->
     </div>
   </div>
-  
 <script src="script.js" type="module"></script>
 
 </body>

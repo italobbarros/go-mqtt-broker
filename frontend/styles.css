@@ -47,6 +47,26 @@ ul {
   margin-left: 20px;
 }
 
+#reloadOptions {
+  top: 0; /* Alinha no topo */
+  right: 0; /* Alinha no canto superior direito */
+  margin: 10px; /* Adiciona alguma margem para espaço */
+  background-color: #f9f9f9; /* Cor de fundo */
+  padding: 10px 20px; /* Espaçamento interno */
+  border: 1px solid #ccc; /* Borda */
+  border-radius: 4px; /* Borda arredondada */
+  z-index: 1000; /* Garante que esteja acima de outros elementos */
+}
+
+/* Estilização adicional para a combobox */
+#reloadSelect {
+  padding: 5px 10px; /* Espaçamento interno */
+  font-size: 16px; /* Tamanho da fonte */
+  border: 1px solid #ccc; /* Borda */
+  border-radius: 4px; /* Borda arredondada */
+}
+
+
 /* Estilo para a árvore principal */
 #tree > ul > li {
   margin-bottom: 10px; /* Espaçamento entre os nós principais */
