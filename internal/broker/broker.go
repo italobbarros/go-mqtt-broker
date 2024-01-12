@@ -51,94 +51,110 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 	currentSession.prot = prot
 	prot.UpdateLogger(currentSession.logger)
 	conn.UpdateLogger(currentSession.logger)
+
+	resultChan := make(chan *protocol.MqttCmdResult)
+	go prot.IsValidMqttCmd(resultChan)
 	for {
-		cmd, data, err := prot.IsValidMqttCmd()
-		if err != nil {
-			currentSession.logger.Error(err.Error())
-			return
-		}
-		if cmd == nil {
-			currentSession.logger.Error("Command is nil")
-			return
-		}
-		if protocol.IsCmdEqual(cmd, protocol.COMMAND_PUBLISH) {
-			prot.Start()
-			responsePublish, err = b.handlePublishCommand(data, prot)
-			if err != nil {
-				prot.End()
-				currentSession.logger.Error("handlePublishCommand: %s", err.Error())
+		select {
+		case result := <-resultChan:
+			if result.Err != nil {
+				// Tratar o erro, se necessário
+				b.logger.Error(result.Err.Error())
 				return
 			}
-			if responsePublish == nil {
-				prot.End()
-			}
-			currentSession.logger.Info("Published!")
-			continue
-		}
-		if (protocol.IsCmdEqual(cmd, protocol.COMMAND_PUBREL)) && (responsePublish != nil) { // exactly equal
-			//Continued command publish if qos is 2
-			err := prot.PubRelProcess(data, &responsePublish.Identifier)
-			if err != nil {
-				prot.End()
-				currentSession.logger.Error("PubRelProcess: %s", err.Error())
-				return
-			}
-			if err = b.NotifyAllSubscribers(responsePublish.Topic); err != nil {
-				b.logger.Error("Erro ao notificar todos os subscribers topic %s , erro:%s", responsePublish.Topic, err)
-			}
-			b.IncMsgCount(responsePublish.Topic)
-			responsePublish = nil
-			currentSession.logger.Info("Success PubRel!")
-			prot.End()
-			continue
-		}
-		if protocol.IsCmdEqual(cmd, protocol.COMMAND_SUBSCRIBE) {
-			prot.Start()
-			var Success []bool
-			subs, err := prot.SubscribeProcess(data)
-			if err != nil {
-				prot.End()
-				currentSession.logger.Error("SubscribeProcess: %s", err.Error())
-				return
-			}
-			Success = make([]bool, len(subs.TopicFilter))
-			for index, topic := range subs.TopicFilter {
-				b.logger.Debug("topic: %s", topic)
-				err = b.AddSubscribeTopicNode(
-					topic,
-					currentSession.config.Id,
-					&SubscriberConfig{
-						Identifier: subs.Identifier,
-						Qos:        subs.Qos[index],
-						session:    currentSession,
-					},
-				)
-				if err != nil {
-					b.logger.Error("Erro ao adicionar subscriber topic: %s , erro:%s", topic, err)
-					Success[index] = false
-				} else {
-					Success[index] = true
-				}
-			}
-			currentSession.logger.Info("Subscribed!")
-			prot.End()
-			continue
-		}
-		if protocol.IsCmdEqual(cmd, protocol.COMMAND_PINGREQ) {
-			prot.Start()
-			err := prot.PingProcess()
-			if err != nil {
-				prot.End()
-				currentSession.logger.Error("PingProcess: %s", err.Error())
-				return
-			}
-			currentSession.logger.Info("PING!")
-			prot.End()
-			continue
+			b.processCommands(result, currentSession, prot, responsePublish)
 		}
 	}
 }
 
+func (b *Broker) processCommands(r *protocol.MqttCmdResult, currentSession *Session, prot *protocol.MqttProtocol, responsePublish *protocol.ResponsePublish) {
+	err := r.Err
+	cmd := r.Command
+	data := r.Data
+	if err != nil {
+		currentSession.logger.Error(err.Error())
+		return
+	}
+	if cmd == nil {
+		currentSession.logger.Error("Command is nil")
+		return
+	}
+	if protocol.IsCmdEqual(cmd, protocol.COMMAND_PUBLISH) {
+		prot.Start()
+		responsePublish, err = b.handlePublishCommand(data, prot)
+		if err != nil {
+			prot.End()
+			currentSession.logger.Error("handlePublishCommand: %s", err.Error())
+			return
+		}
+		if responsePublish == nil {
+			prot.End()
+		}
+		currentSession.logger.Info("Published!")
+		return
+	}
+	if (protocol.IsCmdEqual(cmd, protocol.COMMAND_PUBREL)) && (responsePublish != nil) { // exactly equal
+		//Continued command publish if qos is 2
+		err := prot.PubRelProcess(data, &responsePublish.Identifier)
+		if err != nil {
+			prot.End()
+			currentSession.logger.Error("PubRelProcess: %s", err.Error())
+			return
+		}
+		if err = b.NotifyAllSubscribers(responsePublish.Topic); err != nil {
+			b.logger.Error("Erro ao notificar todos os subscribers topic %s , erro:%s", responsePublish.Topic, err)
+		}
+		b.IncMsgCount(responsePublish.Topic)
+		responsePublish = nil
+		currentSession.logger.Info("Success PubRel!")
+		prot.End()
+		return
+	}
+	if protocol.IsCmdEqual(cmd, protocol.COMMAND_SUBSCRIBE) {
+		prot.Start()
+		var Success []bool
+		subs, err := prot.SubscribeProcess(data)
+		if err != nil {
+			prot.End()
+			currentSession.logger.Error("SubscribeProcess: %s", err.Error())
+			return
+		}
+		Success = make([]bool, len(subs.TopicFilter))
+		for index, topic := range subs.TopicFilter {
+			b.logger.Debug("topic: %s", topic)
+			err = b.AddSubscribeTopicNode(
+				topic,
+				currentSession.config.Id,
+				&SubscriberConfig{
+					Identifier: subs.Identifier,
+					Qos:        subs.Qos[index],
+					session:    currentSession,
+				},
+			)
+			if err != nil {
+				b.logger.Error("Erro ao adicionar subscriber topic: %s , erro:%s", topic, err)
+				Success[index] = false
+			} else {
+				Success[index] = true
+			}
+		}
+		currentSession.logger.Info("Subscribed!")
+		prot.End()
+		return
+	}
+	if protocol.IsCmdEqual(cmd, protocol.COMMAND_PINGREQ) {
+		prot.Start()
+		err := prot.PingProcess()
+		if err != nil {
+			prot.End()
+			currentSession.logger.Error("PingProcess: %s", err.Error())
+			return
+		}
+		currentSession.logger.Info("PING!")
+		prot.End()
+		return
+	}
+}
 func (b *Broker) newSession(sessionCfg *protocol.ResponseConnect) *Session {
 	var currentSession *Session = nil
 

@@ -25,6 +25,7 @@ func (a *API) Init() {
 
 	r.HandleFunc("/mqtt-tree", corsHandler(a.MqttTreeHandler)).Methods("GET")
 	r.HandleFunc("/topic-info", corsHandler(a.TopicInfoHandler)).Methods("GET")
+	r.HandleFunc("/session-info", corsHandler(a.SessionInfo)).Methods("GET")
 
 	http.Handle("/", r)
 
@@ -51,6 +52,16 @@ func (a *API) MqttTreeHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(root)
+}
+
+func (a *API) SessionInfo(w http.ResponseWriter, r *http.Request) {
+	// Aqui, você pode usar a instância de Broker para obter a árvore MQTT.
+	qtdSessions := len(a.Broker.SessionMg.SessionMap)
+	w.Header().Set("Content-Type", "application/json")
+	result := &SessionInfo{
+		NumberSessions: qtdSessions,
+	}
+	json.NewEncoder(w).Encode(result)
 }
 
 // Você também pode adicionar métodos adicionais à estrutura API conforme necessário.

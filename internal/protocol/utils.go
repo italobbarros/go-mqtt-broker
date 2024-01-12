@@ -64,50 +64,75 @@ func encodeLength(length int) []byte {
 	return encoded
 }
 
-func (prot *MqttProtocol) IsValidMqttCmd() (*Command, []byte, error) {
-	data, err := prot.conn.Read(2)
-	var cmd Command
-	if err != nil {
-		return nil, make([]byte, 0), err
-	}
-	if len(data) > 2 {
-		return nil, make([]byte, 0), fmt.Errorf("length data is < 2")
-	}
-	cmd = Command(data[0])
-	var d1 []byte
-	if data[1] > 127 {
-		d1, err = prot.conn.Read(1)
+type MqttCmdResult struct {
+	Command *Command
+	Data    []byte
+	Err     error
+}
+
+func (prot *MqttProtocol) IsValidMqttCmd(resultChan chan<- *MqttCmdResult) {
+	for {
+		data, err := prot.conn.Read(2)
+		result := &MqttCmdResult{}
+
 		if err != nil {
-			return nil, make([]byte, 0), err
+			result.Err = err
+			resultChan <- result
+			return
 		}
-		data = append(data, d1...)
-		if data[2] > 127 {
+		if len(data) > 2 {
+			result.Err = fmt.Errorf("length data is < 2")
+			resultChan <- result
+			return
+		}
+		cmd := Command(data[0])
+		result.Command = &cmd
+		var d1 []byte
+		if data[1] > 127 {
 			d1, err = prot.conn.Read(1)
 			if err != nil {
-				return nil, make([]byte, 0), err
+				result.Err = err
+				resultChan <- result
+				return
 			}
 			data = append(data, d1...)
-			if data[3] > 127 {
+			if data[2] > 127 {
 				d1, err = prot.conn.Read(1)
 				if err != nil {
-					return nil, make([]byte, 0), err
+					result.Err = err
+					resultChan <- result
+					return
 				}
 				data = append(data, d1...)
+				if data[3] > 127 {
+					d1, err = prot.conn.Read(1)
+					if err != nil {
+						result.Err = err
+						resultChan <- result
+						return
+					}
+					data = append(data, d1...)
+				}
 			}
 		}
-	}
-	length, err := decodeLength(data[1:])
-	if err != nil {
-		return nil, make([]byte, 0), err
-	}
-	if length != 0 {
-		data2, err := prot.conn.Read(length)
+		length, err := decodeLength(data[1:])
 		if err != nil {
-			return nil, make([]byte, 0), err
+			result.Err = err
+			resultChan <- result
+			return
 		}
-		data = append(data, data2...)
+		if length != 0 {
+			data2, err := prot.conn.Read(length)
+			if err != nil {
+				result.Err = err
+				resultChan <- result
+				return
+			}
+			data = append(data, data2...)
+		}
+		result.Data = data
+		resultChan <- result
 	}
-	return &cmd, data, nil
 }
 
 func (prot *MqttProtocol) isMqttCmd(Cmd Command) ([]byte, error) {

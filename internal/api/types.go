@@ -12,3 +12,7 @@ type TopicInfo struct {
 	MessageCount int    `json:"messageCount"`
 	Subscribers  int    `json:"subscribers"`
 }
+
+type SessionInfo struct {
+	NumberSessions int `json:"numberSessions"`
+}

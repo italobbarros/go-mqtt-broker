@@ -10,8 +10,8 @@ func TestNewSessionManager(t *testing.T) {
 	if sm == nil {
 		t.Error("Expected a non-nil SessionManager")
 	}
-	if len(sm.partitionMap) != 0 || len(sm.sessionMap) != 0 {
-		t.Error("Expected empty maps for partitionMap and sessionMap")
+	if len(sm.partitionMap) != 0 || len(sm.SessionMap) != 0 {
+		t.Error("Expected empty maps for partitionMap and SessionMap")
 	}
 }
 
@@ -23,8 +23,8 @@ func TestAddSession(t *testing.T) {
 		Clean:     false,
 	}
 	sm.AddSession(cfg)
-	if len(sm.partitionMap) != 1 || len(sm.sessionMap) != 1 {
-		t.Error("Expected one entry in partitionMap and sessionMap")
+	if len(sm.partitionMap) != 1 || len(sm.SessionMap) != 1 {
+		t.Error("Expected one entry in partitionMap and SessionMap")
 	}
 }
 
@@ -50,8 +50,8 @@ func TestRemoveSession(t *testing.T) {
 	}
 	sm.AddSession(cfg)
 	sm.RemoveSession("testID", 10)
-	if len(sm.sessionMap) != 0 {
-		t.Error("Expected sessionMap to be empty after removal")
+	if len(sm.SessionMap) != 0 {
+		t.Error("Expected SessionMap to be empty after removal")
 	}
 }
 
@@ -77,7 +77,7 @@ func TestCheckSessionTimeouts(t *testing.T) {
 		KeepAlive: 10,
 		Clean:     true,
 	})
-	t.Log("sessionMap length:", len(sm.sessionMap))
+	t.Log("SessionMap length:", len(sm.SessionMap))
 	t.Log("partitionMap length:", len(sm.partitionMap))
 	time.Sleep(3 * time.Second) // Espera 2 segundos para que a sessão expire
 
@@ -86,8 +86,8 @@ func TestCheckSessionTimeouts(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error: %s", err.Error())
 	}
-	if len(sm.sessionMap) != 2 {
-		t.Errorf("Expected sessionMap to be 2 after timeout check, but is %d", len(sm.sessionMap))
+	if len(sm.SessionMap) != 2 {
+		t.Errorf("Expected SessionMap to be 2 after timeout check, but is %d", len(sm.SessionMap))
 	}
 }
 

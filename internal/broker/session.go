@@ -12,13 +12,13 @@ import (
 func NewSessionManager() *SessionManager {
 	return &SessionManager{
 		partitionMap: make(map[int16]*SessionPartition),
-		sessionMap:   make(map[string]*Session),
+		SessionMap:   make(map[string]*Session),
 	}
 }
 
 func (sm *SessionManager) Exist(id string) bool {
 	sm.lockSession.Lock()
-	_, ok := sm.sessionMap[id]
+	_, ok := sm.SessionMap[id]
 	sm.lockSession.Unlock()
 	return ok
 }
@@ -38,7 +38,7 @@ func (sm *SessionManager) AddSession(sessionCfg *SessionConfig) *Session {
 		sm.partitionMap[sessionCfg.KeepAlive] = sessionPartition
 	}
 	sm.lockSession.Lock()
-	sm.sessionMap[sessionCfg.Id] = session
+	sm.SessionMap[sessionCfg.Id] = session
 	sm.lockSession.Unlock()
 	if sessionPartition.head == nil {
 		sessionPartition.head = session
@@ -58,7 +58,7 @@ func (sm *SessionManager) UpdateSession(sessionCfg *SessionConfig) *Session {
 	if SessionPartition, ok := sm.partitionMap[sessionCfg.KeepAlive]; ok {
 		// If already at the top, do nothing
 		sm.lockSession.Lock()
-		session, ok := sm.sessionMap[sessionCfg.Id]
+		session, ok := sm.SessionMap[sessionCfg.Id]
 		sm.lockSession.Unlock()
 		if !ok {
 			return nil
@@ -110,7 +110,7 @@ func (sm *SessionManager) onlyRemoveSession(sessionPartition *SessionPartition, 
 	}
 
 	sm.lockSession.Lock()
-	delete(sm.sessionMap, session.config.Id)
+	delete(sm.SessionMap, session.config.Id)
 	sm.lockSession.Unlock()
 	// Remove the session from the map
 }
@@ -123,7 +123,7 @@ func (sm *SessionManager) RemoveSession(id string, keepAlive int16) {
 		// If the session is the head of the list
 
 		sm.lockSession.Lock()
-		session, ok := sm.sessionMap[id]
+		session, ok := sm.SessionMap[id]
 		sm.lockSession.Unlock()
 		if !ok {
 			return
@@ -162,8 +162,8 @@ func (sm *SessionManager) CheckSessionTimeouts() error {
 	sm.lockPartition.Lock()
 	defer sm.lockPartition.Unlock()
 
-	if len(sm.sessionMap) == 0 {
-		return fmt.Errorf("sessionMap is empty")
+	if len(sm.SessionMap) == 0 {
+		return fmt.Errorf("SessionMap is empty")
 	}
 	if len(sm.partitionMap) == 0 {
 		return fmt.Errorf("partitionMap is empty")

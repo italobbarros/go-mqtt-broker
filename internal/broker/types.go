@@ -75,7 +75,7 @@ type SessionPartition struct {
 
 // SessionManager gerencia sessões MQTT
 type SessionManager struct {
-	sessionMap    map[string]*Session // Mapa para acessar sessões por ID
+	SessionMap    map[string]*Session // Mapa para acessar sessões por ID
 	partitionMap  map[int16]*SessionPartition
 	lockSession   sync.Mutex
 	lockPartition sync.Mutex
