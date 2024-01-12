@@ -1,6 +1,10 @@
 package main
 
 import (
+	"log"
+	"net/http"
+	_ "net/http/pprof"
+
 	"github.com/italobbarros/go-mqtt-broker/internal/api"
 	brokerMqtt "github.com/italobbarros/go-mqtt-broker/internal/broker"
 	connection "github.com/italobbarros/go-mqtt-broker/pkg/connection"
@@ -17,5 +21,9 @@ func main() {
 	go broker.Start()
 	api := api.NewAPI(broker)
 	go api.Init()
+	go func() {
+		log.Println(http.ListenAndServe("0.0.0.0:6060", nil))
+	}()
+
 	select {}
 }

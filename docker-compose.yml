@@ -11,6 +11,7 @@ services:
         max-file: "2"   # Número máximo de arquivos de log
     restart: unless-stopped
     ports:
+      - "6000:6000"
       - "8080:8080"
       - "1883:1883"
     environment:
