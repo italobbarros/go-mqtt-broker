@@ -13,29 +13,30 @@ func NewBroker(b *BrokerConfigs) *Broker {
 	topic := fmt.Sprintf("/%s/#", b.Name)
 	sessionMg := NewSessionManager()
 	var server connection.ServerInterface
+
 	switch b.TypeConnection {
 	case connection.TCP:
 		server = connection.NewTcpServer()
-		go server.Start(b.Address)
-	default:
-		server = connection.NewTcpServer()
-		go server.Start(b.Address)
+	case connection.WEBSOCKET:
+		//server = connection.NewTcpServer()
 	}
-	return &Broker{
+	broker := &Broker{
 		Root: &TopicNode{
 			Name:     b.Name,
 			Topic:    topic,
-			Children: make([]*TopicNode, 0),
+			Children: make(map[string]*TopicNode),
 		},
 		SessionMg: sessionMg,
 		server:    server,
 		logger:    logger.NewLogger("Broker"),
 	}
+	go server.Start(b.Address, broker.handleConnectionMQTT)
+	return broker
 }
 
 func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 	var responsePublish *protocol.ResponsePublish = nil
-	b.logger.Debug("Client Connecting...")
+	b.logger.Info("Client Connecting...")
 	defer func() {
 		conn.Close()
 		b.logger.Warning("Closing client MQTT")
@@ -141,7 +142,7 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 func (b *Broker) newSession(sessionCfg *protocol.ResponseConnect) *Session {
 	var currentSession *Session = nil
 
-	defer b.SessionMg.DebugPrint()
+	//defer b.SessionMg.DebugPrint()
 	if sessionCfg == nil {
 		return currentSession
 	}

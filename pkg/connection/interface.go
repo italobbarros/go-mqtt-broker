@@ -9,8 +9,10 @@ type ConnectionInterface interface {
 	UpdateLogger(*logger.Logger)
 }
 
+type CallbackFunc func(ConnectionInterface)
+
 type ServerInterface interface {
-	Start(string)
+	Start(string, CallbackFunc)
 	GetChannel() chan ConnectionInterface
 }
 

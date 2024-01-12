@@ -22,13 +22,13 @@ func (b *Broker) printTree(node *TopicNode, level int, arrow string) {
 		b.logger.Debug(indent + arrow + " " + node.Name)
 	}
 
-	for index, child := range node.Children {
+	for _, child := range node.Children {
 		var newArrow string
-		if index == len(node.Children)-1 {
-			newArrow = "└──"
-		} else {
-			newArrow = "├──"
-		}
+		//if index == len(node.Children)-1 {
+		//newArrow = "└──"
+		//} else {
+		newArrow = "├──"
+		//}
 		b.printTree(child, level+1, newArrow)
 	}
 }
