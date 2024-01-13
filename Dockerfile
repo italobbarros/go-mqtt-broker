@@ -1,6 +1,5 @@
 # Use a imagem oficial do Golang como imagem base
 FROM golang:1.21-alpine as build
-
 ENV TZ=America/Sao_Paulo
 
 WORKDIR /code
