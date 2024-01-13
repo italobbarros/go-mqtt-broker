@@ -140,6 +140,22 @@ func (b *Broker) processCommands(r *protocol.MqttCmdResult, currentSession *Sess
 		prot.End()
 		return
 	}
+	if protocol.IsCmdEqual(cmd, protocol.COMMAND_UNSUBSCRIBE) {
+		prot.Start()
+		subs, err := prot.UnSubscribeProcess(data)
+		if err != nil {
+			prot.End()
+			currentSession.logger.Error("SubscribeProcess: %s", err.Error())
+			return
+		}
+		for _, topic := range subs.TopicFilter {
+			b.logger.Debug("remove subscribe: %s", topic)
+
+		}
+		currentSession.logger.Info("Subscribed!")
+		prot.End()
+		return
+	}
 	if protocol.IsCmdEqual(cmd, protocol.COMMAND_PINGREQ) {
 		prot.Start()
 		err := prot.PingProcess()

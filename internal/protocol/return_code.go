@@ -3,17 +3,19 @@ package protocol
 type Command int
 
 const (
-	CONNECT           Command = 0x10
-	COMMAND_CONNACK   Command = 0x20
-	COMMAND_PUBLISH   Command = 0x30
-	COMMAND_PUBACK    Command = 0x40
-	COMMAND_PUBREC    Command = 0x50
-	COMMAND_PUBREL    Command = 0x62 // exactly equal
-	COMMAND_PUBCOMP   Command = 0x70
-	COMMAND_SUBSCRIBE Command = 0x82 // exactly equal
-	COMMAND_SUBACK    Command = 0x90
-	COMMAND_PINGREQ   Command = 0xC0
-	COMMAND_PINGRESP  Command = 0xD0
+	CONNECT             Command = 0x10
+	COMMAND_CONNACK     Command = 0x20
+	COMMAND_PUBLISH     Command = 0x30
+	COMMAND_PUBACK      Command = 0x40
+	COMMAND_PUBREC      Command = 0x50
+	COMMAND_PUBREL      Command = 0x62 // exactly equal
+	COMMAND_PUBCOMP     Command = 0x70
+	COMMAND_SUBSCRIBE   Command = 0x82 // exactly equal
+	COMMAND_SUBACK      Command = 0x90
+	COMMAND_UNSUBSCRIBE Command = 0xA2 // exactly equal
+	COMMAND_UNSUBACK    Command = 0xB0
+	COMMAND_PINGREQ     Command = 0xC0
+	COMMAND_PINGRESP    Command = 0xD0
 )
 
 type ConnectReturnCode byte

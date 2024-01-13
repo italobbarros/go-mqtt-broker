@@ -69,6 +69,18 @@ func (prot *MqttProtocol) SubscribeProcess(data []byte) (*ResponseSubscribe, err
 	return r, nil
 }
 
+func (prot *MqttProtocol) UnSubscribeProcess(data []byte) (*ResponseSubscribe, error) {
+	r, err := prot.unSubscribeUnPack(data)
+	if err != nil {
+		return nil, err
+	}
+	err = prot.unSubAck(r)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
 func (prot *MqttProtocol) PingProcess() error {
 	response := []byte{byte(COMMAND_PINGRESP), 0}
 	err := prot.conn.Write(response)

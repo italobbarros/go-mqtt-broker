@@ -3,6 +3,7 @@ package broker
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/italobbarros/go-mqtt-broker/internal/protocol"
 )
@@ -93,7 +94,14 @@ func (b *Broker) notifyNewSubscriber(topic string, sub *SubscriberConfig) error 
 
 func (b *Broker) NotifyAllSubscribers(topic string, topicReady chan bool) {
 	<-topicReady
-	topicNode := b.GetTopicNode(topic)
+	var topicNode *TopicNode
+	for {
+		topicNode = b.GetTopicNode(topic)
+		if topicNode != nil {
+			break
+		}
+		time.Sleep(time.Second * 1)
+	}
 	topicNode.MessageCount += 1
 	for _, sub := range topicNode.Subscribers {
 		currentProt := sub.session.prot

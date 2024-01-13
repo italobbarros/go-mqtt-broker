@@ -263,6 +263,45 @@ func (prot *MqttProtocol) subAck(subCfg *ResponseSubscribe, Success []bool) erro
 	}
 	return nil
 }
+func (prot *MqttProtocol) unSubscribeUnPack(data []byte) (*ResponseSubscribe, error) {
+	prot.logger.Debug("unSubscribeUnPack")
+	var response ResponseSubscribe
+	if data[0] != byte(COMMAND_UNSUBSCRIBE) {
+		return nil, fmt.Errorf("Byte command isn't exactly COMMAND_UNSUBSCRIBE")
+	}
+	if len(data) < 5 {
+		return nil, fmt.Errorf("Incorrect Length")
+	}
+	response.Identifier = data[2:4]
+	payload := data[4:]
+	if len(payload) < 3 {
+		return nil, fmt.Errorf("Incorrect Length")
+	}
+	prot.logger.Debug("%v", payload)
+	for {
+		lengthTopicFilter := int(payload[0])<<8 + int(payload[1])
+		payload = payload[2:]
+		response.TopicFilter = append(response.TopicFilter, string(payload[:lengthTopicFilter]))
+		payload = payload[lengthTopicFilter:]
+		response.Qos = append(response.Qos, int(payload[0]&0b11))
+		if len(payload) < 2 {
+			break
+		}
+		payload = payload[1:]
+	}
+	return &response, nil
+}
+
+func (prot *MqttProtocol) unSubAck(subCfg *ResponseSubscribe) error {
+	prot.logger.Debug("unSubAck")
+	response := []byte{byte(COMMAND_UNSUBACK), 0b10}
+	response = append(response, subCfg.Identifier...)
+	err := prot.conn.Write(response)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 func (prot *MqttProtocol) PublishSend(Qos int, dutFlag bool, Retained bool, payload string, topic string, identifier []byte) error {
 	prot.logger.Debug("PublishSend")
 	var data []byte
