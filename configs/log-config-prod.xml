@@ -4,12 +4,12 @@
         <filter levels="trace">
             <console formatid="colored_prot"/>
         </filter>
-        <!--<filter levels="debug">
+        <filter levels="debug">
             <console formatid="colored_debug"/>
         </filter>
         <filter levels="info">
             <console formatid="colored_info"/>
-        </filter>-->
+        </filter>
         <filter levels="warn">
             <console formatid="colored_warn"/>
         </filter>
