@@ -31,8 +31,7 @@ type TopicNode struct {
 	Subscribers      map[string]*SubscriberConfig `json:"subscribers"` // Lista de sub-tópicos associados a este tópico
 	MessageCount     int                          `json:"messageCount"`
 	SubscribersCount int                          `json:"subscribersCount"`
-	lock             sync.RWMutex
-	Children         *sync.Map `json:"children,omitempty"` //map[string]*TopicNode
+	Children         *sync.Map                    `json:"children,omitempty"` //map[string]*TopicNode
 }
 
 type TopicConfig struct {

@@ -71,9 +71,9 @@ func (b *Broker) AddSubscribeTopicNode(topic string, id string, subs *Subscriber
 		TopicNode = b.GetTopicNode(topic)
 	}
 	TopicNode.Subscribers[id] = subs
-	TopicNode.SubscribersCount = len(TopicNode.Subscribers)
+	TopicNode.SubscribersCount++
 	b.logger.Debug("Add subscriber...")
-	b.logger.Debug("SubscribersCount: %d", len(TopicNode.Subscribers))
+	b.logger.Debug("SubscribersCount: %d", TopicNode.SubscribersCount)
 	if TopicNode.TopicConfig.Retained {
 		if err := b.notifyNewSubscriber(topic, subs); err != nil {
 			return err
