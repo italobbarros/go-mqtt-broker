@@ -32,7 +32,7 @@ type TopicNode struct {
 	MessageCount     int                          `json:"messageCount"`
 	SubscribersCount int                          `json:"subscribersCount"`
 	lock             sync.RWMutex
-	Children         map[string]*TopicNode `json:"children,omitempty"`
+	Children         *sync.Map `json:"children,omitempty"` //map[string]*TopicNode
 }
 
 type TopicConfig struct {
