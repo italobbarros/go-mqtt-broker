@@ -9,24 +9,22 @@ document.addEventListener("DOMContentLoaded", function() {
   })
   .then(data => {
       const treeElement = document.getElementById('tree');
-      renderTree(data,data, treeElement.querySelector('ul'));
+      renderTree(data, treeElement.querySelector('ul'));
   })
   .catch(error => {
       console.error('Erro:', error);
   });
 
-  function renderTree(nodes,dataObject, parentUl = null) {
-    console.log("Renderizando árvore com nodes:", nodes);
-    if (!Array.isArray(nodes)) { //significa que é o pai
-      console.log("Criando novo parentUl para o nó raiz MQTT");
+  function renderTree(node, parentUl) {
       const li = document.createElement('li');
       const arrow = document.createElement('span');
       arrow.className = 'arrow';
-      if (nodes.children && nodes.children.length > 0){
-        li.appendChild(arrow);
+
+      if (node.children && Object.keys(node.children).length > 0) {
+          li.appendChild(arrow);
       }
 
-      const textNode = document.createTextNode("/"+nodes.name);
+      const textNode = document.createTextNode("/" + node.name);
       li.appendChild(textNode);
 
       const ul = document.createElement('ul');
@@ -34,59 +32,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
       parentUl.appendChild(li);
 
-      console.log("Elemento anexado ao DOM:", li); // Log para verificar se o elemento está sendo anexado ao DOM
-
-      if (nodes.children && nodes.children.length > 0) {
-          renderTree(nodes.children,dataObject, ul);
-      }
-      
       arrow.addEventListener('click', function() {
-        console.log("Clique na seta!"); // Log para verificar se o evento de clique está sendo acionado
-        if (ul.classList.toggle('hidden')) {
-            arrow.classList.toggle('collapsed', true);
-            arrow.classList.toggle('expanded', false);
-        } else {
-            arrow.classList.toggle('expanded', true);
-            arrow.classList.toggle('collapsed', false);
-            console.log("expanded");
-        }
-      });
-      li.addEventListener('click', function(e) {
-        if (e.target && e.target.nodeName === "LI") {
-            const clickedItem = getCurrentClickText(e.target);
-            handleListItemClick(dataObject,clickedItem);
-        }
-      });
-      
-      return parentUl;
-    }
-
-    nodes.forEach(node => {
-        console.log("Renderizando node:", node); // Log para verificar o node sendo processado
-
-        const li = document.createElement('li');
-        const arrow = document.createElement('span');
-        arrow.className = 'arrow';
-        if (node.children && node.children.length > 0){
-          li.appendChild(arrow);
-        }
-
-        const textNode = document.createTextNode("/"+node.name);
-        li.appendChild(textNode);
-
-        const ul = document.createElement('ul');
-        li.appendChild(ul);
-
-        parentUl.appendChild(li);
-
-        console.log("Elemento anexado ao DOM:", li); // Log para verificar se o elemento está sendo anexado ao DOM
-
-        if (node.children && node.children.length > 0) {
-            renderTree(node.children,dataObject, ul);
-        }
-        
-        arrow.addEventListener('click', function() {
-          console.log("Clique na seta!"); // Log para verificar se o evento de clique está sendo acionado
           if (ul.classList.toggle('hidden')) {
               arrow.classList.toggle('collapsed', true);
               arrow.classList.toggle('expanded', false);
@@ -94,9 +40,24 @@ document.addEventListener("DOMContentLoaded", function() {
               arrow.classList.toggle('expanded', true);
               arrow.classList.toggle('collapsed', false);
           }
-        });
-    });   
-}
+      });
+
+      // Adicionando o evento de clique para o li
+      li.addEventListener('click', function(e) {
+          if (e.target && e.target.nodeName === "LI") {
+              const clickedItem = getCurrentClickText(e.target);
+              handleListItemClick(node, clickedItem);
+          }
+      });
+
+      // Renderizar os filhos recursivamente
+      if (node.children && Object.keys(node.children).length > 0) {
+          for (const key in node.children) {
+              renderTree(node.children[key], ul);
+          }
+      }
+  }   
+
 
 function handleListItemClick(dataObject,name) {
   const topic = findTopicByName(dataObject, name); // Substitua yourDataObject pelo objeto de dados retornado do endpoint

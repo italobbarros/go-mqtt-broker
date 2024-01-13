@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
 
 	"github.com/italobbarros/go-mqtt-broker/internal/api"
 	brokerMqtt "github.com/italobbarros/go-mqtt-broker/internal/broker"
@@ -15,7 +16,7 @@ func main() {
 	logger.InitCustomFormatter()
 	broker := brokerMqtt.NewBroker(&brokerMqtt.BrokerConfigs{
 		Name:           "go-mqtt-broker",
-		Address:        "0.0.0.0:1883",
+		Address:        os.Getenv("ADDRESS"),
 		TypeConnection: connection.TCP,
 	})
 	go broker.Start()

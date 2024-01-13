@@ -1,7 +1,7 @@
 <seelog type="sync">
     <outputs>
         <!-- Console Output -->
-        <filter levels="trace">
+        <!--<filter levels="trace">
             <console formatid="colored_prot"/>
         </filter>
         <filter levels="debug">
@@ -12,7 +12,7 @@
         </filter>
         <filter levels="warn">
             <console formatid="colored_warn"/>
-        </filter>
+        </filter>-->
         <filter levels="error">
             <console formatid="colored_error"/>
         </filter>
