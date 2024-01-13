@@ -52,7 +52,7 @@ func (t *TcpServer) Start(address string, fn CallbackFunc) {
 			continue
 		}
 		tcpConn := NewTcpConn(conn)
-		fn(tcpConn)
+		go fn(tcpConn)
 	}
 }
 

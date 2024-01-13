@@ -2,6 +2,7 @@ package broker
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/italobbarros/go-mqtt-broker/internal/protocol"
 	connection "github.com/italobbarros/go-mqtt-broker/pkg/connection"
@@ -24,7 +25,7 @@ func NewBroker(b *BrokerConfigs) *Broker {
 		Root: &TopicNode{
 			Name:     b.Name,
 			Topic:    topic,
-			Children: make(map[string]*TopicNode),
+			Children: &sync.Map{},
 		},
 		SessionMg: sessionMg,
 		server:    server,
@@ -53,6 +54,7 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 	conn.UpdateLogger(currentSession.logger)
 
 	resultChan := make(chan *protocol.MqttCmdResult)
+	topicReady := make(chan bool)
 	go prot.IsValidMqttCmd(resultChan)
 	for {
 		select {
@@ -62,12 +64,12 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 				b.logger.Error(result.Err.Error())
 				return
 			}
-			b.processCommands(result, currentSession, prot, responsePublish)
+			b.processCommands(result, currentSession, prot, responsePublish, topicReady)
 		}
 	}
 }
 
-func (b *Broker) processCommands(r *protocol.MqttCmdResult, currentSession *Session, prot *protocol.MqttProtocol, responsePublish *protocol.ResponsePublish) {
+func (b *Broker) processCommands(r *protocol.MqttCmdResult, currentSession *Session, prot *protocol.MqttProtocol, responsePublish *protocol.ResponsePublish, topicReady chan bool) {
 	err := r.Err
 	cmd := r.Command
 	data := r.Data
@@ -81,7 +83,7 @@ func (b *Broker) processCommands(r *protocol.MqttCmdResult, currentSession *Sess
 	}
 	if protocol.IsCmdEqual(cmd, protocol.COMMAND_PUBLISH) {
 		prot.Start()
-		responsePublish, err = b.handlePublishCommand(data, prot)
+		responsePublish, err = b.handlePublishCommand(data, prot, topicReady)
 		if err != nil {
 			prot.End()
 			currentSession.logger.Error("handlePublishCommand: %s", err.Error())
@@ -101,10 +103,7 @@ func (b *Broker) processCommands(r *protocol.MqttCmdResult, currentSession *Sess
 			currentSession.logger.Error("PubRelProcess: %s", err.Error())
 			return
 		}
-		if err = b.NotifyAllSubscribers(responsePublish.Topic); err != nil {
-			b.logger.Error("Erro ao notificar todos os subscribers topic %s , erro:%s", responsePublish.Topic, err)
-		}
-		b.IncMsgCount(responsePublish.Topic)
+		go b.NotifyAllSubscribers(responsePublish.Topic, topicReady)
 		responsePublish = nil
 		currentSession.logger.Info("Success PubRel!")
 		prot.End()
@@ -129,7 +128,7 @@ func (b *Broker) processCommands(r *protocol.MqttCmdResult, currentSession *Sess
 					Identifier: subs.Identifier,
 					Qos:        subs.Qos[index],
 					session:    currentSession,
-				},
+				}, topicReady,
 			)
 			if err != nil {
 				b.logger.Error("Erro ao adicionar subscriber topic: %s , erro:%s", topic, err)
@@ -180,23 +179,21 @@ func (b *Broker) newSession(sessionCfg *protocol.ResponseConnect) *Session {
 	return currentSession
 }
 
-func (b *Broker) handlePublishCommand(data []byte, prot *protocol.MqttProtocol) (*protocol.ResponsePublish, error) {
+func (b *Broker) handlePublishCommand(data []byte, prot *protocol.MqttProtocol, topicReady chan bool) (*protocol.ResponsePublish, error) {
 	r, err := prot.PublishProcess(data)
 	if err != nil {
 		return nil, err
 	}
-	b.AddTopic(r.Topic, &TopicConfig{
+	go b.AddTopic(r.Topic, &TopicConfig{
 		Retained: r.Retained,
 		Payload:  string(r.Payload),
 		Qos:      r.Qos,
-	})
+	}, topicReady)
 	if r.Qos == 2 {
 		return r, nil
 	}
-	if err = b.NotifyAllSubscribers(r.Topic); err != nil {
-		b.logger.Error("Erro ao notificar todos os subscribers topic %s , erro:%s", r.Topic, err)
-	}
-	b.IncMsgCount(r.Topic)
+	go b.NotifyAllSubscribers(r.Topic, topicReady)
+
 	return nil, nil
 }
 

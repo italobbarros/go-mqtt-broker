@@ -56,7 +56,7 @@ func (a *API) MqttTreeHandler(w http.ResponseWriter, r *http.Request) {
 
 func (a *API) SessionInfo(w http.ResponseWriter, r *http.Request) {
 	// Aqui, você pode usar a instância de Broker para obter a árvore MQTT.
-	qtdSessions := len(a.Broker.SessionMg.SessionMap)
+	qtdSessions := a.Broker.SessionMg.GetSessionCount()
 	w.Header().Set("Content-Type", "application/json")
 	result := &SessionInfo{
 		NumberSessions: qtdSessions,

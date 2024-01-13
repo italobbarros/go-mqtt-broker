@@ -32,7 +32,7 @@ type TopicNode struct {
 	MessageCount     int                          `json:"messageCount"`
 	SubscribersCount int                          `json:"subscribersCount"`
 	lock             sync.RWMutex
-	Children         map[string]*TopicNode `json:"children,omitempty"`
+	Children         *sync.Map `json:"children,omitempty"` //map[string]*TopicNode
 }
 
 type TopicConfig struct {
@@ -75,8 +75,12 @@ type SessionPartition struct {
 
 // SessionManager gerencia sessões MQTT
 type SessionManager struct {
-	SessionMap    map[string]*Session // Mapa para acessar sessões por ID
-	partitionMap  map[int16]*SessionPartition
-	lockSession   sync.Mutex
-	lockPartition sync.Mutex
+	sessionMap     *sync.Map // Usando sync.Map
+	partitionMap   *sync.Map // Outro sync.Map
+	sessionCount   int       // Contador para o número de sessões
+	partitionCount int       // Contador para o número de partições
+	//SessionMap    map[string]*Session // Mapa para acessar sessões por ID
+	//partitionMap  map[int16]*SessionPartition
+	//lockSession   sync.Mutex
+	//lockPartition sync.Mutex
 }
