@@ -2,7 +2,6 @@ package broker
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/italobbarros/go-mqtt-broker/internal/protocol"
 	connection "github.com/italobbarros/go-mqtt-broker/pkg/connection"
@@ -25,7 +24,7 @@ func NewBroker(b *BrokerConfigs) *Broker {
 		Root: &TopicNode{
 			Name:     b.Name,
 			Topic:    topic,
-			Children: &sync.Map{},
+			Children: make(map[string]*TopicNode),
 		},
 		SessionMg: sessionMg,
 		server:    server,

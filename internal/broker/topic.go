@@ -3,7 +3,6 @@ package broker
 import (
 	"fmt"
 	"strings"
-	"sync"
 
 	"github.com/italobbarros/go-mqtt-broker/internal/protocol"
 )
@@ -12,11 +11,12 @@ func (b *Broker) AddTopic(topic string, topicCfg *TopicConfig, topicReady chan b
 	segments := strings.Split(topic, "/")
 
 	currentNode := b.Root
-	var child *TopicNode
 	for index, segment := range segments {
-		childVar, ok := currentNode.Children.Load(segment)
+		currentNode.lockChildren.RLock()
+		child, ok := currentNode.Children[segment]
+		currentNode.lockChildren.RUnlock()
+
 		if ok {
-			child = childVar.(*TopicNode)
 			if child.Name == segment {
 				// Se for o último segmento, atualize o TopicConfig existente
 				if index == len(segments)-1 {
@@ -36,10 +36,12 @@ func (b *Broker) AddTopic(topic string, topicCfg *TopicConfig, topicReady chan b
 			Name:        segment,
 			Topic:       newTopic,
 			TopicConfig: topicConfig,
-			Children:    &sync.Map{},
+			Children:    make(map[string]*TopicNode),
 			Subscribers: make(map[string]*SubscriberConfig),
 		}
-		currentNode.Children.Store(segment, newChild)
+		currentNode.lockChildren.Lock()
+		currentNode.Children[segment] = newChild
+		currentNode.lockChildren.Unlock()
 		currentNode = newChild
 	}
 	topicReady <- true
@@ -50,11 +52,13 @@ func (b *Broker) GetTopicNode(topic string) *TopicNode {
 	segments := strings.Split(topic, "/")
 	currentNode := b.Root
 	for _, segment := range segments {
-		child, ok := currentNode.Children.Load(segment)
+		currentNode.lockChildren.RLock()
+		child, ok := currentNode.Children[segment]
+		currentNode.lockChildren.RUnlock()
 		if !ok {
 			return nil
 		}
-		currentNode = child.(*TopicNode)
+		currentNode = child
 	}
 	return currentNode
 }
