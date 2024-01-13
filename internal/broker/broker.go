@@ -52,23 +52,14 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 	prot.UpdateLogger(currentSession.logger)
 	conn.UpdateLogger(currentSession.logger)
 
-	resultChan := make(chan *protocol.MqttCmdResult)
 	topicReady := make(chan bool)
-	go prot.IsValidMqttCmd(resultChan)
 	for {
-		select {
-		case result := <-resultChan:
-			if result.Err != nil {
-				// Tratar o erro, se necessário
-				b.logger.Error(result.Err.Error())
-				return
-			}
-			b.processCommands(result, currentSession, prot, responsePublish, topicReady)
-		}
+		b.processCommands(currentSession, prot, responsePublish, topicReady)
 	}
 }
 
-func (b *Broker) processCommands(r *protocol.MqttCmdResult, currentSession *Session, prot *protocol.MqttProtocol, responsePublish *protocol.ResponsePublish, topicReady chan bool) {
+func (b *Broker) processCommands(currentSession *Session, prot *protocol.MqttProtocol, responsePublish *protocol.ResponsePublish, topicReady chan bool) {
+	r := prot.IsValidMqttCmd()
 	err := r.Err
 	cmd := r.Command
 	data := r.Data
@@ -150,7 +141,6 @@ func (b *Broker) processCommands(r *protocol.MqttCmdResult, currentSession *Sess
 		}
 		for _, topic := range subs.TopicFilter {
 			b.logger.Debug("remove subscribe: %s", topic)
-
 		}
 		currentSession.logger.Info("Subscribed!")
 		prot.End()

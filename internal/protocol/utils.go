@@ -70,69 +70,61 @@ type MqttCmdResult struct {
 	Err     error
 }
 
-func (prot *MqttProtocol) IsValidMqttCmd(resultChan chan<- *MqttCmdResult) {
-	for {
-		data, err := prot.conn.Read(2)
-		result := &MqttCmdResult{}
+func (prot *MqttProtocol) IsValidMqttCmd() *MqttCmdResult {
 
+	data, err := prot.conn.Read(2)
+	result := &MqttCmdResult{}
+
+	if err != nil {
+		result.Err = err
+		return result
+	}
+	if len(data) > 2 {
+		result.Err = fmt.Errorf("length data is < 2")
+		return result
+	}
+	cmd := Command(data[0])
+	result.Command = &cmd
+	var d1 []byte
+	if data[1] > 127 {
+		d1, err = prot.conn.Read(1)
 		if err != nil {
 			result.Err = err
-			resultChan <- result
-			return
+			return result
 		}
-		if len(data) > 2 {
-			result.Err = fmt.Errorf("length data is < 2")
-			resultChan <- result
-			return
-		}
-		cmd := Command(data[0])
-		result.Command = &cmd
-		var d1 []byte
-		if data[1] > 127 {
+		data = append(data, d1...)
+		if data[2] > 127 {
 			d1, err = prot.conn.Read(1)
 			if err != nil {
 				result.Err = err
-				resultChan <- result
-				return
+				return result
 			}
 			data = append(data, d1...)
-			if data[2] > 127 {
+			if data[3] > 127 {
 				d1, err = prot.conn.Read(1)
 				if err != nil {
 					result.Err = err
-					resultChan <- result
-					return
+					return result
 				}
 				data = append(data, d1...)
-				if data[3] > 127 {
-					d1, err = prot.conn.Read(1)
-					if err != nil {
-						result.Err = err
-						resultChan <- result
-						return
-					}
-					data = append(data, d1...)
-				}
 			}
 		}
-		length, err := decodeLength(data[1:])
+	}
+	length, err := decodeLength(data[1:])
+	if err != nil {
+		result.Err = err
+		return result
+	}
+	if length != 0 {
+		data2, err := prot.conn.Read(length)
 		if err != nil {
 			result.Err = err
-			resultChan <- result
-			return
+			return result
 		}
-		if length != 0 {
-			data2, err := prot.conn.Read(length)
-			if err != nil {
-				result.Err = err
-				resultChan <- result
-				return
-			}
-			data = append(data, data2...)
-		}
-		result.Data = data
-		resultChan <- result
+		data = append(data, data2...)
 	}
+	result.Data = data
+	return result
 }
 
 func (prot *MqttProtocol) isMqttCmd(Cmd Command) ([]byte, error) {
