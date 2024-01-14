@@ -18,10 +18,11 @@
 - [x] Endpoint tree mqtt topics
 - [x] Endpoint info mqtt topic
 - [ ] Save Username and Password on json and validate
+- [ ] Save payload on specific Database
+- [ ] Using Cluster on MQTT broker container
 - [ ] Save Username and Password on redis or DB
 - [ ] Specific rules permission and security
 - [ ] TLS authenticator
-- [ ] Save payload on specific Database
 
 
 
