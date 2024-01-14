@@ -8,11 +8,13 @@ import (
 
 	"github.com/italobbarros/go-mqtt-broker/internal/api"
 	brokerMqtt "github.com/italobbarros/go-mqtt-broker/internal/broker"
+	"github.com/italobbarros/go-mqtt-broker/internal/utils"
 	connection "github.com/italobbarros/go-mqtt-broker/pkg/connection"
 	"github.com/italobbarros/go-mqtt-broker/pkg/logger"
 )
 
 func main() {
+	utils.LoadEnv()
 	logger.InitCustomFormatter()
 	broker := brokerMqtt.NewBroker(&brokerMqtt.BrokerConfigs{
 		Name:           "go-mqtt-broker",
