@@ -43,15 +43,18 @@ func (prot *MqttProtocol) PublishProcess(data []byte) (*ResponsePublish, error) 
 	if err != nil {
 		return nil, err
 	}
+	ackErr := make(chan error)
 	if r.Qos == 1 {
-		err = prot.pubAck(r)
+		go prot.pubAck(r, ackErr)
+		err := <-ackErr
 		if err != nil {
 			return nil, err
 		}
 		return r, nil
 	}
 	if r.Qos == 2 {
-		err = prot.pubRec(r)
+		go prot.pubRec(r, ackErr)
+		err := <-ackErr
 		if err != nil {
 			return nil, err
 		}

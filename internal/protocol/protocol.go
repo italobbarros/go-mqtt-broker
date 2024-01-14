@@ -163,25 +163,17 @@ func (prot *MqttProtocol) publishUnPack(data []byte) (*ResponsePublish, error) {
 	response.Payload = payload
 	return &response, nil
 }
-func (prot *MqttProtocol) pubAck(pubCfg *ResponsePublish) error {
+func (prot *MqttProtocol) pubAck(pubCfg *ResponsePublish, chErr chan error) {
 	prot.logger.Debug("pubAck")
 	response := []byte{byte(COMMAND_PUBACK), 0b10}
 	response = append(response, pubCfg.Identifier...)
-	err := prot.conn.Write(response)
-	if err != nil {
-		return err
-	}
-	return nil
+	chErr <- prot.conn.Write(response)
 }
-func (prot *MqttProtocol) pubRec(pubCfg *ResponsePublish) error {
+func (prot *MqttProtocol) pubRec(pubCfg *ResponsePublish, chErr chan error) {
 	prot.logger.Debug("pubRec")
 	response := []byte{byte(COMMAND_PUBREC), 0b10}
 	response = append(response, pubCfg.Identifier...)
-	err := prot.conn.Write(response)
-	if err != nil {
-		return err
-	}
-	return nil
+	chErr <- prot.conn.Write(response)
 }
 func (prot *MqttProtocol) unpackPubRel(data []byte, packetIdentifier *[]byte) error {
 	prot.logger.Debug("unpackPubRel")
