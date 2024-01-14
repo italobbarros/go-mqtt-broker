@@ -25,8 +25,7 @@ func (sm *SessionManager) GetSessionCount() int {
 	return sm.sessionCount
 }
 
-// AddSession adds a new session to the top of the list
-func (sm *SessionManager) AddSession(sessionCfg *SessionConfig, chSession chan *Session) {
+func (sm *SessionManager) AddSession(sessionCfg *SessionConfig) *Session {
 	session := &Session{
 		config:    sessionCfg,
 		Timestamp: time.Now(),
@@ -46,29 +45,26 @@ func (sm *SessionManager) AddSession(sessionCfg *SessionConfig, chSession chan *
 	if sessionPartition.head == nil {
 		sessionPartition.head = session
 		sessionPartition.tail = session
-		chSession <- session
-		return
+		return session
 	}
 	session.bottom = sessionPartition.head
 	sessionPartition.head.top = session
 	sessionPartition.head = session
 	sm.sessionCount++
-	chSession <- session
+	return session
 }
 
 // UpdateSession moves the updated session to the top of the list
-func (sm *SessionManager) UpdateSession(sessionCfg *SessionConfig, chSession chan *Session) {
+func (sm *SessionManager) UpdateSession(sessionCfg *SessionConfig) *Session {
 	sessionPartitionVar, ok := sm.partitionMap.Load(sessionCfg.KeepAlive)
 	if !ok {
-		chSession <- nil
-		return
+		return nil
 	}
 	sessionPartition := sessionPartitionVar.(*SessionPartition)
 
 	sessionVar, ok := sm.sessionMap.Load(sessionCfg.Id)
 	if !ok {
-		chSession <- nil
-		return
+		return nil
 	}
 	session := sessionVar.(*Session)
 
@@ -78,8 +74,7 @@ func (sm *SessionManager) UpdateSession(sessionCfg *SessionConfig, chSession cha
 	session.config = sessionCfg
 	session.Timestamp = time.Now()
 	if session == sessionPartition.head {
-		chSession <- session
-		return
+		return session
 	}
 	if session == sessionPartition.tail {
 		sessionPartition.tail = session.top
@@ -98,7 +93,7 @@ func (sm *SessionManager) UpdateSession(sessionCfg *SessionConfig, chSession cha
 	session.top = nil
 	sessionPartition.head.top = session
 	sessionPartition.head = session
-	chSession <- session
+	return session
 }
 
 func (sm *SessionManager) onlyRemoveSession(sessionPartition *SessionPartition, session *Session) {

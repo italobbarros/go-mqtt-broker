@@ -47,9 +47,8 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 		b.logger.Error("Error connectProcess : %s", err.Error())
 		return
 	}
-	chSession := make(chan *Session)
-	go b.newSession(sessionCfg, chSession)
-	currentSession := <-chSession
+	currentSession := b.newSession(sessionCfg)
+	currentSession.prot = prot
 	if currentSession == nil {
 		return
 	}
@@ -162,26 +161,29 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 	}
 }
 
-func (b *Broker) newSession(sessionCfg *protocol.ResponseConnect, chSession chan *Session) {
+func (b *Broker) newSession(sessionCfg *protocol.ResponseConnect) *Session {
+	var currentSession *Session = nil
+
 	//defer b.SessionMg.DebugPrint()
 	if sessionCfg == nil {
-		chSession <- nil
-		return
+		return currentSession
 	}
 	if b.SessionMg.Exist(sessionCfg.Id) {
-		b.SessionMg.UpdateSession(&SessionConfig{
+		currentSession = b.SessionMg.UpdateSession(&SessionConfig{
 			Id:        sessionCfg.Id,
 			KeepAlive: sessionCfg.KeepAlive,
 			username:  sessionCfg.Username,
 			password:  sessionCfg.Password,
-		}, chSession)
+		})
+		return currentSession
 	}
-	b.SessionMg.AddSession(&SessionConfig{
+	currentSession = b.SessionMg.AddSession(&SessionConfig{
 		Id:        sessionCfg.Id,
 		KeepAlive: sessionCfg.KeepAlive,
 		username:  sessionCfg.Username,
 		password:  sessionCfg.Password,
-	}, chSession)
+	})
+	return currentSession
 }
 
 func (b *Broker) handlePublishCommand(data []byte, prot *protocol.MqttProtocol, topicReady chan bool) (*protocol.ResponsePublish, error) {
