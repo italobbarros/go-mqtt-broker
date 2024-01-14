@@ -22,7 +22,8 @@ func TestAddSession(t *testing.T) {
 		KeepAlive: 10,
 		Clean:     false,
 	}
-	sm.AddSession(cfg)
+	chSession := make(chan *Session)
+	sm.AddSession(cfg, chSession)
 	if sm.partitionCount != 0 || sm.sessionCount != 0 {
 		t.Error("Expected one entry in partitionMap and SessionMap")
 	}
@@ -35,9 +36,11 @@ func TestUpdateSession(t *testing.T) {
 		KeepAlive: 10,
 		Clean:     false,
 	}
-	sm.AddSession(cfg)
+	chSession := make(chan *Session)
+	sm.AddSession(cfg, chSession)
+	//session := <-chSession
 	time.Sleep(1 * time.Second) // Espera 1 segundo para simular uma atualização
-	sm.UpdateSession(cfg)
+	sm.UpdateSession(cfg, chSession)
 	// Você pode adicionar mais verificações aqui para validar a funcionalidade.
 }
 
@@ -48,7 +51,8 @@ func TestRemoveSession(t *testing.T) {
 		KeepAlive: 10,
 		Clean:     false,
 	}
-	sm.AddSession(cfg)
+	chSession := make(chan *Session)
+	sm.AddSession(cfg, chSession)
 	sm.RemoveSession("testID", 10)
 	if sm.sessionCount != 0 {
 		t.Error("Expected SessionMap to be empty after removal")
@@ -57,26 +61,28 @@ func TestRemoveSession(t *testing.T) {
 
 func TestCheckSessionTimeouts(t *testing.T) {
 	sm := NewSessionManager()
+	chSession := make(chan *Session)
+
 	sm.AddSession(&SessionConfig{
 		Id:        "testID1",
 		KeepAlive: 1,
 		Clean:     true,
-	})
+	}, chSession)
 	sm.AddSession(&SessionConfig{
 		Id:        "testID2",
 		KeepAlive: 0,
 		Clean:     true,
-	})
+	}, chSession)
 	sm.AddSession(&SessionConfig{
 		Id:        "testID3",
 		KeepAlive: 0,
 		Clean:     false,
-	})
+	}, chSession)
 	sm.AddSession(&SessionConfig{
 		Id:        "testID3",
 		KeepAlive: 10,
 		Clean:     true,
-	})
+	}, chSession)
 	t.Log("SessionMap length:", sm.sessionCount)
 	t.Log("partitionMap length:", sm.partitionCount)
 	time.Sleep(3 * time.Second) // Espera 2 segundos para que a sessão expire

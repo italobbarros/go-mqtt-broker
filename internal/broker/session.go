@@ -26,7 +26,7 @@ func (sm *SessionManager) GetSessionCount() int {
 }
 
 // AddSession adds a new session to the top of the list
-func (sm *SessionManager) AddSession(sessionCfg *SessionConfig) *Session {
+func (sm *SessionManager) AddSession(sessionCfg *SessionConfig, chSession chan *Session) {
 	session := &Session{
 		config:    sessionCfg,
 		Timestamp: time.Now(),
@@ -46,26 +46,29 @@ func (sm *SessionManager) AddSession(sessionCfg *SessionConfig) *Session {
 	if sessionPartition.head == nil {
 		sessionPartition.head = session
 		sessionPartition.tail = session
-		return session
+		chSession <- session
+		return
 	}
 	session.bottom = sessionPartition.head
 	sessionPartition.head.top = session
 	sessionPartition.head = session
 	sm.sessionCount++
-	return session
+	chSession <- session
 }
 
 // UpdateSession moves the updated session to the top of the list
-func (sm *SessionManager) UpdateSession(sessionCfg *SessionConfig) *Session {
+func (sm *SessionManager) UpdateSession(sessionCfg *SessionConfig, chSession chan *Session) {
 	sessionPartitionVar, ok := sm.partitionMap.Load(sessionCfg.KeepAlive)
 	if !ok {
-		return nil
+		chSession <- nil
+		return
 	}
 	sessionPartition := sessionPartitionVar.(*SessionPartition)
 
 	sessionVar, ok := sm.sessionMap.Load(sessionCfg.Id)
 	if !ok {
-		return nil
+		chSession <- nil
+		return
 	}
 	session := sessionVar.(*Session)
 
@@ -75,7 +78,8 @@ func (sm *SessionManager) UpdateSession(sessionCfg *SessionConfig) *Session {
 	session.config = sessionCfg
 	session.Timestamp = time.Now()
 	if session == sessionPartition.head {
-		return session
+		chSession <- session
+		return
 	}
 	if session == sessionPartition.tail {
 		sessionPartition.tail = session.top
@@ -94,7 +98,7 @@ func (sm *SessionManager) UpdateSession(sessionCfg *SessionConfig) *Session {
 	session.top = nil
 	sessionPartition.head.top = session
 	sessionPartition.head = session
-	return session
+	chSession <- session
 }
 
 func (sm *SessionManager) onlyRemoveSession(sessionPartition *SessionPartition, session *Session) {
