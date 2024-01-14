@@ -13,8 +13,8 @@ formatter = logging.Formatter('%(asctime)s - [%(levelname)s] %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-MQTT_NUM_MSG = 10000
-MQTT_NUM_CLIENTS =5
+MQTT_NUM_MSG = 100
+MQTT_NUM_CLIENTS =500
 #823.0356823416419 - 10000 - 2
 async def publish_messages(client_id, topic,delay):
     await asyncio.sleep(delay)
