@@ -1,6 +1,14 @@
 # go-mqtt-broker
 
 # TO DO 
+## Frontend
+- [x] Tree topics viewer
+- [x] Info topic by topic-info endpoint
+- [ ] General information about total of messages,sessions,subscripts...
+- [ ] login
+- [ ] save and edit username and password
+- [ ] save and edit rules permission and security
+  
 ## Backend
 - [x] Connected MQTT
 - [x] Publish Qos 0,1,2
@@ -13,14 +21,8 @@
 - [ ] Save Username and Password on redis or DB
 - [ ] Specific rules permission and security
 - [ ] TLS authenticator
+- [ ] Save payload on specific Database
 
-## Frontend
-- [x] Tree topics viewer
-- [x] Info topic by topic-info endpoint
-- [ ] General information about total of messages,sessions,subscripts...
-- [ ] login
-- [ ] save and edit username and password
-- [ ] save and edit rules permission and security
 
 
 # How to Run
