@@ -41,9 +41,11 @@ def report(duration):
     logger.info(f"Tempo total de execucao: {duration}")
     logger.info(f"Qtd_msg: {MQTT_NUM_MSG} sendo enviadas por qtd_clients: {MQTT_NUM_CLIENTS}")
     logger.info(f"rate: {(MQTT_NUM_MSG*MQTT_NUM_CLIENTS)/duration.total_seconds()} msg/s")
+    logger.info("-"*50)
 
 async def main():
-    for _ in range(2):
+    for _ in range(12):
+        logger.info("-"*25+f"Number {i}"+"-"*25)
         start_time = datetime.datetime.now()
         tasks = []
         # Cria x clientes assíncronos
