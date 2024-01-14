@@ -44,8 +44,8 @@ def report(duration):
     logger.info("-"*50)
 
 async def main():
-    for _ in range(12):
-        logger.info("-"*25+f"Number {i}"+"-"*25)
+    for j in range(12):
+        logger.info("-"*25+f"Number {j}"+"-"*25)
         start_time = datetime.datetime.now()
         tasks = []
         # Cria x clientes assíncronos
