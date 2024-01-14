@@ -3,7 +3,6 @@ package broker
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/italobbarros/go-mqtt-broker/internal/protocol"
 )
@@ -13,9 +12,9 @@ func (b *Broker) AddTopic(topic string, topicCfg *TopicConfig, topicReady chan b
 
 	currentNode := b.Root
 	for index, segment := range segments {
-		currentNode.lockChildren.RLock()
+		currentNode.lockChildren.Lock()
 		child, ok := currentNode.Children[segment]
-		currentNode.lockChildren.RUnlock()
+		currentNode.lockChildren.Unlock()
 
 		if ok {
 			if child.Name == segment {
@@ -53,9 +52,9 @@ func (b *Broker) GetTopicNode(topic string) *TopicNode {
 	segments := strings.Split(topic, "/")
 	currentNode := b.Root
 	for _, segment := range segments {
-		currentNode.lockChildren.RLock()
+		currentNode.lockChildren.Lock()
 		child, ok := currentNode.Children[segment]
-		currentNode.lockChildren.RUnlock()
+		currentNode.lockChildren.Unlock()
 		if !ok {
 			return nil
 		}
@@ -68,15 +67,16 @@ func (b *Broker) AddSubscribeTopicNode(topic string, id string, subs *Subscriber
 	TopicNode := b.GetTopicNode(topic)
 	if TopicNode == nil {
 		b.logger.Warning("Don't exist Topic on Topic Node")
-		b.AddTopic(topic, &TopicConfig{
+		go b.AddTopic(topic, &TopicConfig{
 			Retained: false,
 			Payload:  "",
 			Qos:      0,
 		}, topicNode)
+		<-topicNode
 		TopicNode = b.GetTopicNode(topic)
 	}
 	TopicNode.Subscribers[id] = subs
-	TopicNode.SubscribersCount++
+	TopicNode.SubscribersCount = len(TopicNode.Subscribers)
 	b.logger.Debug("Add subscriber...")
 	b.logger.Debug("SubscribersCount: %d", TopicNode.SubscribersCount)
 	if TopicNode.TopicConfig.Retained {
@@ -93,14 +93,12 @@ func (b *Broker) notifyNewSubscriber(topic string, sub *SubscriberConfig) error 
 }
 
 func (b *Broker) NotifyAllSubscribers(topic string, topicReady chan bool) {
+	b.logger.Debug("NotifyAllSubscribers")
 	<-topicReady
-	var topicNode *TopicNode
-	for {
-		topicNode = b.GetTopicNode(topic)
-		if topicNode != nil {
-			break
-		}
-		time.Sleep(time.Second * 1)
+	topicNode := b.GetTopicNode(topic)
+	if topicNode == nil {
+		b.logger.Warning("topicNode empty: %v")
+		return
 	}
 	topicNode.MessageCount += 1
 	for _, sub := range topicNode.Subscribers {
@@ -115,7 +113,7 @@ func (b *Broker) publishSubscribe(topic string, currentProt *protocol.MqttProtoc
 	if err != nil {
 		currentProt.End()
 	}
-	b.logger.Debug("sub.Identifier: %s", sub.Identifier)
+	b.logger.Debug("publishSubscribe Identifier: %v", sub.Identifier)
 	currentProt.End()
 }
 

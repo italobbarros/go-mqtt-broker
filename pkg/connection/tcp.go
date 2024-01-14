@@ -66,10 +66,10 @@ func (t *TcpConn) UpdateLogger(logger *logger.Logger) {
 // ReadExactly lê exatamente n bytes da conexão TCP.
 func (t *TcpConn) Read(length int) ([]byte, error) {
 	buffer := make([]byte, length)
-	err := t.conn.SetReadDeadline(time.Now().Add(time.Duration(30) * time.Second))
-	if err != nil {
-		return nil, err
-	}
+	//err := t.conn.SetReadDeadline(time.Now().Add(time.Duration(30) * time.Second))
+	//if err != nil {
+	//	return nil, err
+	//}
 	n, err := t.conn.Read(buffer)
 	if err != nil {
 		return nil, err
@@ -77,7 +77,7 @@ func (t *TcpConn) Read(length int) ([]byte, error) {
 	if n != length {
 		return nil, fmt.Errorf("didn't read exactly %d bytes", length)
 	}
-	//t.logger.Answer("Read: %v", buffer)
+	t.logger.Answer("Read: %v", buffer)
 	return buffer, nil
 }
 
@@ -87,7 +87,7 @@ func (t *TcpConn) Write(data []byte) error {
 	if err != nil {
 		return err
 	}
-	//t.logger.Ask("Write: %v", data)
+	t.logger.Ask("Write: %v", data)
 	_, err = t.conn.Write(data)
 	return err
 }
