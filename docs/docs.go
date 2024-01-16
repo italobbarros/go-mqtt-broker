@@ -22,7 +22,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Containers"
+                    "Container"
                 ],
                 "summary": "Get all containers",
                 "responses": {
@@ -31,7 +31,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/api.ContainerTable"
+                                "$ref": "#/definitions/api.Container"
                             }
                         }
                     }
@@ -46,7 +46,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Containers"
+                    "Container"
                 ],
                 "summary": "Create a new container",
                 "parameters": [
@@ -56,7 +56,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.Container"
+                            "$ref": "#/definitions/api.ContainerPost"
                         }
                     }
                 ],
@@ -64,7 +64,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/api.Container"
+                            "$ref": "#/definitions/api.ContainerPost"
                         }
                     }
                 }
@@ -77,7 +77,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Containers"
+                    "Container"
                 ],
                 "summary": "Get a container by ID",
                 "parameters": [
@@ -93,7 +93,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.ContainerTable"
+                            "$ref": "#/definitions/api.Container"
                         }
                     }
                 }
@@ -107,7 +107,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Containers"
+                    "Container"
                 ],
                 "summary": "Update a container by ID",
                 "parameters": [
@@ -124,7 +124,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.Container"
+                            "$ref": "#/definitions/api.ContainerPost"
                         }
                     }
                 ],
@@ -132,7 +132,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Container"
+                            "$ref": "#/definitions/api.ContainerPost"
                         }
                     }
                 }
@@ -154,7 +154,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/api.PublicationTable"
+                                "$ref": "#/definitions/api.Publication"
                             }
                         }
                     }
@@ -179,7 +179,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.Publication"
+                            "$ref": "#/definitions/api.PublicationRequest"
                         }
                     }
                 ],
@@ -187,7 +187,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/api.Publication"
+                            "$ref": "#/definitions/api.PublicationRequest"
                         }
                     }
                 }
@@ -216,7 +216,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.PublicationTable"
+                            "$ref": "#/definitions/api.Publication"
                         }
                     }
                 }
@@ -247,7 +247,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.Publication"
+                            "$ref": "#/definitions/api.PublicationRequest"
                         }
                     }
                 ],
@@ -255,7 +255,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Publication"
+                            "$ref": "#/definitions/api.PublicationRequest"
                         }
                     }
                 }
@@ -277,7 +277,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/api.SessionTable"
+                                "$ref": "#/definitions/api.Session"
                             }
                         }
                     }
@@ -302,7 +302,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.Session"
+                            "$ref": "#/definitions/api.SessionRequest"
                         }
                     }
                 ],
@@ -310,7 +310,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/api.Session"
+                            "$ref": "#/definitions/api.SessionRequest"
                         }
                     }
                 }
@@ -339,7 +339,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SessionTable"
+                            "$ref": "#/definitions/api.Session"
                         }
                     }
                 }
@@ -370,7 +370,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.Session"
+                            "$ref": "#/definitions/api.SessionRequest"
                         }
                     }
                 ],
@@ -378,7 +378,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Session"
+                            "$ref": "#/definitions/api.SessionRequest"
                         }
                     }
                 }
@@ -400,7 +400,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/api.SubscriptionTable"
+                                "$ref": "#/definitions/api.Subscription"
                             }
                         }
                     }
@@ -462,7 +462,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SubscriptionTable"
+                            "$ref": "#/definitions/api.Subscription"
                         }
                     }
                 }
@@ -493,7 +493,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.Subscription"
+                            "$ref": "#/definitions/api.SubscriptionRequest"
                         }
                     }
                 ],
@@ -501,7 +501,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Subscription"
+                            "$ref": "#/definitions/api.SubscriptionRequest"
                         }
                     }
                 }
@@ -514,7 +514,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Topics"
+                    "Topic"
                 ],
                 "summary": "Get all topics",
                 "responses": {
@@ -523,7 +523,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/api.TopicTable"
+                                "$ref": "#/definitions/api.Topic"
                             }
                         }
                     }
@@ -538,7 +538,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Topics"
+                    "Topic"
                 ],
                 "summary": "Create a new topic",
                 "parameters": [
@@ -548,7 +548,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.Topic"
+                            "$ref": "#/definitions/api.TopicRequest"
                         }
                     }
                 ],
@@ -562,6 +562,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/topics/ByIdContainer/{IdContainer}": {
+            "get": {
+                "description": "Get all topics",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Topic"
+                ],
+                "summary": "Get all topics",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Topic by IdContainer",
+                        "name": "IdContainer",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/api.Topic"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/topics/{id}": {
             "get": {
                 "description": "Get a topic by ID",
@@ -569,7 +601,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Topics"
+                    "Topic"
                 ],
                 "summary": "Get a topic by ID",
                 "parameters": [
@@ -585,7 +617,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.TopicTable"
+                            "$ref": "#/definitions/api.Topic"
                         }
                     }
                 }
@@ -599,7 +631,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Topics"
+                    "Topic"
                 ],
                 "summary": "Update a topic by ID",
                 "parameters": [
@@ -616,7 +648,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.Topic"
+                            "$ref": "#/definitions/api.TopicRequest"
                         }
                     }
                 ],
@@ -624,7 +656,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Topic"
+                            "$ref": "#/definitions/api.TopicRequest"
                         }
                     }
                 }
@@ -635,66 +667,236 @@ const docTemplate = `{
         "api.Container": {
             "type": "object",
             "properties": {
-                "containerName": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
                 }
             }
         },
-        "api.ContainerTable": {
+        "api.ContainerPost": {
             "type": "object",
             "properties": {
-                "containerName": {
-                    "$ref": "#/definitions/api.Container"
-                },
-                "id": {
-                    "type": "integer"
+                "name": {
+                    "type": "string"
                 }
             }
         },
         "api.Publication": {
-            "type": "object"
-        },
-        "api.PublicationTable": {
             "type": "object",
             "properties": {
+                "container": {
+                    "$ref": "#/definitions/api.Container"
+                },
+                "created": {
+                    "type": "string",
+                    "example": "2024-01-16T12:00:00Z"
+                },
+                "deleted": {
+                    "type": "string",
+                    "example": "2024-01-16T12:45:00Z"
+                },
                 "id": {
                     "type": "integer"
                 },
-                "publication": {
-                    "$ref": "#/definitions/api.Publication"
+                "idContainer": {
+                    "type": "integer"
+                },
+                "idTopic": {
+                    "type": "integer"
+                },
+                "payload": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "integer"
+                },
+                "topic": {
+                    "$ref": "#/definitions/api.Topic"
+                },
+                "updated": {
+                    "type": "string",
+                    "example": "2024-01-16T12:00:00Z"
+                }
+            }
+        },
+        "api.PublicationRequest": {
+            "type": "object",
+            "properties": {
+                "container": {
+                    "$ref": "#/definitions/api.Container"
+                },
+                "idContainer": {
+                    "type": "integer"
+                },
+                "idTopic": {
+                    "type": "integer"
+                },
+                "payload": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "integer"
+                },
+                "topic": {
+                    "$ref": "#/definitions/api.Topic"
                 }
             }
         },
         "api.Session": {
-            "type": "object"
-        },
-        "api.SessionTable": {
             "type": "object",
             "properties": {
+                "clean": {
+                    "type": "boolean"
+                },
+                "clientId": {
+                    "type": "string"
+                },
+                "container": {
+                    "$ref": "#/definitions/api.Container"
+                },
+                "created": {
+                    "type": "string",
+                    "example": "2024-01-16T12:00:00Z"
+                },
+                "deleted": {
+                    "type": "string",
+                    "example": "2024-01-16T12:45:00Z"
+                },
                 "id": {
                     "type": "integer"
                 },
-                "session": {
-                    "$ref": "#/definitions/api.Session"
+                "idContainer": {
+                    "type": "integer"
+                },
+                "keepAlive": {
+                    "type": "integer"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "updated": {
+                    "type": "string",
+                    "example": "2024-01-16T12:00:00Z"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.SessionRequest": {
+            "type": "object",
+            "properties": {
+                "clean": {
+                    "type": "boolean"
+                },
+                "clientId": {
+                    "type": "string"
+                },
+                "idContainer": {
+                    "type": "integer"
+                },
+                "keepAlive": {
+                    "type": "integer"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },
         "api.Subscription": {
-            "type": "object"
-        },
-        "api.SubscriptionTable": {
             "type": "object",
             "properties": {
+                "container": {
+                    "$ref": "#/definitions/api.Container"
+                },
+                "created": {
+                    "type": "string",
+                    "example": "2024-01-16T12:00:00Z"
+                },
+                "deleted": {
+                    "type": "string",
+                    "example": "2024-01-16T12:45:00Z"
+                },
                 "id": {
                     "type": "integer"
                 },
-                "subscription": {
-                    "$ref": "#/definitions/api.Subscription"
+                "idContainer": {
+                    "type": "integer"
+                },
+                "idSession": {
+                    "type": "integer"
+                },
+                "idTopic": {
+                    "type": "integer"
+                },
+                "session": {
+                    "$ref": "#/definitions/api.Session"
+                },
+                "topic": {
+                    "$ref": "#/definitions/api.Topic"
+                },
+                "updated": {
+                    "type": "string",
+                    "example": "2024-01-16T12:00:00Z"
+                }
+            }
+        },
+        "api.SubscriptionRequest": {
+            "type": "object",
+            "properties": {
+                "container": {
+                    "$ref": "#/definitions/api.Container"
+                },
+                "idContainer": {
+                    "type": "integer"
+                },
+                "idTopic": {
+                    "type": "integer"
+                },
+                "sessionId": {
+                    "type": "string"
+                },
+                "topic": {
+                    "$ref": "#/definitions/api.Topic"
                 }
             }
         },
         "api.Topic": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "config": {
+                    "$ref": "#/definitions/api.TopicConfig"
+                },
+                "container": {
+                    "$ref": "#/definitions/api.Container"
+                },
+                "created": {
+                    "type": "string",
+                    "example": "2024-01-16T12:00:00Z"
+                },
+                "deleted": {
+                    "type": "string",
+                    "example": "2024-01-16T12:45:00Z"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "idContainer": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated": {
+                    "type": "string",
+                    "example": "2024-01-16T12:00:00Z"
+                }
+            }
         },
         "api.TopicConfig": {
             "type": "object",
@@ -715,14 +917,17 @@ const docTemplate = `{
                 }
             }
         },
-        "api.TopicTable": {
+        "api.TopicRequest": {
             "type": "object",
             "properties": {
-                "id": {
+                "config": {
+                    "$ref": "#/definitions/api.TopicConfig"
+                },
+                "idContainer": {
                     "type": "integer"
                 },
-                "topic": {
-                    "$ref": "#/definitions/api.Topic"
+                "name": {
+                    "type": "string"
                 }
             }
         }
