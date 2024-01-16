@@ -1,6 +1,6 @@
 # Ignore arquivos de build
 build/*
-logs/*
+*.log
 tmp/*
 # Exceção para a pasta de build
 !build/
