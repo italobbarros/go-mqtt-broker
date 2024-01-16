@@ -1,4 +1,4 @@
-package api
+package routes
 
 import (
 	"net/http"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/italobbarros/go-mqtt-broker/docs"
+	models "github.com/italobbarros/go-mqtt-broker/internal/api/models"
 )
 
 // Endpoints for Publication
@@ -16,17 +17,17 @@ import (
 // @Tags Publications
 // @Accept json
 // @Produce json
-// @Param input body PublicationRequest true "Publication object that needs to be added"
-// @Success 201 {object} PublicationRequest
+// @Param input body models.PublicationRequest true "Publication object that needs to be added"
+// @Success 201 {object} models.PublicationRequest
 // @Router /publications [post]
-func (a *API) createPublication(c *gin.Context) {
-	var publication Publication
+func (r *Routes) CreatePublication(c *gin.Context) {
+	var publication models.Publication
 	if err := c.ShouldBindJSON(&publication); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	a.db.Create(&publication)
+	r.db.Create(&publication)
 	c.JSON(http.StatusCreated, publication)
 }
 
@@ -35,11 +36,11 @@ func (a *API) createPublication(c *gin.Context) {
 // @Description Get all publications
 // @Tags Publications
 // @Produce json
-// @Success 200 {array}  Publication
+// @Success 200 {array}  models.Publication
 // @Router /publications [get]
-func (a *API) getAllPublications(c *gin.Context) {
-	var publications []Publication
-	a.db.Find(&publications)
+func (r *Routes) GetAllPublications(c *gin.Context) {
+	var publications []models.Publication
+	r.db.Find(&publications)
 	c.JSON(http.StatusOK, publications)
 }
 
@@ -49,12 +50,12 @@ func (a *API) getAllPublications(c *gin.Context) {
 // @Tags Publications
 // @Produce json
 // @Param id path int true "Publication ID"
-// @Success 200 {object}  Publication
+// @Success 200 {object}  models.Publication
 // @Router /publications/{id} [get]
-func (a *API) getPublicationByID(c *gin.Context) {
+func (r *Routes) GetPublicationByID(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	var publication Publication
-	if err := a.db.First(&publication, id).Error; err != nil {
+	var publication models.Publication
+	if err := r.db.First(&publication, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
 		return
 	}
@@ -69,13 +70,13 @@ func (a *API) getPublicationByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Publication ID"
-// @Param input body PublicationRequest true "Updated publication object"
-// @Success 200 {object} PublicationRequest
+// @Param input body models.PublicationRequest true "Updated publication object"
+// @Success 200 {object} models.PublicationRequest
 // @Router /publications/{id} [put]
-func (a *API) updatePublication(c *gin.Context) {
+func (r *Routes) UpdatePublication(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	var publication Publication
-	if err := a.db.First(&publication, id).Error; err != nil {
+	var publication models.Publication
+	if err := r.db.First(&publication, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
 		return
 	}
@@ -85,6 +86,6 @@ func (a *API) updatePublication(c *gin.Context) {
 		return
 	}
 
-	a.db.Save(&publication)
+	r.db.Save(&publication)
 	c.JSON(http.StatusOK, publication)
 }

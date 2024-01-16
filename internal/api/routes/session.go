@@ -1,4 +1,4 @@
-package api
+package routes
 
 import (
 	"net/http"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/italobbarros/go-mqtt-broker/docs"
+	models "github.com/italobbarros/go-mqtt-broker/internal/api/models"
 )
 
 // Endpoints for Session
@@ -16,17 +17,17 @@ import (
 // @Tags Sessions
 // @Accept json
 // @Produce json
-// @Param input body SessionRequest true "Session object that needs to be added"
-// @Success 201 {object} SessionRequest
+// @Param input body models.SessionRequest true "Session object that needs to be added"
+// @Success 201 {object} models.SessionRequest
 // @Router /sessions [post]
-func (a *API) createSession(c *gin.Context) {
-	var session Session
+func (r *Routes) CreateSession(c *gin.Context) {
+	var session models.Session
 	if err := c.ShouldBindJSON(&session); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	a.db.Create(&session)
+	r.db.Create(&session)
 	c.JSON(http.StatusCreated, session)
 }
 
@@ -35,11 +36,11 @@ func (a *API) createSession(c *gin.Context) {
 // @Description Get all sessions
 // @Tags Sessions
 // @Produce json
-// @Success 200 {array}  Session
+// @Success 200 {array}  models.Session
 // @Router /sessions [get]
-func (a *API) getAllSessions(c *gin.Context) {
-	var sessions []Session
-	a.db.Find(&sessions)
+func (r *Routes) GetAllSessions(c *gin.Context) {
+	var sessions []models.Session
+	r.db.Find(&sessions)
 	c.JSON(http.StatusOK, sessions)
 }
 
@@ -49,12 +50,12 @@ func (a *API) getAllSessions(c *gin.Context) {
 // @Tags Sessions
 // @Produce json
 // @Param id path int true "Session ID"
-// @Success 200 {object}  Session
+// @Success 200 {object}  models.Session
 // @Router /sessions/{id} [get]
-func (a *API) getSessionByID(c *gin.Context) {
+func (r *Routes) GetSessionByID(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	var session Session
-	if err := a.db.First(&session, id).Error; err != nil {
+	var session models.Session
+	if err := r.db.First(&session, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
 		return
 	}
@@ -69,13 +70,13 @@ func (a *API) getSessionByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Session ID"
-// @Param input body SessionRequest true "Updated session object"
-// @Success 200 {object} SessionRequest
+// @Param input body models.SessionRequest true "Updated session object"
+// @Success 200 {object} models.SessionRequest
 // @Router /sessions/{id} [put]
-func (a *API) updateSession(c *gin.Context) {
+func (r *Routes) UpdateSession(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	var session Session
-	if err := a.db.First(&session, id).Error; err != nil {
+	var session models.Session
+	if err := r.db.First(&session, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
 		return
 	}
@@ -85,6 +86,6 @@ func (a *API) updateSession(c *gin.Context) {
 		return
 	}
 
-	a.db.Save(&session)
+	r.db.Save(&session)
 	c.JSON(http.StatusOK, session)
 }

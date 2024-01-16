@@ -1,20 +1,20 @@
 definitions:
-  api.Container:
+  models.Container:
     properties:
       id:
         type: integer
       name:
         type: string
     type: object
-  api.ContainerPost:
+  models.ContainerRequest:
     properties:
       name:
         type: string
     type: object
-  api.Publication:
+  models.Publication:
     properties:
       container:
-        $ref: '#/definitions/api.Container'
+        $ref: '#/definitions/models.Container'
       created:
         example: "2024-01-16T12:00:00Z"
         type: string
@@ -32,15 +32,15 @@ definitions:
       timestamp:
         type: integer
       topic:
-        $ref: '#/definitions/api.Topic'
+        $ref: '#/definitions/models.Topic'
       updated:
         example: "2024-01-16T12:00:00Z"
         type: string
     type: object
-  api.PublicationRequest:
+  models.PublicationRequest:
     properties:
       container:
-        $ref: '#/definitions/api.Container'
+        $ref: '#/definitions/models.Container'
       idContainer:
         type: integer
       idTopic:
@@ -50,16 +50,16 @@ definitions:
       timestamp:
         type: integer
       topic:
-        $ref: '#/definitions/api.Topic'
+        $ref: '#/definitions/models.Topic'
     type: object
-  api.Session:
+  models.Session:
     properties:
       clean:
         type: boolean
       clientId:
         type: string
       container:
-        $ref: '#/definitions/api.Container'
+        $ref: '#/definitions/models.Container'
       created:
         example: "2024-01-16T12:00:00Z"
         type: string
@@ -80,7 +80,7 @@ definitions:
       username:
         type: string
     type: object
-  api.SessionRequest:
+  models.SessionRequest:
     properties:
       clean:
         type: boolean
@@ -95,10 +95,10 @@ definitions:
       username:
         type: string
     type: object
-  api.Subscription:
+  models.Subscription:
     properties:
       container:
-        $ref: '#/definitions/api.Container'
+        $ref: '#/definitions/models.Container'
       created:
         example: "2024-01-16T12:00:00Z"
         type: string
@@ -114,17 +114,17 @@ definitions:
       idTopic:
         type: integer
       session:
-        $ref: '#/definitions/api.Session'
+        $ref: '#/definitions/models.Session'
       topic:
-        $ref: '#/definitions/api.Topic'
+        $ref: '#/definitions/models.Topic'
       updated:
         example: "2024-01-16T12:00:00Z"
         type: string
     type: object
-  api.SubscriptionRequest:
+  models.SubscriptionRequest:
     properties:
       container:
-        $ref: '#/definitions/api.Container'
+        $ref: '#/definitions/models.Container'
       idContainer:
         type: integer
       idTopic:
@@ -132,14 +132,14 @@ definitions:
       sessionId:
         type: string
       topic:
-        $ref: '#/definitions/api.Topic'
+        $ref: '#/definitions/models.Topic'
     type: object
-  api.Topic:
+  models.Topic:
     properties:
       config:
-        $ref: '#/definitions/api.TopicConfig'
+        $ref: '#/definitions/models.TopicConfig'
       container:
-        $ref: '#/definitions/api.Container'
+        $ref: '#/definitions/models.Container'
       created:
         example: "2024-01-16T12:00:00Z"
         type: string
@@ -156,7 +156,7 @@ definitions:
         example: "2024-01-16T12:00:00Z"
         type: string
     type: object
-  api.TopicConfig:
+  models.TopicConfig:
     properties:
       payload:
         type: string
@@ -169,10 +169,10 @@ definitions:
         description: Regra de segurança aplicada ao tópico
         type: string
     type: object
-  api.TopicRequest:
+  models.TopicRequest:
     properties:
       config:
-        $ref: '#/definitions/api.TopicConfig'
+        $ref: '#/definitions/models.TopicConfig'
       idContainer:
         type: integer
       name:
@@ -191,7 +191,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/api.Container'
+              $ref: '#/definitions/models.Container'
             type: array
       summary: Get all containers
       tags:
@@ -206,14 +206,14 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/api.ContainerPost'
+          $ref: '#/definitions/models.ContainerRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/api.ContainerPost'
+            $ref: '#/definitions/models.ContainerRequest'
       summary: Create a new container
       tags:
       - Container
@@ -232,7 +232,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.Container'
+            $ref: '#/definitions/models.Container'
       summary: Get a container by ID
       tags:
       - Container
@@ -251,14 +251,14 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/api.ContainerPost'
+          $ref: '#/definitions/models.ContainerRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.ContainerPost'
+            $ref: '#/definitions/models.ContainerRequest'
       summary: Update a container by ID
       tags:
       - Container
@@ -272,7 +272,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/api.Publication'
+              $ref: '#/definitions/models.Publication'
             type: array
       summary: Get all publications
       tags:
@@ -287,14 +287,14 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/api.PublicationRequest'
+          $ref: '#/definitions/models.PublicationRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/api.PublicationRequest'
+            $ref: '#/definitions/models.PublicationRequest'
       summary: Create a new publication
       tags:
       - Publications
@@ -313,7 +313,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.Publication'
+            $ref: '#/definitions/models.Publication'
       summary: Get a publication by ID
       tags:
       - Publications
@@ -332,14 +332,14 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/api.PublicationRequest'
+          $ref: '#/definitions/models.PublicationRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.PublicationRequest'
+            $ref: '#/definitions/models.PublicationRequest'
       summary: Update a publication by ID
       tags:
       - Publications
@@ -353,7 +353,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/api.Session'
+              $ref: '#/definitions/models.Session'
             type: array
       summary: Get all sessions
       tags:
@@ -368,14 +368,14 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/api.SessionRequest'
+          $ref: '#/definitions/models.SessionRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/api.SessionRequest'
+            $ref: '#/definitions/models.SessionRequest'
       summary: Create a new session
       tags:
       - Sessions
@@ -394,7 +394,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.Session'
+            $ref: '#/definitions/models.Session'
       summary: Get a session by ID
       tags:
       - Sessions
@@ -413,14 +413,14 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/api.SessionRequest'
+          $ref: '#/definitions/models.SessionRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SessionRequest'
+            $ref: '#/definitions/models.SessionRequest'
       summary: Update a session by ID
       tags:
       - Sessions
@@ -434,7 +434,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/api.Subscription'
+              $ref: '#/definitions/models.Subscription'
             type: array
       summary: Get all subscriptions
       tags:
@@ -449,14 +449,14 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/api.Subscription'
+          $ref: '#/definitions/models.Subscription'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/api.Subscription'
+            $ref: '#/definitions/models.Subscription'
       summary: Create a new subscription
       tags:
       - Subscriptions
@@ -475,7 +475,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.Subscription'
+            $ref: '#/definitions/models.Subscription'
       summary: Get a subscription by ID
       tags:
       - Subscriptions
@@ -494,14 +494,14 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/api.SubscriptionRequest'
+          $ref: '#/definitions/models.SubscriptionRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.SubscriptionRequest'
+            $ref: '#/definitions/models.SubscriptionRequest'
       summary: Update a subscription by ID
       tags:
       - Subscriptions
@@ -515,7 +515,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/api.Topic'
+              $ref: '#/definitions/models.Topic'
             type: array
       summary: Get all topics
       tags:
@@ -530,14 +530,14 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/api.TopicRequest'
+          $ref: '#/definitions/models.TopicRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/api.Topic'
+            $ref: '#/definitions/models.Topic'
       summary: Create a new topic
       tags:
       - Topic
@@ -556,7 +556,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.Topic'
+            $ref: '#/definitions/models.Topic'
       summary: Get a topic by ID
       tags:
       - Topic
@@ -575,14 +575,14 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/api.TopicRequest'
+          $ref: '#/definitions/models.TopicRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/api.TopicRequest'
+            $ref: '#/definitions/models.TopicRequest'
       summary: Update a topic by ID
       tags:
       - Topic
@@ -602,7 +602,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/api.Topic'
+              $ref: '#/definitions/models.Topic'
             type: array
       summary: Get all topics
       tags:

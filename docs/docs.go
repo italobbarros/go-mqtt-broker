@@ -31,7 +31,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/api.Container"
+                                "$ref": "#/definitions/models.Container"
                             }
                         }
                     }
@@ -56,7 +56,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.ContainerPost"
+                            "$ref": "#/definitions/models.ContainerRequest"
                         }
                     }
                 ],
@@ -64,7 +64,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/api.ContainerPost"
+                            "$ref": "#/definitions/models.ContainerRequest"
                         }
                     }
                 }
@@ -93,7 +93,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Container"
+                            "$ref": "#/definitions/models.Container"
                         }
                     }
                 }
@@ -124,7 +124,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.ContainerPost"
+                            "$ref": "#/definitions/models.ContainerRequest"
                         }
                     }
                 ],
@@ -132,7 +132,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.ContainerPost"
+                            "$ref": "#/definitions/models.ContainerRequest"
                         }
                     }
                 }
@@ -154,7 +154,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/api.Publication"
+                                "$ref": "#/definitions/models.Publication"
                             }
                         }
                     }
@@ -179,7 +179,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.PublicationRequest"
+                            "$ref": "#/definitions/models.PublicationRequest"
                         }
                     }
                 ],
@@ -187,7 +187,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/api.PublicationRequest"
+                            "$ref": "#/definitions/models.PublicationRequest"
                         }
                     }
                 }
@@ -216,7 +216,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Publication"
+                            "$ref": "#/definitions/models.Publication"
                         }
                     }
                 }
@@ -247,7 +247,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.PublicationRequest"
+                            "$ref": "#/definitions/models.PublicationRequest"
                         }
                     }
                 ],
@@ -255,7 +255,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.PublicationRequest"
+                            "$ref": "#/definitions/models.PublicationRequest"
                         }
                     }
                 }
@@ -277,7 +277,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/api.Session"
+                                "$ref": "#/definitions/models.Session"
                             }
                         }
                     }
@@ -302,7 +302,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.SessionRequest"
+                            "$ref": "#/definitions/models.SessionRequest"
                         }
                     }
                 ],
@@ -310,7 +310,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/api.SessionRequest"
+                            "$ref": "#/definitions/models.SessionRequest"
                         }
                     }
                 }
@@ -339,7 +339,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Session"
+                            "$ref": "#/definitions/models.Session"
                         }
                     }
                 }
@@ -370,7 +370,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.SessionRequest"
+                            "$ref": "#/definitions/models.SessionRequest"
                         }
                     }
                 ],
@@ -378,7 +378,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SessionRequest"
+                            "$ref": "#/definitions/models.SessionRequest"
                         }
                     }
                 }
@@ -400,7 +400,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/api.Subscription"
+                                "$ref": "#/definitions/models.Subscription"
                             }
                         }
                     }
@@ -425,7 +425,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.Subscription"
+                            "$ref": "#/definitions/models.Subscription"
                         }
                     }
                 ],
@@ -433,7 +433,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/api.Subscription"
+                            "$ref": "#/definitions/models.Subscription"
                         }
                     }
                 }
@@ -462,7 +462,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Subscription"
+                            "$ref": "#/definitions/models.Subscription"
                         }
                     }
                 }
@@ -493,7 +493,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.SubscriptionRequest"
+                            "$ref": "#/definitions/models.SubscriptionRequest"
                         }
                     }
                 ],
@@ -501,7 +501,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SubscriptionRequest"
+                            "$ref": "#/definitions/models.SubscriptionRequest"
                         }
                     }
                 }
@@ -523,7 +523,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/api.Topic"
+                                "$ref": "#/definitions/models.Topic"
                             }
                         }
                     }
@@ -548,7 +548,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.TopicRequest"
+                            "$ref": "#/definitions/models.TopicRequest"
                         }
                     }
                 ],
@@ -556,7 +556,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/api.Topic"
+                            "$ref": "#/definitions/models.Topic"
                         }
                     }
                 }
@@ -587,7 +587,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/api.Topic"
+                                "$ref": "#/definitions/models.Topic"
                             }
                         }
                     }
@@ -617,7 +617,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Topic"
+                            "$ref": "#/definitions/models.Topic"
                         }
                     }
                 }
@@ -648,7 +648,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.TopicRequest"
+                            "$ref": "#/definitions/models.TopicRequest"
                         }
                     }
                 ],
@@ -656,7 +656,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.TopicRequest"
+                            "$ref": "#/definitions/models.TopicRequest"
                         }
                     }
                 }
@@ -664,7 +664,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "api.Container": {
+        "models.Container": {
             "type": "object",
             "properties": {
                 "id": {
@@ -675,7 +675,7 @@ const docTemplate = `{
                 }
             }
         },
-        "api.ContainerPost": {
+        "models.ContainerRequest": {
             "type": "object",
             "properties": {
                 "name": {
@@ -683,11 +683,11 @@ const docTemplate = `{
                 }
             }
         },
-        "api.Publication": {
+        "models.Publication": {
             "type": "object",
             "properties": {
                 "container": {
-                    "$ref": "#/definitions/api.Container"
+                    "$ref": "#/definitions/models.Container"
                 },
                 "created": {
                     "type": "string",
@@ -713,7 +713,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "topic": {
-                    "$ref": "#/definitions/api.Topic"
+                    "$ref": "#/definitions/models.Topic"
                 },
                 "updated": {
                     "type": "string",
@@ -721,11 +721,11 @@ const docTemplate = `{
                 }
             }
         },
-        "api.PublicationRequest": {
+        "models.PublicationRequest": {
             "type": "object",
             "properties": {
                 "container": {
-                    "$ref": "#/definitions/api.Container"
+                    "$ref": "#/definitions/models.Container"
                 },
                 "idContainer": {
                     "type": "integer"
@@ -740,11 +740,11 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "topic": {
-                    "$ref": "#/definitions/api.Topic"
+                    "$ref": "#/definitions/models.Topic"
                 }
             }
         },
-        "api.Session": {
+        "models.Session": {
             "type": "object",
             "properties": {
                 "clean": {
@@ -754,7 +754,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "container": {
-                    "$ref": "#/definitions/api.Container"
+                    "$ref": "#/definitions/models.Container"
                 },
                 "created": {
                     "type": "string",
@@ -785,7 +785,7 @@ const docTemplate = `{
                 }
             }
         },
-        "api.SessionRequest": {
+        "models.SessionRequest": {
             "type": "object",
             "properties": {
                 "clean": {
@@ -808,11 +808,11 @@ const docTemplate = `{
                 }
             }
         },
-        "api.Subscription": {
+        "models.Subscription": {
             "type": "object",
             "properties": {
                 "container": {
-                    "$ref": "#/definitions/api.Container"
+                    "$ref": "#/definitions/models.Container"
                 },
                 "created": {
                     "type": "string",
@@ -835,10 +835,10 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "session": {
-                    "$ref": "#/definitions/api.Session"
+                    "$ref": "#/definitions/models.Session"
                 },
                 "topic": {
-                    "$ref": "#/definitions/api.Topic"
+                    "$ref": "#/definitions/models.Topic"
                 },
                 "updated": {
                     "type": "string",
@@ -846,11 +846,11 @@ const docTemplate = `{
                 }
             }
         },
-        "api.SubscriptionRequest": {
+        "models.SubscriptionRequest": {
             "type": "object",
             "properties": {
                 "container": {
-                    "$ref": "#/definitions/api.Container"
+                    "$ref": "#/definitions/models.Container"
                 },
                 "idContainer": {
                     "type": "integer"
@@ -862,18 +862,18 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "topic": {
-                    "$ref": "#/definitions/api.Topic"
+                    "$ref": "#/definitions/models.Topic"
                 }
             }
         },
-        "api.Topic": {
+        "models.Topic": {
             "type": "object",
             "properties": {
                 "config": {
-                    "$ref": "#/definitions/api.TopicConfig"
+                    "$ref": "#/definitions/models.TopicConfig"
                 },
                 "container": {
-                    "$ref": "#/definitions/api.Container"
+                    "$ref": "#/definitions/models.Container"
                 },
                 "created": {
                     "type": "string",
@@ -898,7 +898,7 @@ const docTemplate = `{
                 }
             }
         },
-        "api.TopicConfig": {
+        "models.TopicConfig": {
             "type": "object",
             "properties": {
                 "payload": {
@@ -917,11 +917,11 @@ const docTemplate = `{
                 }
             }
         },
-        "api.TopicRequest": {
+        "models.TopicRequest": {
             "type": "object",
             "properties": {
                 "config": {
-                    "$ref": "#/definitions/api.TopicConfig"
+                    "$ref": "#/definitions/models.TopicConfig"
                 },
                 "idContainer": {
                     "type": "integer"

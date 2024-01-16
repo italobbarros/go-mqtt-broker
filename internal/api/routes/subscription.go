@@ -1,4 +1,4 @@
-package api
+package routes
 
 import (
 	"net/http"
@@ -6,27 +6,28 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/italobbarros/go-mqtt-broker/docs"
+	models "github.com/italobbarros/go-mqtt-broker/internal/api/models"
 )
 
 // Endpoints for Subscription
 
-// createSubscription cria uma nova assinatura.
+// createSubscription cria uma nova assinaturr.
 // @Summary Create a new subscription
 // @Description Create a new subscription
 // @Tags Subscriptions
 // @Accept json
 // @Produce json
-// @Param input body Subscription true "Subscription object that needs to be added"
-// @Success 201 {object} Subscription
+// @Param input body models.Subscription true "Subscription object that needs to be added"
+// @Success 201 {object} models.Subscription
 // @Router /subscriptions [post]
-func (a *API) createSubscription(c *gin.Context) {
-	var subscription Subscription
+func (r *Routes) CreateSubscription(c *gin.Context) {
+	var subscription models.Subscription
 	if err := c.ShouldBindJSON(&subscription); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	a.db.Create(&subscription)
+	r.db.Create(&subscription)
 	c.JSON(http.StatusCreated, subscription)
 }
 
@@ -35,11 +36,11 @@ func (a *API) createSubscription(c *gin.Context) {
 // @Description Get all subscriptions
 // @Tags Subscriptions
 // @Produce json
-// @Success 200 {array} Subscription
+// @Success 200 {array} models.Subscription
 // @Router /subscriptions [get]
-func (a *API) getAllSubscriptions(c *gin.Context) {
-	var subscriptions []Subscription
-	a.db.Find(&subscriptions)
+func (r *Routes) GetAllSubscriptions(c *gin.Context) {
+	var subscriptions []models.Subscription
+	r.db.Find(&subscriptions)
 	c.JSON(http.StatusOK, subscriptions)
 }
 
@@ -49,12 +50,12 @@ func (a *API) getAllSubscriptions(c *gin.Context) {
 // @Tags Subscriptions
 // @Produce json
 // @Param id path int true "Subscription ID"
-// @Success 200 {object} Subscription
+// @Success 200 {object} models.Subscription
 // @Router /subscriptions/{id} [get]
-func (a *API) getSubscriptionByID(c *gin.Context) {
+func (r *Routes) GetSubscriptionByID(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	var subscription Subscription
-	if err := a.db.First(&subscription, id).Error; err != nil {
+	var subscription models.Subscription
+	if err := r.db.First(&subscription, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
 		return
 	}
@@ -69,13 +70,13 @@ func (a *API) getSubscriptionByID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path int true "Subscription ID"
-// @Param input body SubscriptionRequest true "Updated subscription object"
-// @Success 200 {object} SubscriptionRequest
+// @Param input body models.SubscriptionRequest true "Updated subscription object"
+// @Success 200 {object} models.SubscriptionRequest
 // @Router /subscriptions/{id} [put]
-func (a *API) updateSubscription(c *gin.Context) {
+func (r *Routes) UpdateSubscription(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	var subscription Subscription
-	if err := a.db.First(&subscription, id).Error; err != nil {
+	var subscription models.Subscription
+	if err := r.db.First(&subscription, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
 		return
 	}
@@ -85,6 +86,6 @@ func (a *API) updateSubscription(c *gin.Context) {
 		return
 	}
 
-	a.db.Save(&subscription)
+	r.db.Save(&subscription)
 	c.JSON(http.StatusOK, subscription)
 }

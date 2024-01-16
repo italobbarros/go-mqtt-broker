@@ -20,7 +20,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/api.Container"
+                                "$ref": "#/definitions/models.Container"
                             }
                         }
                     }
@@ -45,7 +45,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.ContainerPost"
+                            "$ref": "#/definitions/models.ContainerRequest"
                         }
                     }
                 ],
@@ -53,7 +53,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/api.ContainerPost"
+                            "$ref": "#/definitions/models.ContainerRequest"
                         }
                     }
                 }
@@ -82,7 +82,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Container"
+                            "$ref": "#/definitions/models.Container"
                         }
                     }
                 }
@@ -113,7 +113,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.ContainerPost"
+                            "$ref": "#/definitions/models.ContainerRequest"
                         }
                     }
                 ],
@@ -121,7 +121,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.ContainerPost"
+                            "$ref": "#/definitions/models.ContainerRequest"
                         }
                     }
                 }
@@ -143,7 +143,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/api.Publication"
+                                "$ref": "#/definitions/models.Publication"
                             }
                         }
                     }
@@ -168,7 +168,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.PublicationRequest"
+                            "$ref": "#/definitions/models.PublicationRequest"
                         }
                     }
                 ],
@@ -176,7 +176,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/api.PublicationRequest"
+                            "$ref": "#/definitions/models.PublicationRequest"
                         }
                     }
                 }
@@ -205,7 +205,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Publication"
+                            "$ref": "#/definitions/models.Publication"
                         }
                     }
                 }
@@ -236,7 +236,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.PublicationRequest"
+                            "$ref": "#/definitions/models.PublicationRequest"
                         }
                     }
                 ],
@@ -244,7 +244,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.PublicationRequest"
+                            "$ref": "#/definitions/models.PublicationRequest"
                         }
                     }
                 }
@@ -266,7 +266,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/api.Session"
+                                "$ref": "#/definitions/models.Session"
                             }
                         }
                     }
@@ -291,7 +291,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.SessionRequest"
+                            "$ref": "#/definitions/models.SessionRequest"
                         }
                     }
                 ],
@@ -299,7 +299,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/api.SessionRequest"
+                            "$ref": "#/definitions/models.SessionRequest"
                         }
                     }
                 }
@@ -328,7 +328,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Session"
+                            "$ref": "#/definitions/models.Session"
                         }
                     }
                 }
@@ -359,7 +359,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.SessionRequest"
+                            "$ref": "#/definitions/models.SessionRequest"
                         }
                     }
                 ],
@@ -367,7 +367,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SessionRequest"
+                            "$ref": "#/definitions/models.SessionRequest"
                         }
                     }
                 }
@@ -389,7 +389,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/api.Subscription"
+                                "$ref": "#/definitions/models.Subscription"
                             }
                         }
                     }
@@ -414,7 +414,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.Subscription"
+                            "$ref": "#/definitions/models.Subscription"
                         }
                     }
                 ],
@@ -422,7 +422,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/api.Subscription"
+                            "$ref": "#/definitions/models.Subscription"
                         }
                     }
                 }
@@ -451,7 +451,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Subscription"
+                            "$ref": "#/definitions/models.Subscription"
                         }
                     }
                 }
@@ -482,7 +482,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.SubscriptionRequest"
+                            "$ref": "#/definitions/models.SubscriptionRequest"
                         }
                     }
                 ],
@@ -490,7 +490,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.SubscriptionRequest"
+                            "$ref": "#/definitions/models.SubscriptionRequest"
                         }
                     }
                 }
@@ -512,7 +512,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/api.Topic"
+                                "$ref": "#/definitions/models.Topic"
                             }
                         }
                     }
@@ -537,7 +537,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.TopicRequest"
+                            "$ref": "#/definitions/models.TopicRequest"
                         }
                     }
                 ],
@@ -545,7 +545,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/api.Topic"
+                            "$ref": "#/definitions/models.Topic"
                         }
                     }
                 }
@@ -576,7 +576,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/api.Topic"
+                                "$ref": "#/definitions/models.Topic"
                             }
                         }
                     }
@@ -606,7 +606,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.Topic"
+                            "$ref": "#/definitions/models.Topic"
                         }
                     }
                 }
@@ -637,7 +637,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/api.TopicRequest"
+                            "$ref": "#/definitions/models.TopicRequest"
                         }
                     }
                 ],
@@ -645,7 +645,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/api.TopicRequest"
+                            "$ref": "#/definitions/models.TopicRequest"
                         }
                     }
                 }
@@ -653,7 +653,7 @@
         }
     },
     "definitions": {
-        "api.Container": {
+        "models.Container": {
             "type": "object",
             "properties": {
                 "id": {
@@ -664,7 +664,7 @@
                 }
             }
         },
-        "api.ContainerPost": {
+        "models.ContainerRequest": {
             "type": "object",
             "properties": {
                 "name": {
@@ -672,11 +672,11 @@
                 }
             }
         },
-        "api.Publication": {
+        "models.Publication": {
             "type": "object",
             "properties": {
                 "container": {
-                    "$ref": "#/definitions/api.Container"
+                    "$ref": "#/definitions/models.Container"
                 },
                 "created": {
                     "type": "string",
@@ -702,7 +702,7 @@
                     "type": "integer"
                 },
                 "topic": {
-                    "$ref": "#/definitions/api.Topic"
+                    "$ref": "#/definitions/models.Topic"
                 },
                 "updated": {
                     "type": "string",
@@ -710,11 +710,11 @@
                 }
             }
         },
-        "api.PublicationRequest": {
+        "models.PublicationRequest": {
             "type": "object",
             "properties": {
                 "container": {
-                    "$ref": "#/definitions/api.Container"
+                    "$ref": "#/definitions/models.Container"
                 },
                 "idContainer": {
                     "type": "integer"
@@ -729,11 +729,11 @@
                     "type": "integer"
                 },
                 "topic": {
-                    "$ref": "#/definitions/api.Topic"
+                    "$ref": "#/definitions/models.Topic"
                 }
             }
         },
-        "api.Session": {
+        "models.Session": {
             "type": "object",
             "properties": {
                 "clean": {
@@ -743,7 +743,7 @@
                     "type": "string"
                 },
                 "container": {
-                    "$ref": "#/definitions/api.Container"
+                    "$ref": "#/definitions/models.Container"
                 },
                 "created": {
                     "type": "string",
@@ -774,7 +774,7 @@
                 }
             }
         },
-        "api.SessionRequest": {
+        "models.SessionRequest": {
             "type": "object",
             "properties": {
                 "clean": {
@@ -797,11 +797,11 @@
                 }
             }
         },
-        "api.Subscription": {
+        "models.Subscription": {
             "type": "object",
             "properties": {
                 "container": {
-                    "$ref": "#/definitions/api.Container"
+                    "$ref": "#/definitions/models.Container"
                 },
                 "created": {
                     "type": "string",
@@ -824,10 +824,10 @@
                     "type": "integer"
                 },
                 "session": {
-                    "$ref": "#/definitions/api.Session"
+                    "$ref": "#/definitions/models.Session"
                 },
                 "topic": {
-                    "$ref": "#/definitions/api.Topic"
+                    "$ref": "#/definitions/models.Topic"
                 },
                 "updated": {
                     "type": "string",
@@ -835,11 +835,11 @@
                 }
             }
         },
-        "api.SubscriptionRequest": {
+        "models.SubscriptionRequest": {
             "type": "object",
             "properties": {
                 "container": {
-                    "$ref": "#/definitions/api.Container"
+                    "$ref": "#/definitions/models.Container"
                 },
                 "idContainer": {
                     "type": "integer"
@@ -851,18 +851,18 @@
                     "type": "string"
                 },
                 "topic": {
-                    "$ref": "#/definitions/api.Topic"
+                    "$ref": "#/definitions/models.Topic"
                 }
             }
         },
-        "api.Topic": {
+        "models.Topic": {
             "type": "object",
             "properties": {
                 "config": {
-                    "$ref": "#/definitions/api.TopicConfig"
+                    "$ref": "#/definitions/models.TopicConfig"
                 },
                 "container": {
-                    "$ref": "#/definitions/api.Container"
+                    "$ref": "#/definitions/models.Container"
                 },
                 "created": {
                     "type": "string",
@@ -887,7 +887,7 @@
                 }
             }
         },
-        "api.TopicConfig": {
+        "models.TopicConfig": {
             "type": "object",
             "properties": {
                 "payload": {
@@ -906,11 +906,11 @@
                 }
             }
         },
-        "api.TopicRequest": {
+        "models.TopicRequest": {
             "type": "object",
             "properties": {
                 "config": {
-                    "$ref": "#/definitions/api.TopicConfig"
+                    "$ref": "#/definitions/models.TopicConfig"
                 },
                 "idContainer": {
                     "type": "integer"
