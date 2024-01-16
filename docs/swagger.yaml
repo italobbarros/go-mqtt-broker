@@ -1,0 +1,471 @@
+definitions:
+  api.Container:
+    properties:
+      containerName:
+        type: string
+    type: object
+  api.ContainerTable:
+    properties:
+      containerName:
+        $ref: '#/definitions/api.Container'
+      id:
+        type: integer
+    type: object
+  api.Publication:
+    type: object
+  api.PublicationTable:
+    properties:
+      id:
+        type: integer
+      publication:
+        $ref: '#/definitions/api.Publication'
+    type: object
+  api.Session:
+    type: object
+  api.SessionTable:
+    properties:
+      id:
+        type: integer
+      session:
+        $ref: '#/definitions/api.Session'
+    type: object
+  api.Subscription:
+    type: object
+  api.SubscriptionTable:
+    properties:
+      id:
+        type: integer
+      subscription:
+        $ref: '#/definitions/api.Subscription'
+    type: object
+  api.Topic:
+    type: object
+  api.TopicConfig:
+    properties:
+      payload:
+        type: string
+      qos:
+        type: integer
+      retained:
+        description: Indica se a mensagem é retida ou não
+        type: boolean
+      securityRule:
+        description: Regra de segurança aplicada ao tópico
+        type: string
+    type: object
+  api.TopicTable:
+    properties:
+      id:
+        type: integer
+      topic:
+        $ref: '#/definitions/api.Topic'
+    type: object
+info:
+  contact: {}
+paths:
+  /containers:
+    get:
+      description: Get all containers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/api.ContainerTable'
+            type: array
+      summary: Get all containers
+      tags:
+      - Containers
+    post:
+      consumes:
+      - application/json
+      description: Create a new container
+      parameters:
+      - description: Container object that needs to be added
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/api.Container'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.Container'
+      summary: Create a new container
+      tags:
+      - Containers
+  /containers/{id}:
+    get:
+      description: Get a container by ID
+      parameters:
+      - description: Container ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.ContainerTable'
+      summary: Get a container by ID
+      tags:
+      - Containers
+    put:
+      consumes:
+      - application/json
+      description: Update a container by ID
+      parameters:
+      - description: Container ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated container object
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/api.Container'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.Container'
+      summary: Update a container by ID
+      tags:
+      - Containers
+  /publications:
+    get:
+      description: Get all publications
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/api.PublicationTable'
+            type: array
+      summary: Get all publications
+      tags:
+      - Publications
+    post:
+      consumes:
+      - application/json
+      description: Create a new publication
+      parameters:
+      - description: Publication object that needs to be added
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/api.Publication'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.Publication'
+      summary: Create a new publication
+      tags:
+      - Publications
+  /publications/{id}:
+    get:
+      description: Get a publication by ID
+      parameters:
+      - description: Publication ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.PublicationTable'
+      summary: Get a publication by ID
+      tags:
+      - Publications
+    put:
+      consumes:
+      - application/json
+      description: Update a publication by ID
+      parameters:
+      - description: Publication ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated publication object
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/api.Publication'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.Publication'
+      summary: Update a publication by ID
+      tags:
+      - Publications
+  /sessions:
+    get:
+      description: Get all sessions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/api.SessionTable'
+            type: array
+      summary: Get all sessions
+      tags:
+      - Sessions
+    post:
+      consumes:
+      - application/json
+      description: Create a new session
+      parameters:
+      - description: Session object that needs to be added
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/api.Session'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.Session'
+      summary: Create a new session
+      tags:
+      - Sessions
+  /sessions/{id}:
+    get:
+      description: Get a session by ID
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SessionTable'
+      summary: Get a session by ID
+      tags:
+      - Sessions
+    put:
+      consumes:
+      - application/json
+      description: Update a session by ID
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated session object
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/api.Session'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.Session'
+      summary: Update a session by ID
+      tags:
+      - Sessions
+  /subscriptions:
+    get:
+      description: Get all subscriptions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/api.SubscriptionTable'
+            type: array
+      summary: Get all subscriptions
+      tags:
+      - Subscriptions
+    post:
+      consumes:
+      - application/json
+      description: Create a new subscription
+      parameters:
+      - description: Subscription object that needs to be added
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/api.Subscription'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.Subscription'
+      summary: Create a new subscription
+      tags:
+      - Subscriptions
+  /subscriptions/{id}:
+    get:
+      description: Get a subscription by ID
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.SubscriptionTable'
+      summary: Get a subscription by ID
+      tags:
+      - Subscriptions
+    put:
+      consumes:
+      - application/json
+      description: Update a subscription by ID
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated subscription object
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/api.Subscription'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.Subscription'
+      summary: Update a subscription by ID
+      tags:
+      - Subscriptions
+  /topics:
+    get:
+      description: Get all topics
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/api.TopicTable'
+            type: array
+      summary: Get all topics
+      tags:
+      - Topics
+    post:
+      consumes:
+      - application/json
+      description: Create a new topic
+      parameters:
+      - description: Topic object that needs to be added
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/api.Topic'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/api.Topic'
+      summary: Create a new topic
+      tags:
+      - Topics
+  /topics/{id}:
+    get:
+      description: Get a topic by ID
+      parameters:
+      - description: Topic ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.TopicTable'
+      summary: Get a topic by ID
+      tags:
+      - Topics
+    put:
+      consumes:
+      - application/json
+      description: Update a topic by ID
+      parameters:
+      - description: Topic ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated topic object
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/api.Topic'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.Topic'
+      summary: Update a topic by ID
+      tags:
+      - Topics
+swagger: "2.0"
