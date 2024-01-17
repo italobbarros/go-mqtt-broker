@@ -37,7 +37,7 @@ func (a *API) initDB() (*gorm.DB, error) {
 	}
 
 	// Migrate the schema
-	err = db.AutoMigrate(&models.Container{}, &models.Topic{}, &models.Subscription{}, &models.Publication{}, &models.Session{})
+	err = db.AutoMigrate(&models.Container{}, &models.Topic{}, &models.Subscription{}, &models.Publish{}, &models.Session{})
 	if err != nil {
 		return nil, err
 	}
@@ -63,10 +63,9 @@ func (a *API) Init() {
 	r.PUT("/containers/:id", a.routes.UpdateContainer)
 
 	// Endpoints for TopicRequest
-	r.POST("/topics", a.routes.CreateTopic)
-	r.GET("/topics", a.routes.GetAllTopics)
+	r.GET("/topics/all", a.routes.GetAllTopics)
 	r.GET("/topics/:id", a.routes.GetTopicByID)
-	r.GET("/topics/ByIdContainer/:IdContainer", a.routes.GetAllTopicsByIdContainer)
+	r.GET("/topics", a.routes.GetTopicsByName)
 	r.PUT("/topics/:id", a.routes.UpdateTopic)
 
 	// Endpoints for Subscription
@@ -75,11 +74,11 @@ func (a *API) Init() {
 	r.GET("/subscriptions/:id", a.routes.GetSubscriptionByID)
 	r.PUT("/subscriptions/:id", a.routes.UpdateSubscription)
 
-	// Endpoints for Publication
-	r.POST("/publications", a.routes.CreatePublication)
-	r.GET("/publications", a.routes.GetAllPublications)
-	r.GET("/publications/:id", a.routes.GetPublicationByID)
-	r.PUT("/publications/:id", a.routes.UpdatePublication)
+	// Endpoints for Publish
+	r.POST("/publishs", a.routes.CreatePublish)
+	r.GET("/publishs/all", a.routes.GetAllPublishs)
+	r.GET("/publishs", a.routes.GetPublishByTopicName)
+	//r.PUT("/publishs/:id", a.routes.UpdatePublish)
 
 	// Endpoints for Session
 	r.POST("/sessions", a.routes.CreateSession)

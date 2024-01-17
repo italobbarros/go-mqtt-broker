@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -10,44 +9,13 @@ import (
 	models "github.com/italobbarros/go-mqtt-broker/internal/api/models"
 )
 
-// createTopic cria um novo tópico.
-// @Summary Create a new topic
-// @Description Create a new topic
-// @Tags Topic
-// @Accept json
-// @Produce json
-// @Param input body models.TopicRequest true "Topic object that needs to be added"
-// @Success 201 {object} models.Topic
-// @Router /topics [post]
-func (r *Routes) CreateTopic(c *gin.Context) {
-	var topic models.Topic
-	if err := c.ShouldBindJSON(&topic); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	// Se o IdContainer existe, crie o tópico e associe-o ao contêiner
-	var container models.Container
-	if err := r.db.Where("\"Id\" = ?", topic.IdContainer).First(&container).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Container not found"})
-		return
-	}
-	topic.IdContainer = uint64(container.Id)
-	if err := r.db.Create(&topic).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create topic"})
-		return
-	}
-
-	c.JSON(http.StatusCreated, topic)
-}
-
 // getAllTopics obtém todos os tópicos.
 // @Summary Get all topics
 // @Description Get all topics
 // @Tags Topic
 // @Produce json
 // @Success 200 {array} models.Topic
-// @Router /topics [get]
+// @Router /topics/all [get]
 func (r *Routes) GetAllTopics(c *gin.Context) {
 	var topicResponses []models.TopicResponse
 
@@ -55,7 +23,7 @@ func (r *Routes) GetAllTopics(c *gin.Context) {
 	if err := r.db.
 		Model(&models.Topic{}).
 		Select("topics.\"Id\", topics.\"Name\", topics.\"Payload\", topics.\"Qos\", topics.\"Created\", topics.\"Updated\", topics.\"Deleted\", containers.*").
-		Joins("left join containers on topics.\"IdContainer\" = containers.\"Id\"").
+		Joins("left join publishes on topics.\"IdPublish\" = publishes.\"Id\"").
 		Where("topics.\"Deleted\" IS NULL").
 		Scan(&topicResponses).
 		Error; err != nil {
@@ -68,32 +36,33 @@ func (r *Routes) GetAllTopics(c *gin.Context) {
 }
 
 // getAllTopics obtém todos os tópicos.
-// @Summary Get all topics
-// @Description Get all topics
+// @Summary Get Topic by Name
+// @Description Get Topic by Name
 // @Tags Topic
 // @Produce json
-// @Param IdContainer path int true "Topic by IdContainer"
-// @Success 200 {array} models.Topic
-// @Router /topics/ByIdContainer/{IdContainer} [get]
-func (r *Routes) GetAllTopicsByIdContainer(c *gin.Context) {
-	IdContainer, _ := strconv.Atoi(c.Param("IdContainer"))
-	var topicResponses []models.TopicResponse
+// @Param Name query string true "Topic by Name"
+// @Success 200 {object} models.Topic
+// @Router /topics [get]
+func (r *Routes) GetTopicsByName(c *gin.Context) {
+	name := c.Query("Name")
+	var topicResponse models.TopicResponse
 
 	// Usando Preload para fazer um join e Select para escolher campos específicos
 	if err := r.db.
 		Model(&models.Topic{}).
-		Select("topics.\"Id\", topics.\"Name\", topics.\"Payload\", topics.\"Qos\", topics.\"Created\", topics.\"Updated\", topics.\"Deleted\", containers.*").
-		Joins("left join containers on topics.\"IdContainer\" = containers.\"Id\"").
-		Where(fmt.Sprintf("topics.\"IdContainer\"=%d", IdContainer)).
+		Select("topics.\"Id\", topics.\"Name\", topics.\"Created\", topics.\"Updated\", topics.\"Deleted\", publishes.*,containers.*").
+		Joins("left join publishes on publishes.\"Id\"=topics.\"IdPublish\"").
+		Joins("left join containers on containers.\"Id\"=publishes.\"IdContainer\"").
+		Where("topics.\"Name\"=?", name).
 		Where("topics.\"Deleted\" IS NULL").
-		Scan(&topicResponses).
+		First(&topicResponse).
 		Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"detail": "Error getting all topics"})
+		c.JSON(http.StatusInternalServerError, gin.H{"detail": "error.get.topicsByName"})
 		r.logger.Error("Error: %s", err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, topicResponses)
+	c.JSON(http.StatusOK, topicResponse)
 }
 
 // getTopicByID obtém um tópico pelo ID.
@@ -111,7 +80,7 @@ func (r *Routes) GetTopicByID(c *gin.Context) {
 	if err := r.db.
 		Model(&models.Topic{}).
 		Select("topics.\"Id\", topics.\"Name\", topics.\"Payload\", topics.\"Qos\", topics.\"Created\", topics.\"Updated\", topics.\"Deleted\", containers.*").
-		Joins("left join containers on topics.\"IdContainer\" = containers.\"Id\"").
+		Joins("left join publishes on topics.\"IdPublish\" = publishes.\"Id\"").
 		Where("topics.\"Deleted\" IS NULL").
 		First(&topicResponse, id).
 		Error; err != nil {

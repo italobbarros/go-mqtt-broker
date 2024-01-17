@@ -4,26 +4,18 @@ type ContainerRequest struct {
 	Name string `gorm:"not null"`
 }
 
-type TopicConfig struct {
-	Payload      string `gorm:"not null;column:Payload"`
-	Qos          int    `gorm:"not null;column:Qos"`
-	Retained     bool   `gorm:"not null;column:Retained"` // Indica se a mensagem é retida ou não
-	SecurityRule string `gorm:"column:SecurityRule"`      // Regra de segurança aplicada ao tópico
-}
-
 type TopicRequest struct {
-	IdContainer uint64
-	Name        string      `gorm:"not null;column:Name"`
-	Config      TopicConfig `gorm:"embedded"`
+	IdPublish uint64 `gorm:"not null;column:IdPublish"`
 }
 
-type PublicationRequest struct {
-	IdContainer uint64    `gorm:"column:IdContainer"`
-	Container   Container `gorm:"foreignKey:IdContainer;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	IdTopic     uint64    `gorm:"-;column:IdTopic"`
-	Topic       Topic     `gorm:"foreignKey:IdTopic;"`
-	Payload     string    `gorm:"column:Payload"`
-	Timestamp   int64     `gorm:"column:Timestamp"`
+type PublishRequest struct {
+	IdContainer   uint64 `gorm:"column:IdContainer"`
+	Payload       string `gorm:"column:Payload"`
+	Qos           int    `gorm:"column:Qos"`
+	TopicName     string `gorm:"not null;column:TopicName"`
+	TopicRetained bool   `gorm:"not null;column:TopicRetained"` // Indica se a mensagem é retida ou não
+	//Timestamp       time.Time `gorm:"column:Timestamp" example:"2024-01-16T12:00:00Z"`
+	//NumberTimestamp int64     `gorm:"column:NumberTimestamp"`
 }
 
 type SubscriptionRequest struct {

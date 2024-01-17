@@ -138,30 +138,39 @@ const docTemplate = `{
                 }
             }
         },
-        "/publications": {
+        "/publishs": {
             "get": {
-                "description": "Get all publications",
+                "description": "Get a publish by TopicName",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Publications"
+                    "Publishs"
                 ],
-                "summary": "Get all publications",
+                "summary": "Get a publish by TopicName",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Topic Name",
+                        "name": "TopicName",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Publication"
+                                "$ref": "#/definitions/models.PublishResponse"
                             }
                         }
                     }
                 }
             },
             "post": {
-                "description": "Create a new publication",
+                "description": "Create a new publish",
                 "consumes": [
                     "application/json"
                 ],
@@ -169,17 +178,17 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Publications"
+                    "Publishs"
                 ],
-                "summary": "Create a new publication",
+                "summary": "Create a new publish",
                 "parameters": [
                     {
-                        "description": "Publication object that needs to be added",
+                        "description": "Publish object that needs to be added",
                         "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.PublicationRequest"
+                            "$ref": "#/definitions/models.PublishRequest"
                         }
                     }
                 ],
@@ -187,42 +196,38 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.PublicationRequest"
+                            "$ref": "#/definitions/models.PublishRequest"
                         }
                     }
                 }
             }
         },
-        "/publications/{id}": {
+        "/publishs/all": {
             "get": {
-                "description": "Get a publication by ID",
+                "description": "Get all publishs",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Publications"
+                    "Publishs"
                 ],
-                "summary": "Get a publication by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Publication ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
+                "summary": "Get all publishs",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Publication"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.PublishResponse"
+                            }
                         }
                     }
                 }
-            },
+            }
+        },
+        "/publishs/{id}": {
             "put": {
-                "description": "Update a publication by ID",
+                "description": "Update a publish by ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -230,24 +235,24 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Publications"
+                    "Publishs"
                 ],
-                "summary": "Update a publication by ID",
+                "summary": "Update a publish by ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Publication ID",
+                        "description": "Publish ID",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Updated publication object",
+                        "description": "Updated publish object",
                         "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.PublicationRequest"
+                            "$ref": "#/definitions/models.PublishRequest"
                         }
                     }
                 ],
@@ -255,7 +260,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.PublicationRequest"
+                            "$ref": "#/definitions/models.PublishRequest"
                         }
                     }
                 }
@@ -509,52 +514,26 @@ const docTemplate = `{
         },
         "/topics": {
             "get": {
-                "description": "Get all topics",
+                "description": "Get Topic by Name",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Topic"
                 ],
-                "summary": "Get all topics",
+                "summary": "Get Topic by Name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Topic by Name",
+                        "name": "Name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Topic"
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "description": "Create a new topic",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Topic"
-                ],
-                "summary": "Create a new topic",
-                "parameters": [
-                    {
-                        "description": "Topic object that needs to be added",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.TopicRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/models.Topic"
                         }
@@ -562,7 +541,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/topics/ByIdContainer/{IdContainer}": {
+        "/topics/all": {
             "get": {
                 "description": "Get all topics",
                 "produces": [
@@ -572,15 +551,6 @@ const docTemplate = `{
                     "Topic"
                 ],
                 "summary": "Get all topics",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Topic by IdContainer",
-                        "name": "IdContainer",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -683,19 +653,11 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Publication": {
+        "models.Publish": {
             "type": "object",
             "properties": {
                 "container": {
                     "$ref": "#/definitions/models.Container"
-                },
-                "created": {
-                    "type": "string",
-                    "example": "2024-01-16T12:00:00Z"
-                },
-                "deleted": {
-                    "type": "string",
-                    "example": "2024-01-16T12:45:00Z"
                 },
                 "id": {
                     "type": "integer"
@@ -703,44 +665,73 @@ const docTemplate = `{
                 "idContainer": {
                     "type": "integer"
                 },
-                "idTopic": {
+                "numberTimestamp": {
                     "type": "integer"
                 },
                 "payload": {
                     "type": "string"
                 },
-                "timestamp": {
+                "qos": {
                     "type": "integer"
                 },
-                "topic": {
-                    "$ref": "#/definitions/models.Topic"
-                },
-                "updated": {
+                "timestamp": {
                     "type": "string",
                     "example": "2024-01-16T12:00:00Z"
+                },
+                "topicName": {
+                    "type": "string"
                 }
             }
         },
-        "models.PublicationRequest": {
+        "models.PublishRequest": {
+            "type": "object",
+            "properties": {
+                "idContainer": {
+                    "type": "integer"
+                },
+                "payload": {
+                    "type": "string"
+                },
+                "qos": {
+                    "type": "integer"
+                },
+                "topicName": {
+                    "type": "string"
+                },
+                "topicRetained": {
+                    "description": "Indica se a mensagem é retida ou não",
+                    "type": "boolean"
+                }
+            }
+        },
+        "models.PublishResponse": {
             "type": "object",
             "properties": {
                 "container": {
                     "$ref": "#/definitions/models.Container"
                 },
-                "idContainer": {
+                "id": {
                     "type": "integer"
                 },
-                "idTopic": {
+                "numberTimestamp": {
                     "type": "integer"
                 },
                 "payload": {
                     "type": "string"
                 },
-                "timestamp": {
+                "qos": {
                     "type": "integer"
                 },
-                "topic": {
-                    "$ref": "#/definitions/models.Topic"
+                "timestamp": {
+                    "type": "string",
+                    "example": "2024-01-16T12:00:00Z"
+                },
+                "topicName": {
+                    "type": "string"
+                },
+                "topicRetained": {
+                    "description": "Indica se a mensagem é retida ou não",
+                    "type": "boolean"
                 }
             }
         },
@@ -869,12 +860,6 @@ const docTemplate = `{
         "models.Topic": {
             "type": "object",
             "properties": {
-                "config": {
-                    "$ref": "#/definitions/models.TopicConfig"
-                },
-                "container": {
-                    "$ref": "#/definitions/models.Container"
-                },
                 "created": {
                     "type": "string",
                     "example": "2024-01-16T12:00:00Z"
@@ -886,11 +871,18 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "idContainer": {
+                "idPublish": {
                     "type": "integer"
                 },
                 "name": {
                     "type": "string"
+                },
+                "publish": {
+                    "$ref": "#/definitions/models.Publish"
+                },
+                "retained": {
+                    "description": "Indica se a mensagem é retida ou não",
+                    "type": "boolean"
                 },
                 "updated": {
                     "type": "string",
@@ -898,36 +890,11 @@ const docTemplate = `{
                 }
             }
         },
-        "models.TopicConfig": {
-            "type": "object",
-            "properties": {
-                "payload": {
-                    "type": "string"
-                },
-                "qos": {
-                    "type": "integer"
-                },
-                "retained": {
-                    "description": "Indica se a mensagem é retida ou não",
-                    "type": "boolean"
-                },
-                "securityRule": {
-                    "description": "Regra de segurança aplicada ao tópico",
-                    "type": "string"
-                }
-            }
-        },
         "models.TopicRequest": {
             "type": "object",
             "properties": {
-                "config": {
-                    "$ref": "#/definitions/models.TopicConfig"
-                },
-                "idContainer": {
+                "idPublish": {
                     "type": "integer"
-                },
-                "name": {
-                    "type": "string"
                 }
             }
         }

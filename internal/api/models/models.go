@@ -15,23 +15,23 @@ type Times struct {
 	Deleted *time.Time `gorm:"column:Deleted" example:"2024-01-16T12:45:00Z"`
 }
 
-type Topic struct {
-	Id          uint64      `gorm:"primaryKey;autoIncrement;uniqueIndex;column:Id"`
-	IdContainer uint64      `gorm:"column:IdContainer"`
-	Container   Container   `gorm:"foreignKey:IdContainer;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	Name        string      `gorm:"not null;unique;column:Name"`
-	Config      TopicConfig `gorm:"embedded"`
-	Times
+type Publish struct {
+	Id              uint64    `gorm:"primaryKey;autoIncrement;uniqueIndex;column:Id"`
+	IdContainer     uint64    `gorm:"column:IdContainer"`
+	Container       Container `gorm:"foreignKey:IdContainer;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	TopicName       string    `gorm:"not null;column:TopicName"`
+	Payload         string    `gorm:"column:Payload"`
+	Qos             int       `gorm:"column:Qos"`
+	Timestamp       time.Time `gorm:"column:Timestamp" example:"2024-01-16T12:00:00Z"`
+	NumberTimestamp int64     `gorm:"column:NumberTimestamp"`
 }
 
-type Publication struct {
-	Id          uint64    `gorm:"primaryKey;autoIncrement;uniqueIndex;column:Id"`
-	IdContainer uint64    `gorm:"column:IdContainer"`
-	Container   Container `gorm:"foreignKey:IdContainer;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	IdTopic     uint64    `gorm:"-;column:IdTopic"`
-	Topic       Topic     `gorm:"foreignKey:IdTopic;"`
-	Payload     string    `gorm:"column:Payload"`
-	Timestamp   int64     `gorm:"column:Timestamp"`
+type Topic struct {
+	Id        uint64  `gorm:"primaryKey;autoIncrement;uniqueIndex;column:Id"`
+	IdPublish uint64  `gorm:"not null;column:IdPublish"`
+	Publish   Publish `gorm:"foreignKey:IdPublish"`
+	Name      string  `gorm:"not null;unique;column:Name"`
+	Retained  bool    `gorm:"not null;column:Retained"` // Indica se a mensagem é retida ou não
 	Times
 }
 
