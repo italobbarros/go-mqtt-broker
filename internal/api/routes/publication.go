@@ -2,7 +2,6 @@ package routes
 
 import (
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -19,7 +18,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param input body models.PublishRequest true "Publish object that needs to be added"
-// @Success 201 {object} models.PublishRequest
+// @Success 201 {object} models.GenericResponse
 // @Router /publisher [post]
 func (r *Routes) CreatePublish(c *gin.Context) {
 	var publish models.Publish
@@ -28,7 +27,6 @@ func (r *Routes) CreatePublish(c *gin.Context) {
 		return
 	}
 	publish.Timestamp = time.Now()
-	publish.NumberTimestamp = time.Now().Unix()
 	r.db.Create(&publish)
 
 	//Update Topic
@@ -63,8 +61,8 @@ func (r *Routes) CreatePublish(c *gin.Context) {
 func (r *Routes) GetAllPublisher(c *gin.Context) {
 	var publisherResponses []models.PublishResponse
 	if err := r.db.Debug().Model(&models.Publish{}).
-		Select("publishes.*, containers.* as \"Container\"").
-		Joins("join containers on publishes.\"IdContainer\"=containers.\"Id\"").
+		Select("publishes.*, sessions.*").
+		Joins("join sessions on publishes.\"IdContainer\"=sessions.\"Id\"").
 		Scan(&publisherResponses).
 		Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"detail": "Error getting all topics"})
@@ -86,8 +84,8 @@ func (r *Routes) GetPublishByTopicName(c *gin.Context) {
 	topicName := c.Query("TopicName")
 	var publisherResponses []models.PublishResponse
 	if err := r.db.Debug().Model(&models.Publish{}).
-		Select("publishes.*, containers.* as \"Container\"").
-		Joins("join containers on publishes.\"IdContainer\"=containers.\"Id\"").
+		Select("publishes.*, sessions.*").
+		Joins("join sessions on publishes.\"IdSession\"=sessions.\"Id\"").
 		Where("publishes.\"TopicName\" = ?", topicName).
 		Scan(&publisherResponses).
 		Error; err != nil {
@@ -96,31 +94,4 @@ func (r *Routes) GetPublishByTopicName(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, publisherResponses)
-}
-
-// updatePublish atualiza uma publicação pelo ID.
-// @Summary Update a publish by ID
-// @Description Update a publish by ID
-// @Tags Publisher
-// @Accept json
-// @Produce json
-// @Param id path int true "Publish ID"
-// @Param input body models.PublishRequest true "Updated publish object"
-// @Success 200 {object} models.PublishRequest
-// @Router /publisher/{id} [put]
-func (r *Routes) UpdatePublish(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
-	var publish models.Publish
-	if err := r.db.First(&publish, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
-		return
-	}
-
-	if err := c.ShouldBindJSON(&publish); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	r.db.Save(&publish)
-	c.JSON(http.StatusOK, publish)
 }

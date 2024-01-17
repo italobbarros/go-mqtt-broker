@@ -16,27 +16,6 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/containers": {
-            "get": {
-                "description": "Get all containers",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Container"
-                ],
-                "summary": "Get all containers",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Container"
-                            }
-                        }
-                    }
-                }
-            },
             "post": {
                 "description": "Create a new container",
                 "consumes": [
@@ -64,7 +43,77 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.ContainerRequest"
+                            "$ref": "#/definitions/models.GenericResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/containers/all": {
+            "get": {
+                "description": "Get all containers info",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Container"
+                ],
+                "summary": "Get all containers info",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.ContainersInfoResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/containers/{Name}": {
+            "delete": {
+                "description": "Delete a container by name",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Containers"
+                ],
+                "summary": "Delete a container by name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Container Name",
+                        "name": "Name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "$ref": "#/definitions/models.GenericResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.GenericResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.GenericResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.GenericResponse"
                         }
                     }
                 }
@@ -97,9 +146,11 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "put": {
-                "description": "Update a container by ID",
+            }
+        },
+        "/publisher": {
+            "post": {
+                "description": "Create a new publish",
                 "consumes": [
                     "application/json"
                 ],
@@ -107,38 +158,54 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Container"
+                    "Publisher"
                 ],
-                "summary": "Update a container by ID",
+                "summary": "Create a new publish",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "Container ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Updated container object",
+                        "description": "Publish object that needs to be added",
                         "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.ContainerRequest"
+                            "$ref": "#/definitions/models.PublishRequest"
                         }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.ContainerRequest"
+                            "$ref": "#/definitions/models.GenericResponse"
                         }
                     }
                 }
             }
         },
-        "/publisher": {
+        "/publisher/all": {
+            "get": {
+                "description": "Get all publisher",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Publisher"
+                ],
+                "summary": "Get all publisher",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.PublishResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/publisher/historic": {
             "get": {
                 "description": "Get a publish by TopicName",
                 "produces": [
@@ -168,122 +235,71 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "post": {
-                "description": "Create a new publish",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Publisher"
-                ],
-                "summary": "Create a new publish",
-                "parameters": [
-                    {
-                        "description": "Publish object that needs to be added",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.PublishRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/models.PublishRequest"
-                        }
-                    }
-                }
-            }
-        },
-        "/publisher/all": {
-            "get": {
-                "description": "Get all publisher",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Publisher"
-                ],
-                "summary": "Get all publisher",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.PublishResponse"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/publisher/{id}": {
-            "put": {
-                "description": "Update a publish by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Publisher"
-                ],
-                "summary": "Update a publish by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Publish ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Updated publish object",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.PublishRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.PublishRequest"
-                        }
-                    }
-                }
             }
         },
         "/sessions": {
             "get": {
-                "description": "Get all sessions",
+                "description": "Get a session by ClientId",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Sessions"
                 ],
-                "summary": "Get all sessions",
+                "summary": "Get a session by ClientId",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ClientId",
+                        "name": "ClientId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Session"
-                            }
+                            "$ref": "#/definitions/models.SessionResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a session by ClientId",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sessions"
+                ],
+                "summary": "Update a session by ClientId",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ClientId",
+                        "name": "ClientId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated session object",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.SessionUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.GenericResponse"
                         }
                     }
                 }
@@ -321,69 +337,24 @@ const docTemplate = `{
                 }
             }
         },
-        "/sessions/{id}": {
+        "/sessions/all": {
             "get": {
-                "description": "Get a session by ID",
+                "description": "Get all sessions",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Sessions"
                 ],
-                "summary": "Get a session by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Session ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
+                "summary": "Get all sessions",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Session"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Update a session by ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Sessions"
-                ],
-                "summary": "Update a session by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Session ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Updated session object",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.SessionRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.SessionRequest"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Session"
+                            }
                         }
                     }
                 }
@@ -653,19 +624,38 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Publish": {
+        "models.ContainersInfoResponse": {
             "type": "object",
             "properties": {
-                "container": {
-                    "$ref": "#/definitions/models.Container"
+                "countPublishers": {
+                    "type": "integer"
+                },
+                "countSession": {
+                    "type": "integer"
+                },
+                "countSubscribers": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
-                },
-                "idContainer": {
+                }
+            }
+        },
+        "models.GenericResponse": {
+            "type": "object",
+            "properties": {
+                "detail": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Publish": {
+            "type": "object",
+            "properties": {
+                "id": {
                     "type": "integer"
                 },
-                "numberTimestamp": {
+                "idSession": {
                     "type": "integer"
                 },
                 "payload": {
@@ -673,6 +663,9 @@ const docTemplate = `{
                 },
                 "qos": {
                     "type": "integer"
+                },
+                "session": {
+                    "$ref": "#/definitions/models.Session"
                 },
                 "timestamp": {
                     "type": "string",
@@ -686,7 +679,7 @@ const docTemplate = `{
         "models.PublishRequest": {
             "type": "object",
             "properties": {
-                "idContainer": {
+                "idSession": {
                     "type": "integer"
                 },
                 "payload": {
@@ -707,9 +700,6 @@ const docTemplate = `{
         "models.PublishResponse": {
             "type": "object",
             "properties": {
-                "container": {
-                    "$ref": "#/definitions/models.Container"
-                },
                 "id": {
                     "type": "integer"
                 },
@@ -721,6 +711,9 @@ const docTemplate = `{
                 },
                 "qos": {
                     "type": "integer"
+                },
+                "session": {
+                    "$ref": "#/definitions/models.Session"
                 },
                 "timestamp": {
                     "type": "string",
@@ -750,10 +743,6 @@ const docTemplate = `{
                 "created": {
                     "type": "string",
                     "example": "2024-01-16T12:00:00Z"
-                },
-                "deleted": {
-                    "type": "string",
-                    "example": "2024-01-16T12:45:00Z"
                 },
                 "id": {
                     "type": "integer"
@@ -799,9 +788,15 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Subscription": {
+        "models.SessionResponse": {
             "type": "object",
             "properties": {
+                "clean": {
+                    "type": "boolean"
+                },
+                "clientId": {
+                    "type": "string"
+                },
                 "container": {
                     "$ref": "#/definitions/models.Container"
                 },
@@ -809,14 +804,52 @@ const docTemplate = `{
                     "type": "string",
                     "example": "2024-01-16T12:00:00Z"
                 },
-                "deleted": {
-                    "type": "string",
-                    "example": "2024-01-16T12:45:00Z"
-                },
                 "id": {
                     "type": "integer"
                 },
+                "keepAlive": {
+                    "type": "integer"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "updated": {
+                    "type": "string",
+                    "example": "2024-01-16T12:00:00Z"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SessionUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "clean": {
+                    "type": "boolean"
+                },
                 "idContainer": {
+                    "type": "integer"
+                },
+                "keepAlive": {
+                    "type": "integer"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Subscription": {
+            "type": "object",
+            "properties": {
+                "created": {
+                    "type": "string",
+                    "example": "2024-01-16T12:00:00Z"
+                },
+                "id": {
                     "type": "integer"
                 },
                 "idSession": {
@@ -840,20 +873,11 @@ const docTemplate = `{
         "models.SubscriptionRequest": {
             "type": "object",
             "properties": {
-                "container": {
-                    "$ref": "#/definitions/models.Container"
-                },
-                "idContainer": {
+                "idSession": {
                     "type": "integer"
                 },
                 "idTopic": {
                     "type": "integer"
-                },
-                "sessionId": {
-                    "type": "string"
-                },
-                "topic": {
-                    "$ref": "#/definitions/models.Topic"
                 }
             }
         },
@@ -863,10 +887,6 @@ const docTemplate = `{
                 "created": {
                     "type": "string",
                     "example": "2024-01-16T12:00:00Z"
-                },
-                "deleted": {
-                    "type": "string",
-                    "example": "2024-01-16T12:45:00Z"
                 },
                 "id": {
                     "type": "integer"

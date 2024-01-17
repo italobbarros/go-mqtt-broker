@@ -60,7 +60,6 @@ func (a *API) Init() {
 	r.POST("/containers", a.routes.CreateContainer)
 	r.GET("/containers", a.routes.GetAllContainers)
 	r.GET("/containers/:id", a.routes.GetContainerByID)
-	r.PUT("/containers/:id", a.routes.UpdateContainer)
 
 	// Endpoints for TopicRequest
 	r.GET("/topics/all", a.routes.GetAllTopics)
@@ -78,13 +77,12 @@ func (a *API) Init() {
 	r.POST("/publisher", a.routes.CreatePublish)
 	r.GET("/publisher/all", a.routes.GetAllPublisher)
 	r.GET("/publisher", a.routes.GetPublishByTopicName)
-	//r.PUT("/publisher/:id", a.routes.UpdatePublish)
 
 	// Endpoints for Session
 	r.POST("/sessions", a.routes.CreateSession)
-	r.GET("/sessions", a.routes.GetAllSessions)
-	r.GET("/sessions/:id", a.routes.GetSessionByID)
-	r.PUT("/sessions/:id", a.routes.UpdateSession)
+	r.GET("/sessions", a.routes.GetSessionByClientId)
+	r.GET("/sessions/all", a.routes.GetAllSessions)
+	r.PUT("/sessions", a.routes.UpdateSession)
 
 	r.Run(":8080")
 }

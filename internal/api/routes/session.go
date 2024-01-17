@@ -2,7 +2,7 @@ package routes
 
 import (
 	"net/http"
-	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/italobbarros/go-mqtt-broker/docs"
@@ -28,7 +28,7 @@ func (r *Routes) CreateSession(c *gin.Context) {
 	}
 
 	r.db.Create(&session)
-	c.JSON(http.StatusCreated, session)
+	c.JSON(http.StatusCreated, gin.H{"detail": "success.created.session"})
 }
 
 // getAllSessions obtém todas as sessões.
@@ -37,55 +37,61 @@ func (r *Routes) CreateSession(c *gin.Context) {
 // @Tags Sessions
 // @Produce json
 // @Success 200 {array}  models.Session
-// @Router /sessions [get]
+// @Router /sessions/all [get]
 func (r *Routes) GetAllSessions(c *gin.Context) {
 	var sessions []models.Session
 	r.db.Find(&sessions)
 	c.JSON(http.StatusOK, sessions)
 }
 
-// getSessionByID obtém uma sessão pelo ID.
-// @Summary Get a session by ID
-// @Description Get a session by ID
+// getSessionByID obtém uma sessão pelo ClientId.
+// @Summary Get a session by ClientId
+// @Description Get a session by ClientId
 // @Tags Sessions
 // @Produce json
-// @Param id path int true "Session ID"
-// @Success 200 {object}  models.Session
-// @Router /sessions/{id} [get]
-func (r *Routes) GetSessionByID(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
-	var session models.Session
-	if err := r.db.First(&session, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
+// @Param ClientId query string true "Session ClientId"
+// @Success 200 {object}  models.SessionResponse
+// @Router /sessions [get]
+func (r *Routes) GetSessionByClientId(c *gin.Context) {
+	clientId := c.Query("ClientId")
+	r.logger.Debug("clientId: %s", clientId)
+	var sessionResponse models.SessionResponse
+	if err := r.db.Model(&models.Session{}).
+		Select("sessions.*, containers.*").
+		Joins("join containers on sessions.\"IdContainer\"=containers.\"Id\"").
+		Where("sessions.\"ClientId\" = ?", clientId).
+		First(&sessionResponse).
+		Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"detail": "Error getting session by ClientId"})
+		r.logger.Error("Error: %s", err.Error())
 		return
 	}
-
-	c.JSON(http.StatusOK, session)
+	c.JSON(http.StatusOK, sessionResponse)
 }
 
-// updateSession atualiza uma sessão pelo ID.
-// @Summary Update a session by ID
-// @Description Update a session by ID
+// updateSession atualiza uma sessão pelo ClientId.
+// @Summary Update a session by ClientId
+// @Description Update a session by ClientId
 // @Tags Sessions
 // @Accept json
 // @Produce json
-// @Param id path int true "Session ID"
-// @Param input body models.SessionRequest true "Updated session object"
-// @Success 200 {object} models.SessionRequest
-// @Router /sessions/{id} [put]
+// @Param ClientId query string true "Session ClientId"
+// @Param input body models.SessionUpdateRequest true "Updated session object"
+// @Success 200 {object} models.GenericResponse
+// @Router /sessions [put]
 func (r *Routes) UpdateSession(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
+	clientId := c.Query("ClientId")
 	var session models.Session
-	if err := r.db.First(&session, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Record not found!"})
+	if err := r.db.Where("\"ClientId\" = ?", clientId).First(&session).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"detail": "Record not found!"})
 		return
 	}
 
 	if err := c.ShouldBindJSON(&session); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"detail": err.Error()})
 		return
 	}
-
+	session.Updated = time.Now()
 	r.db.Save(&session)
-	c.JSON(http.StatusOK, session)
+	c.JSON(http.StatusOK, gin.H{"detail": "session.updated"})
 }

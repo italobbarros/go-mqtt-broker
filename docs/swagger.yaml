@@ -11,20 +11,34 @@ definitions:
       name:
         type: string
     type: object
-  models.Publish:
+  models.ContainersInfoResponse:
     properties:
-      container:
-        $ref: '#/definitions/models.Container'
+      countPublishers:
+        type: integer
+      countSession:
+        type: integer
+      countSubscribers:
+        type: integer
       id:
         type: integer
-      idContainer:
+    type: object
+  models.GenericResponse:
+    properties:
+      detail:
+        type: string
+    type: object
+  models.Publish:
+    properties:
+      id:
         type: integer
-      numberTimestamp:
+      idSession:
         type: integer
       payload:
         type: string
       qos:
         type: integer
+      session:
+        $ref: '#/definitions/models.Session'
       timestamp:
         example: "2024-01-16T12:00:00Z"
         type: string
@@ -33,7 +47,7 @@ definitions:
     type: object
   models.PublishRequest:
     properties:
-      idContainer:
+      idSession:
         type: integer
       payload:
         type: string
@@ -47,8 +61,6 @@ definitions:
     type: object
   models.PublishResponse:
     properties:
-      container:
-        $ref: '#/definitions/models.Container'
       id:
         type: integer
       numberTimestamp:
@@ -57,6 +69,8 @@ definitions:
         type: string
       qos:
         type: integer
+      session:
+        $ref: '#/definitions/models.Session'
       timestamp:
         example: "2024-01-16T12:00:00Z"
         type: string
@@ -76,9 +90,6 @@ definitions:
         $ref: '#/definitions/models.Container'
       created:
         example: "2024-01-16T12:00:00Z"
-        type: string
-      deleted:
-        example: "2024-01-16T12:45:00Z"
         type: string
       id:
         type: integer
@@ -109,19 +120,48 @@ definitions:
       username:
         type: string
     type: object
-  models.Subscription:
+  models.SessionResponse:
     properties:
+      clean:
+        type: boolean
+      clientId:
+        type: string
       container:
         $ref: '#/definitions/models.Container'
       created:
         example: "2024-01-16T12:00:00Z"
         type: string
-      deleted:
-        example: "2024-01-16T12:45:00Z"
-        type: string
       id:
         type: integer
+      keepAlive:
+        type: integer
+      password:
+        type: string
+      updated:
+        example: "2024-01-16T12:00:00Z"
+        type: string
+      username:
+        type: string
+    type: object
+  models.SessionUpdateRequest:
+    properties:
+      clean:
+        type: boolean
       idContainer:
+        type: integer
+      keepAlive:
+        type: integer
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  models.Subscription:
+    properties:
+      created:
+        example: "2024-01-16T12:00:00Z"
+        type: string
+      id:
         type: integer
       idSession:
         type: integer
@@ -137,24 +177,15 @@ definitions:
     type: object
   models.SubscriptionRequest:
     properties:
-      container:
-        $ref: '#/definitions/models.Container'
-      idContainer:
+      idSession:
         type: integer
       idTopic:
         type: integer
-      sessionId:
-        type: string
-      topic:
-        $ref: '#/definitions/models.Topic'
     type: object
   models.Topic:
     properties:
       created:
         example: "2024-01-16T12:00:00Z"
-        type: string
-      deleted:
-        example: "2024-01-16T12:45:00Z"
         type: string
       id:
         type: integer
@@ -180,20 +211,6 @@ info:
   contact: {}
 paths:
   /containers:
-    get:
-      description: Get all containers
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.Container'
-            type: array
-      summary: Get all containers
-      tags:
-      - Container
     post:
       consumes:
       - application/json
@@ -211,10 +228,41 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.ContainerRequest'
+            $ref: '#/definitions/models.GenericResponse'
       summary: Create a new container
       tags:
       - Container
+  /containers/{Name}:
+    delete:
+      description: Delete a container by name
+      parameters:
+      - description: Container Name
+        in: path
+        name: Name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/models.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.GenericResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.GenericResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.GenericResponse'
+      summary: Delete a container by name
+      tags:
+      - Containers
   /containers/{id}:
     get:
       description: Get a container by ID
@@ -234,33 +282,59 @@ paths:
       summary: Get a container by ID
       tags:
       - Container
-    put:
-      consumes:
-      - application/json
-      description: Update a container by ID
-      parameters:
-      - description: Container ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Updated container object
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/models.ContainerRequest'
+  /containers/all:
+    get:
+      description: Get all containers info
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.ContainerRequest'
-      summary: Update a container by ID
+            items:
+              $ref: '#/definitions/models.ContainersInfoResponse'
+            type: array
+      summary: Get all containers info
       tags:
       - Container
   /publisher:
+    post:
+      consumes:
+      - application/json
+      description: Create a new publish
+      parameters:
+      - description: Publish object that needs to be added
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.PublishRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.GenericResponse'
+      summary: Create a new publish
+      tags:
+      - Publisher
+  /publisher/all:
+    get:
+      description: Get all publisher
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.PublishResponse'
+            type: array
+      summary: Get all publisher
+      tags:
+      - Publisher
+  /publisher/historic:
     get:
       description: Get a publish by TopicName
       parameters:
@@ -281,82 +355,23 @@ paths:
       summary: Get a publish by TopicName
       tags:
       - Publisher
-    post:
-      consumes:
-      - application/json
-      description: Create a new publish
-      parameters:
-      - description: Publish object that needs to be added
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/models.PublishRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/models.PublishRequest'
-      summary: Create a new publish
-      tags:
-      - Publisher
-  /publisher/{id}:
-    put:
-      consumes:
-      - application/json
-      description: Update a publish by ID
-      parameters:
-      - description: Publish ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Updated publish object
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/models.PublishRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.PublishRequest'
-      summary: Update a publish by ID
-      tags:
-      - Publisher
-  /publisher/all:
-    get:
-      description: Get all publisher
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.PublishResponse'
-            type: array
-      summary: Get all publisher
-      tags:
-      - Publisher
   /sessions:
     get:
-      description: Get all sessions
+      description: Get a session by ClientId
+      parameters:
+      - description: Session ClientId
+        in: query
+        name: ClientId
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/models.Session'
-            type: array
-      summary: Get all sessions
+            $ref: '#/definitions/models.SessionResponse'
+      summary: Get a session by ClientId
       tags:
       - Sessions
     post:
@@ -380,49 +395,45 @@ paths:
       summary: Create a new session
       tags:
       - Sessions
-  /sessions/{id}:
-    get:
-      description: Get a session by ID
-      parameters:
-      - description: Session ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.Session'
-      summary: Get a session by ID
-      tags:
-      - Sessions
     put:
       consumes:
       - application/json
-      description: Update a session by ID
+      description: Update a session by ClientId
       parameters:
-      - description: Session ID
-        in: path
-        name: id
+      - description: Session ClientId
+        in: query
+        name: ClientId
         required: true
-        type: integer
+        type: string
       - description: Updated session object
         in: body
         name: input
         required: true
         schema:
-          $ref: '#/definitions/models.SessionRequest'
+          $ref: '#/definitions/models.SessionUpdateRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.SessionRequest'
-      summary: Update a session by ID
+            $ref: '#/definitions/models.GenericResponse'
+      summary: Update a session by ClientId
+      tags:
+      - Sessions
+  /sessions/all:
+    get:
+      description: Get all sessions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Session'
+            type: array
+      summary: Get all sessions
       tags:
       - Sessions
   /subscriptions:
