@@ -15,12 +15,12 @@ import (
 // createPublish cria uma nova publicação.
 // @Summary Create a new publish
 // @Description Create a new publish
-// @Tags Publishs
+// @Tags Publisher
 // @Accept json
 // @Produce json
 // @Param input body models.PublishRequest true "Publish object that needs to be added"
 // @Success 201 {object} models.PublishRequest
-// @Router /publishs [post]
+// @Router /publisher [post]
 func (r *Routes) CreatePublish(c *gin.Context) {
 	var publish models.Publish
 	if err := c.ShouldBindJSON(&publish); err != nil {
@@ -53,61 +53,61 @@ func (r *Routes) CreatePublish(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"detail": "success.created.publish"})
 }
 
-// getAllPublishs obtém todas as publicações.
-// @Summary Get all publishs
-// @Description Get all publishs
-// @Tags Publishs
+// getAllPublisher obtém todas as publicações.
+// @Summary Get all publisher
+// @Description Get all publisher
+// @Tags Publisher
 // @Produce json
 // @Success 200 {array}  models.PublishResponse
-// @Router /publishs/all [get]
-func (r *Routes) GetAllPublishs(c *gin.Context) {
-	var publishsResponses []models.PublishResponse
+// @Router /publisher/all [get]
+func (r *Routes) GetAllPublisher(c *gin.Context) {
+	var publisherResponses []models.PublishResponse
 	if err := r.db.Debug().Model(&models.Publish{}).
 		Select("publishes.*, containers.* as \"Container\"").
 		Joins("join containers on publishes.\"IdContainer\"=containers.\"Id\"").
-		Scan(&publishsResponses).
+		Scan(&publisherResponses).
 		Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"detail": "Error getting all topics"})
 		r.logger.Error("Error: %s", err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, publishsResponses)
+	c.JSON(http.StatusOK, publisherResponses)
 }
 
 // getPublishByTopicName obtém uma publicação pelo ID.
 // @Summary Get a publish by TopicName
 // @Description Get a publish by TopicName
-// @Tags Publishs
+// @Tags Publisher
 // @Produce json
 // @Param TopicName query string true "Topic Name"
 // @Success 200 {array}  models.PublishResponse
-// @Router /publishs [get]
+// @Router /publisher/historic [get]
 func (r *Routes) GetPublishByTopicName(c *gin.Context) {
 	topicName := c.Query("TopicName")
-	var publishsResponses []models.PublishResponse
+	var publisherResponses []models.PublishResponse
 	if err := r.db.Debug().Model(&models.Publish{}).
 		Select("publishes.*, containers.* as \"Container\"").
 		Joins("join containers on publishes.\"IdContainer\"=containers.\"Id\"").
 		Where("publishes.\"TopicName\" = ?", topicName).
-		Scan(&publishsResponses).
+		Scan(&publisherResponses).
 		Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"detail": "Error getting all publish datas"})
 		r.logger.Error("Error: %s", err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, publishsResponses)
+	c.JSON(http.StatusOK, publisherResponses)
 }
 
 // updatePublish atualiza uma publicação pelo ID.
 // @Summary Update a publish by ID
 // @Description Update a publish by ID
-// @Tags Publishs
+// @Tags Publisher
 // @Accept json
 // @Produce json
 // @Param id path int true "Publish ID"
 // @Param input body models.PublishRequest true "Updated publish object"
 // @Success 200 {object} models.PublishRequest
-// @Router /publishs/{id} [put]
+// @Router /publisher/{id} [put]
 func (r *Routes) UpdatePublish(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	var publish models.Publish

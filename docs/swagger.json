@@ -127,14 +127,14 @@
                 }
             }
         },
-        "/publishs": {
+        "/publisher": {
             "get": {
                 "description": "Get a publish by TopicName",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Publishs"
+                    "Publisher"
                 ],
                 "summary": "Get a publish by TopicName",
                 "parameters": [
@@ -167,7 +167,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Publishs"
+                    "Publisher"
                 ],
                 "summary": "Create a new publish",
                 "parameters": [
@@ -191,16 +191,16 @@
                 }
             }
         },
-        "/publishs/all": {
+        "/publisher/all": {
             "get": {
-                "description": "Get all publishs",
+                "description": "Get all publisher",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Publishs"
+                    "Publisher"
                 ],
-                "summary": "Get all publishs",
+                "summary": "Get all publisher",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -214,7 +214,7 @@
                 }
             }
         },
-        "/publishs/{id}": {
+        "/publisher/{id}": {
             "put": {
                 "description": "Update a publish by ID",
                 "consumes": [
@@ -224,7 +224,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "Publishs"
+                    "Publisher"
                 ],
                 "summary": "Update a publish by ID",
                 "parameters": [

@@ -138,14 +138,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/publishs": {
+        "/publisher": {
             "get": {
                 "description": "Get a publish by TopicName",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Publishs"
+                    "Publisher"
                 ],
                 "summary": "Get a publish by TopicName",
                 "parameters": [
@@ -178,7 +178,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Publishs"
+                    "Publisher"
                 ],
                 "summary": "Create a new publish",
                 "parameters": [
@@ -202,16 +202,16 @@ const docTemplate = `{
                 }
             }
         },
-        "/publishs/all": {
+        "/publisher/all": {
             "get": {
-                "description": "Get all publishs",
+                "description": "Get all publisher",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Publishs"
+                    "Publisher"
                 ],
-                "summary": "Get all publishs",
+                "summary": "Get all publisher",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -225,7 +225,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/publishs/{id}": {
+        "/publisher/{id}": {
             "put": {
                 "description": "Update a publish by ID",
                 "consumes": [
@@ -235,7 +235,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Publishs"
+                    "Publisher"
                 ],
                 "summary": "Update a publish by ID",
                 "parameters": [

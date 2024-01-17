@@ -260,7 +260,7 @@ paths:
       summary: Update a container by ID
       tags:
       - Container
-  /publishs:
+  /publisher:
     get:
       description: Get a publish by TopicName
       parameters:
@@ -280,7 +280,7 @@ paths:
             type: array
       summary: Get a publish by TopicName
       tags:
-      - Publishs
+      - Publisher
     post:
       consumes:
       - application/json
@@ -301,8 +301,8 @@ paths:
             $ref: '#/definitions/models.PublishRequest'
       summary: Create a new publish
       tags:
-      - Publishs
-  /publishs/{id}:
+      - Publisher
+  /publisher/{id}:
     put:
       consumes:
       - application/json
@@ -328,10 +328,10 @@ paths:
             $ref: '#/definitions/models.PublishRequest'
       summary: Update a publish by ID
       tags:
-      - Publishs
-  /publishs/all:
+      - Publisher
+  /publisher/all:
     get:
-      description: Get all publishs
+      description: Get all publisher
       produces:
       - application/json
       responses:
@@ -341,9 +341,9 @@ paths:
             items:
               $ref: '#/definitions/models.PublishResponse'
             type: array
-      summary: Get all publishs
+      summary: Get all publisher
       tags:
-      - Publishs
+      - Publisher
   /sessions:
     get:
       description: Get all sessions

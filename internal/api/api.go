@@ -75,10 +75,10 @@ func (a *API) Init() {
 	r.PUT("/subscriptions/:id", a.routes.UpdateSubscription)
 
 	// Endpoints for Publish
-	r.POST("/publishs", a.routes.CreatePublish)
-	r.GET("/publishs/all", a.routes.GetAllPublishs)
-	r.GET("/publishs", a.routes.GetPublishByTopicName)
-	//r.PUT("/publishs/:id", a.routes.UpdatePublish)
+	r.POST("/publisher", a.routes.CreatePublish)
+	r.GET("/publisher/all", a.routes.GetAllPublisher)
+	r.GET("/publisher", a.routes.GetPublishByTopicName)
+	//r.PUT("/publisher/:id", a.routes.UpdatePublish)
 
 	// Endpoints for Session
 	r.POST("/sessions", a.routes.CreateSession)
