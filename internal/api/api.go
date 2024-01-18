@@ -41,7 +41,11 @@ func (a *API) initDB() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	sqlDB, err := db.DB()
+	// SetMaxIdleConns sets the maximum number of connections in the idle connection pool.
+	sqlDB.SetMaxIdleConns(50)
+	// SetMaxOpenConns sets the maximum number of open connections to the database.
+	sqlDB.SetMaxOpenConns(1000)
 	return db, nil
 }
 

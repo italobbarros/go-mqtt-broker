@@ -90,7 +90,6 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 				TopicName:       responsePublish.Topic,
 				TopicRetained:   responsePublish.Retained,
 			})
-
 			continue
 		}
 		if protocol.IsCmdEqual(cmd, protocol.COMMAND_PUBREL) && responsePublish != nil { // exactly equal
