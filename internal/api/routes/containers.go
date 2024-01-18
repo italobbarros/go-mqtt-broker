@@ -44,7 +44,7 @@ func (r *Routes) GetAllContainers(c *gin.Context) {
 		Table("containers c").
 		Select("c.\"Id\", COALESCE(COUNT(DISTINCT s.\"Id\"), 0) as \"CountSession\", COALESCE(COUNT(DISTINCT p.\"Id\"), 0) as \"CountPublishers\", COALESCE(COUNT(DISTINCT sub.\"Id\"), 0) as \"CountSubscribers\"").
 		Joins("LEFT JOIN sessions s ON c.\"Id\" = s.\"IdContainer\"").
-		Joins("LEFT JOIN publishes p ON s.\"Id\" = p.\"IdSession\"").
+		Joins("LEFT JOIN publishes p ON s.\"ClientId\" = p.\"ClientIdSession\"").
 		Joins("LEFT JOIN subscriptions sub ON s.\"Id\" = sub.\"IdSession\"").
 		Group("c.\"Id\"").
 		Scan(&containersInfoResponse).

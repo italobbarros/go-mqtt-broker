@@ -21,13 +21,28 @@ import (
 // @Success 201 {object} models.GenericResponse
 // @Router /publisher [post]
 func (r *Routes) CreatePublish(c *gin.Context) {
-	var publish models.Publish
-	if err := c.ShouldBindJSON(&publish); err != nil {
+	var publishRequest models.PublishRequest
+	if err := c.ShouldBindJSON(&publishRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	publish.Timestamp = time.Now()
+	publish := models.Publish{
+		ClientIdSession: publishRequest.ClientIdSession,
+		TopicName:       publishRequest.TopicName,
+		Payload:         publishRequest.Payload,
+		Qos:             publishRequest.Qos,
+		Timestamp:       time.Now(),
+	}
+	var existingSession models.Session
+	if err := r.db.Where("\"ClientId\" = ?", publish.ClientIdSession).First(&existingSession).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	r.db.Create(&publish)
+
+	//Update Session
+	existingSession.Updated = time.Now()
+	r.db.Save(&existingSession)
 
 	//Update Topic
 	var existingTopic models.Topic
@@ -35,7 +50,9 @@ func (r *Routes) CreatePublish(c *gin.Context) {
 	if err := r.db.Where("\"Name\" = ?", publish.TopicName).First(&existingTopic).Error; err != nil {
 		// Tópico não existe, então criamos um novo
 		var newTopic models.Topic
-		newTopic.Name = publish.TopicName
+		newTopic.Name = publishRequest.TopicName
+		newTopic.Retained = publishRequest.TopicRetained
+		newTopic.IdPublish = publish.Id
 		newTopic.Publish = publish
 		newTopic.Created = time.Now()
 		newTopic.Updated = time.Now()
@@ -43,7 +60,9 @@ func (r *Routes) CreatePublish(c *gin.Context) {
 	} else {
 		// Tópico já existe, então atualizamos as informações de retenção
 		existingTopic.Name = publish.TopicName
+		existingTopic.Retained = publishRequest.TopicRetained
 		existingTopic.IdPublish = publish.Id
+		existingTopic.Publish = publish
 		existingTopic.Updated = time.Now()
 		r.db.Save(&existingTopic)
 	}
@@ -85,7 +104,7 @@ func (r *Routes) GetPublishByTopicName(c *gin.Context) {
 	var publisherResponses []models.PublishResponse
 	if err := r.db.Debug().Model(&models.Publish{}).
 		Select("publishes.*, sessions.*").
-		Joins("join sessions on publishes.\"IdSession\"=sessions.\"Id\"").
+		Joins("join sessions on publishes.\"ClientId\"=sessions.\"ClientId\"").
 		Where("publishes.\"TopicName\" = ?", topicName).
 		Scan(&publisherResponses).
 		Error; err != nil {

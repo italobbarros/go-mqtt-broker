@@ -8,6 +8,7 @@ type GenericResponse struct {
 
 type PublishResponse struct {
 	Id              uint64              `gorm:"primaryKey;autoIncrement;uniqueIndex;column:Id"`
+	ClientIdSession string              `gorm:"column:ClientIdSession;not null;"`
 	Payload         string              `gorm:"column:Payload"`
 	Qos             int                 `gorm:"column:Qos"`
 	TopicName       string              `gorm:"not null;column:TopicName"`

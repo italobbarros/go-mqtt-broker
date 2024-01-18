@@ -697,10 +697,10 @@
         "models.Publish": {
             "type": "object",
             "properties": {
-                "id": {
-                    "type": "integer"
+                "clientIdSession": {
+                    "type": "string"
                 },
-                "idSession": {
+                "id": {
                     "type": "integer"
                 },
                 "payload": {
@@ -724,8 +724,8 @@
         "models.PublishRequest": {
             "type": "object",
             "properties": {
-                "idSession": {
-                    "type": "integer"
+                "clientIdSession": {
+                    "type": "string"
                 },
                 "payload": {
                     "type": "string"
@@ -745,6 +745,9 @@
         "models.PublishResponse": {
             "type": "object",
             "properties": {
+                "clientIdSession": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },

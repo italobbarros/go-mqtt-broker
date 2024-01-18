@@ -708,10 +708,10 @@ const docTemplate = `{
         "models.Publish": {
             "type": "object",
             "properties": {
-                "id": {
-                    "type": "integer"
+                "clientIdSession": {
+                    "type": "string"
                 },
-                "idSession": {
+                "id": {
                     "type": "integer"
                 },
                 "payload": {
@@ -735,8 +735,8 @@ const docTemplate = `{
         "models.PublishRequest": {
             "type": "object",
             "properties": {
-                "idSession": {
-                    "type": "integer"
+                "clientIdSession": {
+                    "type": "string"
                 },
                 "payload": {
                     "type": "string"
@@ -756,6 +756,9 @@ const docTemplate = `{
         "models.PublishResponse": {
             "type": "object",
             "properties": {
+                "clientIdSession": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },

@@ -15,9 +15,9 @@ type Container struct {
 
 type Session struct {
 	Id          uint64    `gorm:"primaryKey;autoIncrement;uniqueIndex;column:Id"`
-	IdContainer uint64    `gorm:"column:IdContainer"`
-	Container   Container `gorm:"foreignKey:IdContainer;constraint:OnDelete:CASCADE;"`
 	ClientId    string    `gorm:"column:ClientId;unique"`
+	IdContainer uint64    `gorm:"column:IdContainer"`
+	Container   Container `gorm:"foreignKey:IdContainer;constraint:OnDelete:CASCADE"`
 	KeepAlive   int16     `gorm:"column:KeepAlive"`
 	Clean       bool      `gorm:"column:Clean"`
 	Username    string    `gorm:"column:Username"`
@@ -26,13 +26,13 @@ type Session struct {
 }
 
 type Publish struct {
-	Id        uint64    `gorm:"primaryKey;autoIncrement;uniqueIndex;column:Id"`
-	IdSession uint64    `gorm:"column:IdSession"`
-	Session   Session   `gorm:"foreignKey:IdSession;constraint:OnDelete:CASCADE;"`
-	TopicName string    `gorm:"not null;column:TopicName"`
-	Payload   string    `gorm:"column:Payload"`
-	Qos       int       `gorm:"column:Qos"`
-	Timestamp time.Time `gorm:"column:Timestamp" example:"2024-01-16T12:00:00Z"`
+	Id              uint64    `gorm:"primaryKey;autoIncrement;uniqueIndex;column:Id"`
+	ClientIdSession string    `gorm:"column:ClientIdSession;not null;"`
+	Session         Session   `gorm:"foreignKey:ClientIdSession;references:ClientId;constraint:OnDelete:CASCADE;"`
+	TopicName       string    `gorm:"not null;column:TopicName"`
+	Payload         string    `gorm:"column:Payload"`
+	Qos             int       `gorm:"column:Qos"`
+	Timestamp       time.Time `gorm:"column:Timestamp" example:"2024-01-16T12:00:00Z"`
 }
 
 type Topic struct {

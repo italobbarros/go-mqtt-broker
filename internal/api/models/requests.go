@@ -9,18 +9,16 @@ type TopicRequest struct {
 }
 
 type PublishRequest struct {
-	IdSession     uint64 `gorm:"column:IdSession"`
-	Payload       string `gorm:"column:Payload"`
-	Qos           int    `gorm:"column:Qos"`
-	TopicName     string `gorm:"not null;column:TopicName"`
-	TopicRetained bool   `gorm:"not null;column:TopicRetained"` // Indica se a mensagem é retida ou não
-	//Timestamp       time.Time `gorm:"column:Timestamp" example:"2024-01-16T12:00:00Z"`
-	//NumberTimestamp int64     `gorm:"column:NumberTimestamp"`
+	ClientIdSession string `gorm:"column:ClientIdSession;not null;"`
+	Payload         string `gorm:"column:Payload"`
+	Qos             int    `gorm:"column:Qos"`
+	TopicName       string `gorm:"not null;column:TopicName"`
+	TopicRetained   bool   `gorm:"not null;column:TopicRetained"` // Indica se a mensagem é retida ou não
 }
 
 type SubscriptionRequest struct {
 	IdSession uint64 `gorm:"column:IdSession"`
-	IdTopic   uint64 `gorm:"-;column:IdTopic"`
+	IdTopic   uint64 `gorm:"column:IdTopic"`
 }
 
 type SessionRequest struct {

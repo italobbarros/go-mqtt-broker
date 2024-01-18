@@ -58,7 +58,7 @@ func (a *API) Init() {
 	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	// Endpoints for ContainerPost
 	r.POST("/containers", a.routes.CreateContainer)
-	r.GET("/containers", a.routes.GetAllContainers)
+	r.GET("/containers/all", a.routes.GetAllContainers)
 	r.GET("/containers/:id", a.routes.GetContainerByID)
 	r.DELETE("/containers/:Name", a.routes.DeleteContainerByName)
 
