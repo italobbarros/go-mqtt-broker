@@ -11,8 +11,7 @@ services:
       - broker-mqtt-2
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-    networks:
-      - broker
+    network_mode: host
 
   broker-mqtt-1:
     image: broker-mqtt
@@ -31,11 +30,10 @@ services:
       - ADDRESS=0.0.0.0:10001
       - CONTAINER_ID=1
       - API_ADDRESS=0.0.0.0:8081
-      - API_GET_TOPIC=http://192.168.68.107:8081/topics
-      - API_POST_PUBLISH=http://192.168.68.107:8081/publisher
-      - API_POST_SESSION=http://192.168.68.107:8081/sessions
-    networks:
-       - broker
+      - API_GET_TOPIC=http://localhost:8081/topics
+      - API_POST_PUBLISH=http://localhost:8081/publisher
+      - API_POST_SESSION=http://localhost:8081/sessions
+    network_mode: host
 
   broker-mqtt-2:
     image: broker-mqtt
@@ -53,11 +51,10 @@ services:
       - ADDRESS=0.0.0.0:10002
       - CONTAINER_ID=2
       - API_ADDRESS=0.0.0.0:8082
-      - API_GET_TOPIC=http://192.168.68.107:8082/topics
-      - API_POST_PUBLISH=http://192.168.68.107:8082/publisher
-      - API_POST_SESSION=http://192.168.68.107:8082/sessions
-    networks:
-       - broker
+      - API_GET_TOPIC=http://localhost:8082/topics
+      - API_POST_PUBLISH=http://localhost:8082/publisher
+      - API_POST_SESSION=http://localhost:8082/sessions
+    network_mode: host
 
 #  broker-management:
 #    image: broker-management
