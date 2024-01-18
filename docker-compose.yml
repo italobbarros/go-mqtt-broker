@@ -1,18 +1,18 @@
 version: '3'
 
 services:
-  #nginx:
-  #  container_name: nginx
-  #  image: nginx
-  #  ports:
-  #    - "1883:1883"
-  #  depends_on:
-  #    - broker-mqtt-1
-  #    - broker-mqtt-2
-  #  volumes:
-  #    - ./nginx.conf:/etc/nginx/nginx.conf
-  #  networks:
-  #     - broker
+  nginx:
+    container_name: nginx
+    image: nginx
+    ports:
+      - "1883:1883"
+    depends_on:
+      - broker-mqtt-1
+      - broker-mqtt-2
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - broker
 
   broker-mqtt-1:
     image: broker-mqtt
@@ -24,45 +24,56 @@ services:
         max-file: "2"   # Número máximo de arquivos de log
     restart: unless-stopped
     ports:
-      - "8080:8080"
-      - "1883:1883"
+      - "8081:8081"
+      - "10001:1883"
     environment:
       - LOG_CONFIG_PROD=true
-      - ADDRESS=0.0.0.0:1883
+      - ADDRESS=0.0.0.0:10001
+      - CONTAINER_ID=1
+      - API_ADDRESS=0.0.0.0:8081
+      - API_GET_TOPIC=http://192.168.68.107:8081/topics
+      - API_POST_PUBLISH=http://192.168.68.107:8081/publisher
+      - API_POST_SESSION=http://192.168.68.107:8081/sessions
     networks:
        - broker
 
-  #broker-mqtt-2:
-  #  image: broker-mqtt
-  #  container_name: broker-mqtt-2
-  #  logging:            # Configuração de log
-  #    options:
-  #      max-size: "50m" # Tamanho máximo de cada arquivo de log
-  #      max-file: "2"   # Número máximo de arquivos de log
-  #  restart: unless-stopped
-  #  ports:
-  #    - "8082:8080"
-  #  environment:
-  #    - LOG_CONFIG_PROD=true
-  #    - ADDRESS=0.0.0.0:10002
-  #  networks:
-  #     - broker
-
-  broker-management:
-    image: broker-management
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: broker-management
+  broker-mqtt-2:
+    image: broker-mqtt
+    container_name: broker-mqtt-2
     logging:            # Configuração de log
       options:
         max-size: "50m" # Tamanho máximo de cada arquivo de log
         max-file: "2"   # Número máximo de arquivos de log
     restart: unless-stopped
     ports:
-      - "3000:8000"
+      - "8082:8082"
+      - "10002:1883"
+    environment:
+      - LOG_CONFIG_PROD=true
+      - ADDRESS=0.0.0.0:10002
+      - CONTAINER_ID=2
+      - API_ADDRESS=0.0.0.0:8082
+      - API_GET_TOPIC=http://192.168.68.107:8082/topics
+      - API_POST_PUBLISH=http://192.168.68.107:8082/publisher
+      - API_POST_SESSION=http://192.168.68.107:8082/sessions
     networks:
-      - broker
+       - broker
+
+#  broker-management:
+#    image: broker-management
+#    build:
+#      context: ./frontend
+#      dockerfile: Dockerfile
+#    container_name: broker-management
+#    logging:            # Configuração de log
+#      options:
+#        max-size: "50m" # Tamanho máximo de cada arquivo de log
+#        max-file: "2"   # Número máximo de arquivos de log
+#    restart: unless-stopped
+#    ports:
+#      - "3000:8000"
+#    networks:
+#      - broker
 
 networks:
   broker:

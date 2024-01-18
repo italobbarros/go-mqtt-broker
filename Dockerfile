@@ -25,6 +25,4 @@ COPY --from=build /code/logs /logs
 # Torne o script executável
 #RUN chmod +x /start.sh
 
-# Exponha a porta 8000 (opcionalmente, se você desejar usar uma porta diferente dentro do contêiner, pode mapeá-la aqui)
-EXPOSE 8080
 CMD ["/main"]
