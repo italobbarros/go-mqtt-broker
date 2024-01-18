@@ -18,7 +18,8 @@ import (
 // @Accept json
 // @Produce json
 // @Param input body models.SessionRequest true "Session object that needs to be added"
-// @Success 201 {object} models.SessionRequest
+// @Success 201 {object} models.SessionResponse
+// @Failure 400 {object} models.GenericResponse
 // @Router /sessions [post]
 func (r *Routes) CreateSession(c *gin.Context) {
 	var session models.Session
@@ -29,7 +30,14 @@ func (r *Routes) CreateSession(c *gin.Context) {
 	session.Created = time.Now()
 	session.Updated = time.Now()
 	r.db.Create(&session)
-	c.JSON(http.StatusCreated, gin.H{"detail": "success.created.session"})
+	c.JSON(http.StatusCreated, models.SessionResponse{
+		Id:        session.Id,
+		ClientId:  session.ClientId,
+		KeepAlive: session.KeepAlive,
+		Clean:     session.Clean,
+		Username:  session.Username,
+		Password:  session.Password,
+	})
 }
 
 // getAllSessions obtém todas as sessões.

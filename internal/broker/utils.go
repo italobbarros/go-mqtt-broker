@@ -6,7 +6,7 @@ import (
 
 // PrintTree imprime a árvore de tópicos a partir do nó fornecido
 func (b *Broker) PrintAllTree() {
-	b.printTree(b.Root, 0, "")
+	//b.printTree(b.Root, 0, "")
 }
 
 // Função auxiliar para imprimir a árvore recursivamente

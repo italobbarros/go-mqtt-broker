@@ -3,6 +3,7 @@ package broker
 import (
 	"fmt"
 
+	"github.com/italobbarros/go-mqtt-broker/internal/api/models"
 	"github.com/italobbarros/go-mqtt-broker/internal/protocol"
 	connection "github.com/italobbarros/go-mqtt-broker/pkg/connection"
 	"github.com/italobbarros/go-mqtt-broker/pkg/logger"
@@ -10,7 +11,7 @@ import (
 
 // NewBroker inicializa um novo corretor MQTT com um nó raiz
 func NewBroker(b *BrokerConfigs) *Broker {
-	topic := fmt.Sprintf("/%s/#", b.Name)
+	//topic := fmt.Sprintf("/%s/#", b.Name)
 	sessionMg := NewSessionManager()
 	var server connection.ServerInterface
 
@@ -21,11 +22,6 @@ func NewBroker(b *BrokerConfigs) *Broker {
 		//server = connection.NewTcpServer()
 	}
 	broker := &Broker{
-		Root: &TopicNode{
-			Name:     b.Name,
-			Topic:    topic,
-			Children: make(map[string]*TopicNode),
-		},
 		SessionMg: sessionMg,
 		server:    server,
 		logger:    logger.NewLogger("Broker"),
@@ -81,8 +77,20 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 			}
 			if responsePublish == nil {
 				prot.End()
-				currentSession.logger.Info("Published!")
+				currentSession.logger.Error("handlePublishCommand: responsePublish == nil")
+				return
 			}
+			if responsePublish.Qos < 2 {
+				prot.End()
+			}
+			go b.AddPublish(models.PublishRequest{
+				ClientIdSession: currentSession.Id,
+				Payload:         string(responsePublish.Payload),
+				Qos:             responsePublish.Qos,
+				TopicName:       responsePublish.Topic,
+				TopicRetained:   responsePublish.Retained,
+			})
+
 			continue
 		}
 		if protocol.IsCmdEqual(cmd, protocol.COMMAND_PUBREL) && responsePublish != nil { // exactly equal
@@ -114,7 +122,7 @@ func (b *Broker) handleConnectionMQTT(conn connection.ConnectionInterface) {
 				b.logger.Debug("AddSubscribeTopicNode: %s", topic)
 				err = b.AddSubscribeTopicNode(
 					topic,
-					currentSession.config.Id,
+					currentSession.Id,
 					&SubscriberConfig{
 						Identifier: subs.Identifier,
 						Qos:        subs.Qos[index],
@@ -168,14 +176,6 @@ func (b *Broker) newSession(sessionCfg *protocol.ResponseConnect, chSession chan
 		chSession <- nil
 		return
 	}
-	if b.SessionMg.Exist(sessionCfg.Id) {
-		b.SessionMg.UpdateSession(&SessionConfig{
-			Id:        sessionCfg.Id,
-			KeepAlive: sessionCfg.KeepAlive,
-			username:  sessionCfg.Username,
-			password:  sessionCfg.Password,
-		}, chSession)
-	}
 	b.SessionMg.AddSession(&SessionConfig{
 		Id:        sessionCfg.Id,
 		KeepAlive: sessionCfg.KeepAlive,
@@ -189,17 +189,12 @@ func (b *Broker) handlePublishCommand(data []byte, prot *protocol.MqttProtocol, 
 	if err != nil {
 		return nil, err
 	}
-	go b.AddTopic(r.Topic, &TopicConfig{
-		Retained: r.Retained,
-		Payload:  string(r.Payload),
-		Qos:      r.Qos,
-	}, topicReady)
 	if r.Qos == 2 {
 		b.logger.Debug("Publish Qos 2")
 		return r, nil
 	}
-	go b.NotifyAllSubscribers(r.Topic, topicReady)
-	return nil, nil
+	//go b.NotifyAllSubscribers(r.Topic, topicReady)
+	return r, nil
 }
 
 func (b *Broker) Start() {

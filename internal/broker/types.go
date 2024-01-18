@@ -18,7 +18,6 @@ type BrokerConfigs struct {
 
 type Broker struct {
 	logger    *logger.Logger
-	Root      *TopicNode
 	SessionMg *SessionManager
 	server    connection.ServerInterface
 }
@@ -31,8 +30,6 @@ type TopicNode struct {
 	Subscribers      map[string]*SubscriberConfig `json:"subscribers"` // Lista de sub-tópicos associados a este tópico
 	MessageCount     int                          `json:"messageCount"`
 	SubscribersCount int                          `json:"subscribersCount"`
-	Children         map[string]*TopicNode        `json:"children,omitempty"` //map[string]*TopicNode
-	lockChildren     sync.Mutex
 }
 
 type TopicConfig struct {
@@ -59,12 +56,13 @@ type SessionConfig struct {
 
 // Session representa uma sessão MQTT
 type Session struct {
+	Id        string
+	KeepAlive int16
+	Clean     bool
+	username  string
+	password  string
 	Timestamp time.Time
-	partition int
 	prot      *protocol.MqttProtocol
-	config    *SessionConfig
-	top       *Session // Ponteiro para o nó anterior na lista
-	bottom    *Session // Ponteiro para o próximo nó na lista
 	logger    *logger.Logger
 }
 
@@ -75,12 +73,5 @@ type SessionPartition struct {
 
 // SessionManager gerencia sessões MQTT
 type SessionManager struct {
-	sessionMap     *sync.Map // Usando sync.Map
-	partitionMap   *sync.Map // Outro sync.Map
-	sessionCount   int       // Contador para o número de sessões
-	partitionCount int       // Contador para o número de partições
-	//SessionMap    map[string]*Session // Mapa para acessar sessões por ID
-	//partitionMap  map[int16]*SessionPartition
-	//lockSession   sync.Mutex
-	//lockPartition sync.Mutex
+	sessionMap *sync.Map // Usando sync.Map
 }

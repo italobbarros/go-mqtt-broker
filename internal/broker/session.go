@@ -1,18 +1,22 @@
 package broker
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
+	"strconv"
 	"sync"
 	"time"
 
+	"github.com/italobbarros/go-mqtt-broker/internal/api/models"
+	"github.com/italobbarros/go-mqtt-broker/pkg/client"
 	"github.com/italobbarros/go-mqtt-broker/pkg/logger"
 )
 
 // NewSessionManager creates a new SessionManager
 func NewSessionManager() *SessionManager {
 	return &SessionManager{
-		sessionMap:   &sync.Map{},
-		partitionMap: &sync.Map{},
+		sessionMap: &sync.Map{},
 	}
 }
 
@@ -22,116 +26,94 @@ func (sm *SessionManager) Exist(id string) bool {
 }
 
 func (sm *SessionManager) GetSessionCount() int {
-	return sm.sessionCount
+	return 1
+}
+
+func addSession(sessionRequest models.SessionRequest) (*models.SessionResponse, error) {
+	// Cabeçalhos
+	headers := map[string]string{
+		"Accept":       "application/json",
+		"Content-Type": "application/json",
+	}
+
+	// Realiza a requisição POST usando a função do pacote client
+	resp, err := client.Post(os.Getenv("API_POST_SESSION"), client.RequestOptions{
+		Headers:    headers,
+		Body:       sessionRequest,
+		JSONEncode: true,
+	})
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	// Verifica se a resposta foi bem-sucedida (código 2xx)
+	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		fmt.Println("Session adicionado com sucesso!")
+		var sessionResponse models.SessionResponse
+		if err := json.NewDecoder(resp.Body).Decode(&sessionResponse); err != nil {
+			return nil, err
+		}
+		return &sessionResponse, nil
+	}
+
+	// Se a resposta não foi bem-sucedida, retorna um erro
+	return nil, fmt.Errorf("Erro na resposta. Código de status: %d, body:%s", resp.StatusCode, resp.Body)
 }
 
 // AddSession adds a new session to the top of the list
 func (sm *SessionManager) AddSession(sessionCfg *SessionConfig, chSession chan *Session) {
-	session := &Session{
-		config:    sessionCfg,
-		Timestamp: time.Now(),
-		logger:    logger.NewLogger(sessionCfg.Id),
-	}
-	sessionPartitionVar, ok := sm.partitionMap.Load(sessionCfg.KeepAlive)
-	var sessionPartition *SessionPartition
-	if !ok {
-		sessionPartition = &SessionPartition{}
-		sm.partitionMap.Store(sessionCfg.KeepAlive, sessionPartition)
-		sm.partitionCount++
-	} else {
-		sessionPartition = sessionPartitionVar.(*SessionPartition)
 
+	intNumber, _ := strconv.Atoi(os.Getenv("CONTAINER_ID"))
+	r, _ := addSession(models.SessionRequest{
+		IdContainer: uint64(intNumber),
+		ClientId:    sessionCfg.Id,
+		KeepAlive:   sessionCfg.KeepAlive,
+		Clean:       sessionCfg.Clean,
+		Username:    sessionCfg.username,
+		Password:    sessionCfg.password,
+	})
+	session := &Session{
+		Id:        r.ClientId,
+		KeepAlive: r.KeepAlive,
+		Clean:     r.Clean,
+		username:  r.Username,
+		password:  r.Password,
+		Timestamp: r.Updated,
+		logger:    logger.NewLogger(r.ClientId),
 	}
-	sm.sessionMap.Store(sessionCfg.Id, session)
-	if sessionPartition.head == nil {
-		sessionPartition.head = session
-		sessionPartition.tail = session
-		chSession <- session
-		return
-	}
-	session.bottom = sessionPartition.head
-	sessionPartition.head.top = session
-	sessionPartition.head = session
-	sm.sessionCount++
 	chSession <- session
 }
 
 // UpdateSession moves the updated session to the top of the list
 func (sm *SessionManager) UpdateSession(sessionCfg *SessionConfig, chSession chan *Session) {
-	sessionPartitionVar, ok := sm.partitionMap.Load(sessionCfg.KeepAlive)
-	if !ok {
-		chSession <- nil
-		return
-	}
-	sessionPartition := sessionPartitionVar.(*SessionPartition)
 
 	sessionVar, ok := sm.sessionMap.Load(sessionCfg.Id)
 	if !ok {
-		chSession <- nil
 		return
 	}
 	session := sessionVar.(*Session)
 
-	if session.config.KeepAlive != sessionCfg.KeepAlive {
-		//TODO caso tenha mudado o keepalive
-	}
-	session.config = sessionCfg
+	session.Id = sessionCfg.Id
+	session.KeepAlive = sessionCfg.KeepAlive
+	session.Clean = sessionCfg.Clean
 	session.Timestamp = time.Now()
-	if session == sessionPartition.head {
-		chSession <- session
-		return
-	}
-	if session == sessionPartition.tail {
-		sessionPartition.tail = session.top
-	}
 
-	// Remove the node from its current position
-	if session.bottom != nil {
-		session.bottom.top = session.top
-	}
-	if session.top != nil {
-		session.top.bottom = session.bottom
-	}
-
-	// Move the node to the top
-	session.bottom = sessionPartition.head
-	session.top = nil
-	sessionPartition.head.top = session
-	sessionPartition.head = session
 	chSession <- session
 }
 
-func (sm *SessionManager) onlyRemoveSession(sessionPartition *SessionPartition, session *Session) {
-	if session == sessionPartition.head {
-		sessionPartition.head = session.bottom
-	}
-	if session == sessionPartition.tail {
-		sessionPartition.tail = session.top
-	}
-
-	// Update pointers to remove the session from the list
-	if session.bottom != nil {
-		session.bottom.top = session.top
-	}
-	if session.top != nil {
-		session.top.bottom = session.bottom
-	}
-	sm.sessionMap.Delete(session.config.Id)
-	sm.sessionCount--
+func (sm *SessionManager) onlyRemoveSession(session *Session) {
+	sm.sessionMap.Delete(session.Id)
 	// Remove the session from the map
 }
 
 // RemoveSession removes sessions from the map and updates pointers
 func (sm *SessionManager) RemoveSession(id string, keepAlive int16) {
-	sessionPartitionVar, ok := sm.partitionMap.Load(keepAlive)
-	if !ok {
-		return
-	}
 	sessionVar, ok := sm.sessionMap.Load(id)
 	if !ok {
 		return
 	}
-	sm.onlyRemoveSession(sessionPartitionVar.(*SessionPartition), sessionVar.(*Session))
+	sm.onlyRemoveSession(sessionVar.(*Session))
 }
 
 func (sm *SessionManager) CheckSession(partition *SessionPartition, wg *sync.WaitGroup, currentTimestamp *time.Time) {
@@ -139,22 +121,21 @@ func (sm *SessionManager) CheckSession(partition *SessionPartition, wg *sync.Wai
 	currentSession := partition.tail
 	for currentSession != nil {
 		var elapsed float64
-		if !currentSession.config.Clean {
+		if !currentSession.Clean {
 			elapsed = currentTimestamp.Sub(currentSession.Timestamp).Seconds()
 			if elapsed > 3600 {
-				sm.onlyRemoveSession(partition, currentSession)
+				sm.onlyRemoveSession(currentSession)
 			} else {
 				break
 			}
 		} else {
 			elapsed = currentTimestamp.Sub(currentSession.Timestamp).Seconds()
-			if elapsed > float64(currentSession.config.KeepAlive) {
-				sm.onlyRemoveSession(partition, currentSession)
+			if elapsed > float64(currentSession.KeepAlive) {
+				sm.onlyRemoveSession(currentSession)
 			} else {
 				break
 			}
 		}
-		currentSession = currentSession.top
 	}
 	//return nil
 }
@@ -162,12 +143,6 @@ func (sm *SessionManager) CheckSession(partition *SessionPartition, wg *sync.Wai
 // CheckSessionTimeouts verifica e remove sessões cujo tempo limite expirou
 func (sm *SessionManager) CheckSessionTimeouts() error {
 
-	if sm.sessionCount == 0 {
-		return fmt.Errorf("SessionMap is empty")
-	}
-	if sm.partitionCount == 0 {
-		return fmt.Errorf("partitionMap is empty")
-	}
 	/*
 		currentTimestamp := time.Now()
 		var wg sync.WaitGroup

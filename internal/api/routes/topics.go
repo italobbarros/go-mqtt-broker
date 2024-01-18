@@ -24,7 +24,7 @@ func (r *Routes) GetAllTopics(c *gin.Context) {
 		Model(&models.Topic{}).
 		Select("topics.\"Id\", topics.\"Name\", topics.\"Created\", topics.\"Updated\",publishes.*,sessions.* as \"session\",containers.*").
 		Joins("left join publishes on topics.\"IdPublish\" = publishes.\"Id\"").
-		Joins("left join sessions on publishes.\"IdSession\" = sessions.\"Id\"").
+		Joins("left join sessions on publishes.\"ClientIdSession\" = sessions.\"ClientId\"").
 		Joins("left join containers on sessions.\"IdContainer\" = containers.\"Id\"").
 		Scan(&topicResponses).
 		Error; err != nil {
@@ -53,7 +53,7 @@ func (r *Routes) GetTopicsByName(c *gin.Context) {
 		Model(&models.Topic{}).
 		Select("topics.\"Id\", topics.\"Name\", topics.\"Created\", topics.\"Updated\", publishes.*,sessions.*").
 		Joins("left join publishes on publishes.\"Id\"=topics.\"IdPublish\"").
-		Joins("left join sessions on sessions.\"Id\"=publishes.\"IdSession\"").
+		Joins("left join sessions on sessions.\"ClientId\"=publishes.\"ClientIdSession\"").
 		Where("topics.\"Name\"=?", name).
 		First(&topicResponse).
 		Error; err != nil {

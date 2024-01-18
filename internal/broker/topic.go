@@ -1,89 +1,77 @@
 package broker
 
 import (
+	"encoding/json"
 	"fmt"
-	"strings"
+	"os"
 
+	"github.com/italobbarros/go-mqtt-broker/internal/api/models"
 	"github.com/italobbarros/go-mqtt-broker/internal/protocol"
+	"github.com/italobbarros/go-mqtt-broker/pkg/client"
 )
 
-func (b *Broker) AddTopic(topic string, topicCfg *TopicConfig, topicReady chan bool) {
-	segments := strings.Split(topic, "/")
-
-	currentNode := b.Root
-	for index, segment := range segments {
-		currentNode.lockChildren.Lock()
-		child, ok := currentNode.Children[segment]
-		currentNode.lockChildren.Unlock()
-
-		if ok {
-			if child.Name == segment {
-				// Se for o último segmento, atualize o TopicConfig existente
-				if index == len(segments)-1 {
-					child.TopicConfig = topicCfg
-				}
-				currentNode = child
-				continue
-			}
-		}
-		newTopic := getTopicUntilKeyword(topic, segment)
-		// Se for o último segmento, crie o nó com um TopicConfig
-		var topicConfig *TopicConfig = nil
-		if index == len(segments)-1 {
-			topicConfig = topicCfg
-		}
-		newChild := &TopicNode{
-			Name:        segment,
-			Topic:       newTopic,
-			TopicConfig: topicConfig,
-			Children:    make(map[string]*TopicNode),
-			Subscribers: make(map[string]*SubscriberConfig),
-		}
-		currentNode.lockChildren.Lock()
-		currentNode.Children[segment] = newChild
-		currentNode.lockChildren.Unlock()
-		currentNode = newChild
+func (b *Broker) GetTopicNode(topic string) (*models.TopicResponse, error) {
+	queryParams := map[string]string{
+		"Name": topic,
 	}
-	topicReady <- true
-	//b.PrintAllTree()
+
+	// Cabeçalhos
+	headers := map[string]string{
+		"Accept": "application/json",
+	}
+
+	resp, err := client.Get(os.Getenv("API_GET_TOPIC"), client.RequestOptions{
+		Params:  queryParams,
+		Headers: headers,
+	})
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		// Decodifica o corpo da resposta em um valor do tipo TopicResponse
+		var topicResponse models.TopicResponse
+		if err := json.NewDecoder(resp.Body).Decode(&topicResponse); err != nil {
+			return nil, err
+		}
+
+		return &topicResponse, nil
+	}
+
+	// Se a resposta não foi bem-sucedida, retorna um erro
+	return nil, fmt.Errorf("Erro na resposta. Código de status: %d", resp.StatusCode)
 }
 
-func (b *Broker) GetTopicNode(topic string) *TopicNode {
-	segments := strings.Split(topic, "/")
-	currentNode := b.Root
-	for _, segment := range segments {
-		currentNode.lockChildren.Lock()
-		child, ok := currentNode.Children[segment]
-		currentNode.lockChildren.Unlock()
-		if !ok {
-			return nil
-		}
-		currentNode = child
+func (b *Broker) AddPublish(publishRequest models.PublishRequest) error {
+	// Cabeçalhos
+	headers := map[string]string{
+		"Accept":       "application/json",
+		"Content-Type": "application/json",
 	}
-	return currentNode
+
+	// Realiza a requisição POST usando a função do pacote client
+	resp, err := client.Post(os.Getenv("API_POST_PUBLISH"), client.RequestOptions{
+		Headers:    headers,
+		Body:       publishRequest,
+		JSONEncode: true,
+	})
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Verifica se a resposta foi bem-sucedida (código 2xx)
+	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		fmt.Println("Publish adicionado com sucesso!")
+		return nil
+	}
+
+	// Se a resposta não foi bem-sucedida, retorna um erro
+	return fmt.Errorf("Erro na resposta. Código de status: %d, body:%s", resp.StatusCode, resp.Body)
 }
 
 func (b *Broker) AddSubscribeTopicNode(topic string, id string, subs *SubscriberConfig, topicNode chan bool) error {
-	TopicNode := b.GetTopicNode(topic)
-	if TopicNode == nil {
-		b.logger.Warning("Don't exist Topic on Topic Node")
-		go b.AddTopic(topic, &TopicConfig{
-			Retained: false,
-			Payload:  "",
-			Qos:      0,
-		}, topicNode)
-		<-topicNode
-		TopicNode = b.GetTopicNode(topic)
-	}
-	TopicNode.Subscribers[id] = subs
-	TopicNode.SubscribersCount = len(TopicNode.Subscribers)
-	b.logger.Debug("Add subscriber...")
-	b.logger.Debug("SubscribersCount: %d", TopicNode.SubscribersCount)
-	if TopicNode.TopicConfig.Retained {
-		if err := b.notifyNewSubscriber(topic, subs); err != nil {
-			return err
-		}
-	}
+
 	return nil
 }
 
@@ -95,16 +83,21 @@ func (b *Broker) notifyNewSubscriber(topic string, sub *SubscriberConfig) error 
 func (b *Broker) NotifyAllSubscribers(topic string, topicReady chan bool) {
 	b.logger.Debug("NotifyAllSubscribers")
 	<-topicReady
-	topicNode := b.GetTopicNode(topic)
+	topicNode, err := b.GetTopicNode(topic)
+	if err != nil {
+		b.logger.Warning("topicNode empty: %v")
+		return
+	}
 	if topicNode == nil {
 		b.logger.Warning("topicNode empty: %v")
 		return
 	}
-	topicNode.MessageCount += 1
-	for _, sub := range topicNode.Subscribers {
-		currentProt := sub.session.prot
-		go b.publishSubscribe(topicNode.Topic, currentProt, topicNode.TopicConfig.Retained, topicNode.TopicConfig.Payload, sub)
-	}
+	/*
+		topicNode.MessageCount += 1
+		for _, sub := range topicNode.Subscribers {
+			currentProt := sub.session.prot
+			go b.publishSubscribe(topicNode.Topic, currentProt, topicNode.TopicConfig.Retained, topicNode.TopicConfig.Payload, sub)
+		}*/
 }
 
 func (b *Broker) publishSubscribe(topic string, currentProt *protocol.MqttProtocol, retained bool, payload string, sub *SubscriberConfig) {
@@ -118,10 +111,5 @@ func (b *Broker) publishSubscribe(topic string, currentProt *protocol.MqttProtoc
 }
 
 func (b *Broker) IncMsgCount(topic string) error {
-	TopicNode := b.GetTopicNode(topic)
-	if TopicNode == nil {
-		return fmt.Errorf("Don't exist Topic on Topic Node")
-	}
-	TopicNode.MessageCount += 1
 	return nil
 }
