@@ -22,9 +22,10 @@ func (r *Routes) GetAllTopics(c *gin.Context) {
 	// Usando Preload para fazer um join e Select para escolher campos específicos
 	if err := r.db.
 		Model(&models.Topic{}).
-		Select("topics.\"Id\", topics.\"Name\", topics.\"Payload\", topics.\"Qos\", topics.\"Created\", topics.\"Updated\", topics.\"Deleted\", containers.*").
+		Select("topics.\"Id\", topics.\"Name\", topics.\"Created\", topics.\"Updated\",publishes.*,sessions.* as \"session\",containers.*").
 		Joins("left join publishes on topics.\"IdPublish\" = publishes.\"Id\"").
-		Where("topics.\"Deleted\" IS NULL").
+		Joins("left join sessions on publishes.\"IdSession\" = sessions.\"Id\"").
+		Joins("left join containers on sessions.\"IdContainer\" = containers.\"Id\"").
 		Scan(&topicResponses).
 		Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"detail": "Error getting all topics"})
@@ -50,11 +51,10 @@ func (r *Routes) GetTopicsByName(c *gin.Context) {
 	// Usando Preload para fazer um join e Select para escolher campos específicos
 	if err := r.db.
 		Model(&models.Topic{}).
-		Select("topics.\"Id\", topics.\"Name\", topics.\"Created\", topics.\"Updated\", topics.\"Deleted\", publishes.*,containers.*").
+		Select("topics.\"Id\", topics.\"Name\", topics.\"Created\", topics.\"Updated\", publishes.*,sessions.*").
 		Joins("left join publishes on publishes.\"Id\"=topics.\"IdPublish\"").
-		Joins("left join containers on containers.\"Id\"=publishes.\"IdContainer\"").
+		Joins("left join sessions on sessions.\"Id\"=publishes.\"IdSession\"").
 		Where("topics.\"Name\"=?", name).
-		Where("topics.\"Deleted\" IS NULL").
 		First(&topicResponse).
 		Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"detail": "error.get.topicsByName"})
@@ -79,9 +79,8 @@ func (r *Routes) GetTopicByID(c *gin.Context) {
 
 	if err := r.db.
 		Model(&models.Topic{}).
-		Select("topics.\"Id\", topics.\"Name\", topics.\"Payload\", topics.\"Qos\", topics.\"Created\", topics.\"Updated\", topics.\"Deleted\", containers.*").
+		Select("topics.\"Id\", topics.\"Name\", topics.\"Created\", topics.\"Updated\", publishes.*").
 		Joins("left join publishes on topics.\"IdPublish\" = publishes.\"Id\"").
-		Where("topics.\"Deleted\" IS NULL").
 		First(&topicResponse, id).
 		Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"detail": "Error getting all topics"})
@@ -117,4 +116,36 @@ func (r *Routes) UpdateTopic(c *gin.Context) {
 
 	r.db.Save(&topic)
 	c.JSON(http.StatusOK, topic)
+}
+
+// @Summary Delete a topic by name
+// @Description Delete a topic by name
+// @Tags Topic
+// @Produce json
+// @Param Name path string true "Topic Name"
+// @Success 204 {object} models.GenericResponse
+// @Failure 400 {object} models.GenericResponse
+// @Router /topics/{Name} [delete]
+func (r *Routes) DeleteTopicsByName(c *gin.Context) {
+	// Extrair o nome do parâmetro da URL
+	name := c.Param("Name")
+
+	// Verificar se o topic existe
+	var topic models.Topic
+	topic.Name = name
+
+	if err := r.db.Where("\"Name\" = ?", name).First(&topic).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"detail": "Error getting topic stats"})
+		r.logger.Error("Error: %s", err.Error())
+		return
+	}
+
+	// Excluir o topic
+	if err := r.db.Delete(&topic).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"detail": "Error deleting topic"})
+		r.logger.Error("Error: %s", err.Error())
+		return
+	}
+
+	c.JSON(http.StatusNoContent, gin.H{"detail": "success.deleted"})
 }

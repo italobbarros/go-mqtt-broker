@@ -1,14 +1,12 @@
 package routes
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/italobbarros/go-mqtt-broker/docs"
 	models "github.com/italobbarros/go-mqtt-broker/internal/api/models"
-	"gorm.io/gorm"
 )
 
 // Example for Container model
@@ -84,8 +82,6 @@ func (r *Routes) GetContainerByID(c *gin.Context) {
 // @Param Name path string true "Container Name"
 // @Success 204 {object} models.GenericResponse
 // @Failure 400 {object} models.GenericResponse
-// @Failure 404 {object} models.GenericResponse
-// @Failure 500 {object} models.GenericResponse
 // @Router /containers/{Name} [delete]
 func (r *Routes) DeleteContainerByName(c *gin.Context) {
 	// Extrair o nome do parâmetro da URL
@@ -93,12 +89,10 @@ func (r *Routes) DeleteContainerByName(c *gin.Context) {
 
 	// Verificar se o container existe
 	var container models.Container
+	container.Name = name
+
 	if err := r.db.Where("\"Name\" = ?", name).First(&container).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"detail": "Container not found"})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{"detail": "Error checking container existence"})
+		c.JSON(http.StatusInternalServerError, gin.H{"detail": "Error getting container stats"})
 		r.logger.Error("Error: %s", err.Error())
 		return
 	}

@@ -25,7 +25,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Container"
+                    "Containers"
                 ],
                 "summary": "Create a new container",
                 "parameters": [
@@ -56,7 +56,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Container"
+                    "Containers"
                 ],
                 "summary": "Get all containers info",
                 "responses": {
@@ -103,18 +103,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.GenericResponse"
                         }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/models.GenericResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/models.GenericResponse"
-                        }
                     }
                 }
             }
@@ -126,7 +114,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Container"
+                    "Containers"
                 ],
                 "summary": "Get a container by ID",
                 "parameters": [
@@ -335,6 +323,39 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "description": "Delete a session ClientId",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sessions"
+                ],
+                "summary": "Delete a session ClientId",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ClientId",
+                        "name": "ClientId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/models.GenericResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.GenericResponse"
+                        }
+                    }
+                }
             }
         },
         "/sessions/all": {
@@ -535,6 +556,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/topics/{Name}": {
+            "delete": {
+                "description": "Delete a topic by name",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Topic"
+                ],
+                "summary": "Delete a topic by name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Topic Name",
+                        "name": "Name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content",
+                        "schema": {
+                            "$ref": "#/definitions/models.GenericResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.GenericResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/topics/{id}": {
             "get": {
                 "description": "Get a topic by ID",
@@ -713,7 +769,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "session": {
-                    "$ref": "#/definitions/models.Session"
+                    "$ref": "#/definitions/models.SessionInfoResponse"
                 },
                 "timestamp": {
                     "type": "string",
@@ -762,6 +818,26 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "models.SessionInfoResponse": {
+            "type": "object",
+            "properties": {
+                "clean": {
+                    "type": "boolean"
+                },
+                "clientId": {
+                    "type": "string"
+                },
+                "container": {
+                    "$ref": "#/definitions/models.Container"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "keepAlive": {
+                    "type": "integer"
                 }
             }
         },

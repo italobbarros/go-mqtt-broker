@@ -70,7 +70,7 @@ definitions:
       qos:
         type: integer
       session:
-        $ref: '#/definitions/models.Session'
+        $ref: '#/definitions/models.SessionInfoResponse'
       timestamp:
         example: "2024-01-16T12:00:00Z"
         type: string
@@ -104,6 +104,19 @@ definitions:
         type: string
       username:
         type: string
+    type: object
+  models.SessionInfoResponse:
+    properties:
+      clean:
+        type: boolean
+      clientId:
+        type: string
+      container:
+        $ref: '#/definitions/models.Container'
+      id:
+        type: integer
+      keepAlive:
+        type: integer
     type: object
   models.SessionRequest:
     properties:
@@ -231,7 +244,7 @@ paths:
             $ref: '#/definitions/models.GenericResponse'
       summary: Create a new container
       tags:
-      - Container
+      - Containers
   /containers/{Name}:
     delete:
       description: Delete a container by name
@@ -250,14 +263,6 @@ paths:
             $ref: '#/definitions/models.GenericResponse'
         "400":
           description: Bad Request
-          schema:
-            $ref: '#/definitions/models.GenericResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/models.GenericResponse'
-        "500":
-          description: Internal Server Error
           schema:
             $ref: '#/definitions/models.GenericResponse'
       summary: Delete a container by name
@@ -281,7 +286,7 @@ paths:
             $ref: '#/definitions/models.Container'
       summary: Get a container by ID
       tags:
-      - Container
+      - Containers
   /containers/all:
     get:
       description: Get all containers info
@@ -296,7 +301,7 @@ paths:
             type: array
       summary: Get all containers info
       tags:
-      - Container
+      - Containers
   /publisher:
     post:
       consumes:
@@ -356,6 +361,28 @@ paths:
       tags:
       - Publisher
   /sessions:
+    delete:
+      description: Delete a session ClientId
+      parameters:
+      - description: Session ClientId
+        in: query
+        name: ClientId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/models.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.GenericResponse'
+      summary: Delete a session ClientId
+      tags:
+      - Sessions
     get:
       description: Get a session by ClientId
       parameters:
@@ -534,6 +561,29 @@ paths:
           schema:
             $ref: '#/definitions/models.Topic'
       summary: Get Topic by Name
+      tags:
+      - Topic
+  /topics/{Name}:
+    delete:
+      description: Delete a topic by name
+      parameters:
+      - description: Topic Name
+        in: path
+        name: Name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/models.GenericResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.GenericResponse'
+      summary: Delete a topic by name
       tags:
       - Topic
   /topics/{id}:

@@ -7,14 +7,14 @@ type GenericResponse struct {
 }
 
 type PublishResponse struct {
-	Id              uint64    `gorm:"primaryKey;autoIncrement;uniqueIndex;column:Id"`
-	Payload         string    `gorm:"column:Payload"`
-	Qos             int       `gorm:"column:Qos"`
-	TopicName       string    `gorm:"not null;column:TopicName"`
-	TopicRetained   bool      `gorm:"not null;column:TopicRetained"` // Indica se a mensagem é retida ou não
-	Session         Session   `gorm:"embedded;column:Session"`
-	Timestamp       time.Time `gorm:"column:Timestamp" example:"2024-01-16T12:00:00Z"`
-	NumberTimestamp int64     `gorm:"column:NumberTimestamp"`
+	Id              uint64              `gorm:"primaryKey;autoIncrement;uniqueIndex;column:Id"`
+	Payload         string              `gorm:"column:Payload"`
+	Qos             int                 `gorm:"column:Qos"`
+	TopicName       string              `gorm:"not null;column:TopicName"`
+	TopicRetained   bool                `gorm:"not null;column:TopicRetained"` // Indica se a mensagem é retida ou não
+	Session         SessionInfoResponse `gorm:"embedded;column:Session"`
+	Timestamp       time.Time           `gorm:"column:Timestamp" example:"2024-01-16T12:00:00Z"`
+	NumberTimestamp int64               `gorm:"column:NumberTimestamp"`
 }
 type TopicResponse struct {
 	Id      uint64          `gorm:"primaryKey;autoIncrement;uniqueIndex;column:Id"`
@@ -32,6 +32,14 @@ type SessionResponse struct {
 	Username  string
 	Password  string
 	Times
+}
+
+type SessionInfoResponse struct {
+	Id        uint64    `gorm:"primaryKey;autoIncrement;uniqueIndex;column:Id"`
+	Container Container `gorm:"embedded;column:Container"`
+	ClientId  string
+	KeepAlive int16
+	Clean     bool
 }
 
 type ContainersInfoResponse struct {

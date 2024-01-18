@@ -16,7 +16,7 @@ type Container struct {
 type Session struct {
 	Id          uint64    `gorm:"primaryKey;autoIncrement;uniqueIndex;column:Id"`
 	IdContainer uint64    `gorm:"column:IdContainer"`
-	Container   Container `gorm:"foreignKey:IdContainer;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Container   Container `gorm:"foreignKey:IdContainer;constraint:OnDelete:CASCADE;"`
 	ClientId    string    `gorm:"column:ClientId;unique"`
 	KeepAlive   int16     `gorm:"column:KeepAlive"`
 	Clean       bool      `gorm:"column:Clean"`
@@ -28,7 +28,7 @@ type Session struct {
 type Publish struct {
 	Id        uint64    `gorm:"primaryKey;autoIncrement;uniqueIndex;column:Id"`
 	IdSession uint64    `gorm:"column:IdSession"`
-	Session   Session   `gorm:"foreignKey:IdSession;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Session   Session   `gorm:"foreignKey:IdSession;constraint:OnDelete:CASCADE;"`
 	TopicName string    `gorm:"not null;column:TopicName"`
 	Payload   string    `gorm:"column:Payload"`
 	Qos       int       `gorm:"column:Qos"`
@@ -37,8 +37,8 @@ type Publish struct {
 
 type Topic struct {
 	Id        uint64  `gorm:"primaryKey;autoIncrement;uniqueIndex;column:Id"`
-	IdPublish uint64  `gorm:"not null;column:IdPublish"`
-	Publish   Publish `gorm:"foreignKey:IdPublish"`
+	IdPublish uint64  `gorm:"column:IdPublish"`
+	Publish   Publish `gorm:"foreignKey:IdPublish;constraint:OnDelete:SET NULL;"`
 	Name      string  `gorm:"not null;unique;column:Name"`
 	Retained  bool    `gorm:"not null;column:Retained"` // Indica se a mensagem é retida ou não
 	Times
@@ -47,7 +47,7 @@ type Topic struct {
 type Subscription struct {
 	Id        uint64  `gorm:"primaryKey;autoIncrement;uniqueIndex;column:Id"`
 	IdSession uint64  `gorm:"column:IdSession"`
-	Session   Session `gorm:"foreignKey:IdSession;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Session   Session `gorm:"foreignKey:IdSession;constraint:OnDelete:CASCADE;"`
 	IdTopic   uint64  `gorm:"-;column:IdTopic"`
 	Topic     Topic   `gorm:"foreignKey:IdTopic;"`
 	Times

@@ -26,7 +26,8 @@ func (r *Routes) CreateSession(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
+	session.Created = time.Now()
+	session.Updated = time.Now()
 	r.db.Create(&session)
 	c.JSON(http.StatusCreated, gin.H{"detail": "success.created.session"})
 }
@@ -94,4 +95,36 @@ func (r *Routes) UpdateSession(c *gin.Context) {
 	session.Updated = time.Now()
 	r.db.Save(&session)
 	c.JSON(http.StatusOK, gin.H{"detail": "session.updated"})
+}
+
+// @Summary Delete a session ClientId
+// @Description Delete a session ClientId
+// @Tags Sessions
+// @Produce json
+// @Param ClientId query string true "Session ClientId"
+// @Success 202 {object} models.GenericResponse
+// @Failure 400 {object} models.GenericResponse
+// @Router /sessions [delete]
+func (r *Routes) DeleteSessionByClientId(c *gin.Context) {
+	// Extrair o nome do parâmetro da URL
+	clientId := c.Query("ClientId")
+
+	// Verificar se o container existe
+	var session models.Session
+	session.ClientId = clientId
+
+	if err := r.db.Where("\"ClientId\" = ?", clientId).First(&session).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"detail": "Error getting session stats"})
+		r.logger.Error("Error: %s", err.Error())
+		return
+	}
+
+	// Excluir o session
+	if err := r.db.Delete(&session).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"detail": "Error deleting session"})
+		r.logger.Error("Error: %s", err.Error())
+		return
+	}
+
+	c.JSON(http.StatusAccepted, gin.H{"detail": "success.deleted"})
 }

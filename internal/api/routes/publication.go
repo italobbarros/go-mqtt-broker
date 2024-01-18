@@ -62,7 +62,7 @@ func (r *Routes) GetAllPublisher(c *gin.Context) {
 	var publisherResponses []models.PublishResponse
 	if err := r.db.Debug().Model(&models.Publish{}).
 		Select("publishes.*, sessions.*").
-		Joins("join sessions on publishes.\"IdContainer\"=sessions.\"Id\"").
+		Joins("join sessions on publishes.\"IdSession\"=sessions.\"Id\"").
 		Scan(&publisherResponses).
 		Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"detail": "Error getting all topics"})

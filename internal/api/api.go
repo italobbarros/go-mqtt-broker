@@ -52,7 +52,7 @@ func (a *API) Init() {
 		return
 	}
 	a.routes = routes.NewRoutes(a.logger, db)
-
+	gin.SetMode(gin.DebugMode)
 	r := gin.Default()
 
 	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -60,6 +60,7 @@ func (a *API) Init() {
 	r.POST("/containers", a.routes.CreateContainer)
 	r.GET("/containers", a.routes.GetAllContainers)
 	r.GET("/containers/:id", a.routes.GetContainerByID)
+	r.DELETE("/containers/:Name", a.routes.DeleteContainerByName)
 
 	// Endpoints for TopicRequest
 	r.GET("/topics/all", a.routes.GetAllTopics)
@@ -76,13 +77,14 @@ func (a *API) Init() {
 	// Endpoints for Publish
 	r.POST("/publisher", a.routes.CreatePublish)
 	r.GET("/publisher/all", a.routes.GetAllPublisher)
-	r.GET("/publisher", a.routes.GetPublishByTopicName)
+	r.GET("/publisher/historic", a.routes.GetPublishByTopicName)
 
 	// Endpoints for Session
 	r.POST("/sessions", a.routes.CreateSession)
 	r.GET("/sessions", a.routes.GetSessionByClientId)
 	r.GET("/sessions/all", a.routes.GetAllSessions)
 	r.PUT("/sessions", a.routes.UpdateSession)
+	r.DELETE("/sessions", a.routes.DeleteSessionByClientId)
 
 	r.Run(":8080")
 }
