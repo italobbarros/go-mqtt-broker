@@ -49,7 +49,6 @@ func addSession(sessionRequest models.SessionRequest) (*models.SessionResponse, 
 
 	// Verifica se a resposta foi bem-sucedida (código 2xx)
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-		fmt.Println("Session adicionado com sucesso!")
 		var sessionResponse models.SessionResponse
 		if err := json.NewDecoder(resp.Body).Decode(&sessionResponse); err != nil {
 			return nil, err
@@ -65,7 +64,7 @@ func addSession(sessionRequest models.SessionRequest) (*models.SessionResponse, 
 func (sm *SessionManager) AddSession(sessionCfg *SessionConfig, chSession chan *Session) {
 
 	intNumber, _ := strconv.Atoi(os.Getenv("CONTAINER_ID"))
-	r, _ := addSession(models.SessionRequest{
+	r, err := addSession(models.SessionRequest{
 		IdContainer: uint64(intNumber),
 		ClientId:    sessionCfg.Id,
 		KeepAlive:   sessionCfg.KeepAlive,
@@ -73,6 +72,11 @@ func (sm *SessionManager) AddSession(sessionCfg *SessionConfig, chSession chan *
 		Username:    sessionCfg.username,
 		Password:    sessionCfg.password,
 	})
+	if err != nil || r == nil {
+		chSession <- nil
+		return
+	}
+	fmt.Println(r)
 	session := &Session{
 		Id:        r.ClientId,
 		KeepAlive: r.KeepAlive,
@@ -82,23 +86,6 @@ func (sm *SessionManager) AddSession(sessionCfg *SessionConfig, chSession chan *
 		Timestamp: r.Updated,
 		logger:    logger.NewLogger(r.ClientId),
 	}
-	chSession <- session
-}
-
-// UpdateSession moves the updated session to the top of the list
-func (sm *SessionManager) UpdateSession(sessionCfg *SessionConfig, chSession chan *Session) {
-
-	sessionVar, ok := sm.sessionMap.Load(sessionCfg.Id)
-	if !ok {
-		return
-	}
-	session := sessionVar.(*Session)
-
-	session.Id = sessionCfg.Id
-	session.KeepAlive = sessionCfg.KeepAlive
-	session.Clean = sessionCfg.Clean
-	session.Timestamp = time.Now()
-
 	chSession <- session
 }
 

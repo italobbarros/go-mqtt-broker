@@ -91,5 +91,5 @@ func (a *API) Init() {
 	r.PUT("/sessions", a.routes.UpdateSession)
 	r.DELETE("/sessions", a.routes.DeleteSessionByClientId)
 
-	r.Run(os.Getenv(""))
+	r.Run(os.Getenv("API_ADDRESS"))
 }

@@ -17,6 +17,7 @@ COPY --from=build /code/main /main
 COPY --from=build /code/configs /configs
 COPY --from=build /code/.env /.env
 COPY --from=build /code/logs /logs
+COPY --from=build /code/docs /docs
 
 # Copie os arquivos da aplicação para o diretório de trabalho no contêiner
 #COPY ./frontend /usr/share/nginx/html
