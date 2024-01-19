@@ -2,6 +2,7 @@ package broker
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/italobbarros/go-mqtt-broker/internal/api/models"
 	"github.com/italobbarros/go-mqtt-broker/internal/protocol"
@@ -203,4 +204,13 @@ func (b *Broker) Start() {
 			go b.handleConnectionMQTT(conn)
 		}
 	}
+}
+
+func (b *Broker) DisconnectAllSessions(wg *sync.WaitGroup) {
+	b.SessionMg.sessionMap.Range(func(key, value interface{}) bool {
+		wg.Add(1)
+		go DeleteClientSession(fmt.Sprintf("%v", key), wg)
+		fmt.Printf("Chave: %v, Valor: %v\n", key, value)
+		return true // Retorna true para continuar a iteração
+	})
 }

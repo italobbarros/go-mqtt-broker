@@ -62,7 +62,6 @@ func (b *Broker) AddPublish(publishRequest models.PublishRequest) error {
 
 	// Verifica se a resposta foi bem-sucedida (código 2xx)
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-		fmt.Println("Publish adicionado com sucesso!")
 		return nil
 	}
 

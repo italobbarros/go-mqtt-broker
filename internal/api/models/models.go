@@ -15,7 +15,7 @@ type Container struct {
 
 type Session struct {
 	Id          uint64    `gorm:"primaryKey;autoIncrement;uniqueIndex;column:Id"`
-	ClientId    string    `gorm:"column:ClientId;unique"`
+	ClientId    string    `gorm:"column:ClientId;uniqueIndex"`
 	IdContainer uint64    `gorm:"column:IdContainer"`
 	Container   Container `gorm:"foreignKey:IdContainer;constraint:OnDelete:CASCADE"`
 	KeepAlive   int16     `gorm:"column:KeepAlive"`
@@ -27,7 +27,7 @@ type Session struct {
 
 type Publish struct {
 	Id              uint64    `gorm:"primaryKey;autoIncrement;uniqueIndex;column:Id"`
-	ClientIdSession string    `gorm:"column:ClientIdSession;not null;"`
+	ClientIdSession string    `gorm:"column:ClientIdSession;not null;index"`
 	Session         Session   `gorm:"foreignKey:ClientIdSession;references:ClientId;constraint:OnDelete:CASCADE;"`
 	TopicName       string    `gorm:"not null;column:TopicName"`
 	Payload         string    `gorm:"column:Payload"`
@@ -48,7 +48,7 @@ type Subscription struct {
 	Id        uint64  `gorm:"primaryKey;autoIncrement;uniqueIndex;column:Id"`
 	IdSession uint64  `gorm:"column:IdSession"`
 	Session   Session `gorm:"foreignKey:IdSession;constraint:OnDelete:CASCADE;"`
-	IdTopic   uint64  `gorm:"-;column:IdTopic"`
+	IdTopic   uint64  `gorm:"column:IdTopic;index"`
 	Topic     Topic   `gorm:"foreignKey:IdTopic;"`
 	Times
 }

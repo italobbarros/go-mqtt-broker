@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/italobbarros/go-mqtt-broker/docs"
+	"github.com/italobbarros/go-mqtt-broker/internal/api/models"
 	"github.com/italobbarros/go-mqtt-broker/internal/api/routes"
 	"github.com/italobbarros/go-mqtt-broker/pkg/logger"
 	swaggerFiles "github.com/swaggo/files"
@@ -32,16 +33,18 @@ func (a *API) initDB() (*gorm.DB, error) {
 	dns := os.Getenv("DB_ADDRESS")
 	db, err := gorm.Open(postgres.Open(dns), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: false,
+		PrepareStmt:                              true,
+		SkipDefaultTransaction:                   true,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect database")
 	}
 
 	// Migrate the schema
-	//err = db.AutoMigrate(&models.Container{}, &models.Topic{}, &models.Subscription{}, &models.Publish{}, &models.Session{})
-	//if err != nil {
-	//	return nil, err
-	//}
+	err = db.AutoMigrate(&models.Container{}, &models.Topic{}, &models.Subscription{}, &models.Publish{}, &models.Session{})
+	if err != nil {
+		return nil, err
+	}
 	sqlDB, err := db.DB()
 	// SetMaxIdleConns sets the maximum number of connections in the idle connection pool.
 	sqlDB.SetMaxIdleConns(50)

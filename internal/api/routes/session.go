@@ -86,7 +86,8 @@ func (r *Routes) GetSessionByClientId(c *gin.Context) {
 // @Produce json
 // @Param ClientId query string true "Session ClientId"
 // @Param input body models.SessionUpdateRequest true "Updated session object"
-// @Success 200 {object} models.GenericResponse
+// @Success 200 {object} models.SessionResponse
+// @Failure 400 {object} models.GenericResponse
 // @Router /sessions [put]
 func (r *Routes) UpdateSession(c *gin.Context) {
 	clientId := c.Query("ClientId")
@@ -102,7 +103,14 @@ func (r *Routes) UpdateSession(c *gin.Context) {
 	}
 	session.Updated = time.Now()
 	r.db.Save(&session)
-	c.JSON(http.StatusOK, gin.H{"detail": "session.updated"})
+	c.JSON(http.StatusOK, models.SessionResponse{
+		Id:        session.Id,
+		ClientId:  session.ClientId,
+		KeepAlive: session.KeepAlive,
+		Clean:     session.Clean,
+		Username:  session.Username,
+		Password:  session.Password,
+	})
 }
 
 // @Summary Delete a session ClientId
